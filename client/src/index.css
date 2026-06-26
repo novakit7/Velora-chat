@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+:root {
+  /* Base */
+  --bg: #08131f;
+  --bg-2: #0f1d2e;
+  --sf: #122338;
+  --card: #16263a;
+  --card-h: #1b314a;
+
+  /* Brand */
+  --pri: #14b8a6;
+  --pri-h: #0d9488;
+  --pri-a: #0f766e;
+
+  --sec: #3b82f6;
+  --sec-h: #2563eb;
+
+  --acc: #22d3ee;
+  --acc-h: #06b6d4;
+
+  /* Text */
+  --fg: #f8fafc;
+  --fg-m: #cbd5e1;
+  --fg-s: #94a3b8;
+  --fg-d: #64748b;
+
+  /* UI */
+  --bd: #27445d;
+  --bd-l: #355675;
+  --inp: #112437;
+  --inp-f: #1d3b56;
+
+  /* Chat */
+  --msg: #14b8a6;
+  --msg-r: #22364a;
+
+  /* Sidebar */
+  --side: #0c1725;
+  --side-h: #152538;
+  --side-a: #14b8a6;
+
+  /* Status */
+  --ok: #22c55e;
+  --warn: #f59e0b;
+  --err: #ef4444;
+  --info: #38bdf8;
+  --off: #64748b;
+
+  /* Misc */
+  --ov: rgba(0, 0, 0, 0.55);
+  --back: rgba(8, 19, 31, 0.75);
+
+  /* Radius */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 24px;
+  --r-full: 9999px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "Inter", sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button {
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+  outline: none;
+}
