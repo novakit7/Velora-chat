@@ -1,0 +1,8 @@
+🤖 AI Chat
+Qwen/Qwen3-8B
+
+🌍 Translation
+facebook/nllb-200-distilled-600M
+
+📄 Summarization
+facebook/bart-large-cnn

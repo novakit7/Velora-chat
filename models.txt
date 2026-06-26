@@ -1,0 +1,54 @@
+User
+├── username
+├── fullName
+├── email
+├── password
+├── avatar
+├── isOnline
+├── lastSeen
+└── refreshToken
+
+Chat
+├── participants [User]
+├── isGroupChat
+├── groupName
+├── groupAvatar
+├── admins [User]
+├── latestMessage
+├── createdBy
+└── timestamps
+
+Message
+├── chat
+├── sender
+├── content
+├── messageType
+├── attachment
+├── readBy [User]
+├── replyTo
+├── isEdited
+├── isDeleted
+└── timestamps
+
+AIConversation
+├── user
+├── chat
+├── prompt
+├── response
+├── model
+└── timestamps
+
+Notification
+├── sender
+├── receiver
+├── chat
+├── type
+├── isRead
+└── timestamps
+
+FriendRequest
+├── sender
+├── receiver
+├── status
+└── timestamps
+
