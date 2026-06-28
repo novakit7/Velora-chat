@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { ApiError } from "./ApiError.js";
 
-const generateAccessAndRefreshToken = async (user) => {
+const generateAccessAndRefreshToken = (user) => {
   try {
     const accessToken = jwt.sign(
       {
