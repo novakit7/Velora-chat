@@ -28,9 +28,11 @@ app.get("/", (req, res) => {
 });
 //route decleration
 import UserRouter from "./routes/User.routes.js";
+import FriendRequestRouter from "./routes/FriendRequest.routes.js";
 
 //routes
-app.use("/api/v1/user" ,UserRouter)
+app.use("/api/v1/user" ,UserRouter);
+app.use("/api/v1/frined-request", FriendRequestRouter);
 
 
 export default app;
