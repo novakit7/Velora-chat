@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import { redisClient } from "../db/redis.db.js";
 import { ApiError } from "./ApiError.js";
 
 const generateAccessAndRefreshToken = async (user) => {
@@ -26,15 +25,6 @@ const generateAccessAndRefreshToken = async (user) => {
         expiresIn: process.env.REFRESH_TOKEN_EXPIRY,
       }
     );
-
-    await Promise.all([
-      redisClient.set(`accessToken:${user._id}`, accessToken, {
-        EX: 60 * 15,
-      }),
-      redisClient.set(`refreshToken:${user._id}`, refreshToken, {
-        EX: 60 * 60 * 24 * 7,
-      }),
-    ]);
 
     return { accessToken, refreshToken };
   } catch (error) {

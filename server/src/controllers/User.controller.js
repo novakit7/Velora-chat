@@ -5,8 +5,18 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import fs from "fs";
 import { removeLocalFile } from "../utils/removeLocalFile.js";
-import genrateAcessAndRefreshToken from "../utils/generateToken.js"
+import genrateAcessAndRefreshToken from "../utils/generateToken.js";
+import { redisClient } from "../db/redis.db.js";
 
+// const options = {
+//   httpOnly: true,
+//   secure: true,
+// };  //deployment peropose
+const options = {
+  httpOnly: true,
+  secure: false,
+  sameSite: "lax",
+};
 
 const registerUser = asyncHandler(async (req, res) => {
   try {
@@ -86,27 +96,38 @@ const signInUser = asyncHandler(async (req, res) => {
   }
 
   const { accessToken, refreshToken } = await genrateAcessAndRefreshToken(user);
+  await redisClient.set(`refreshToken:${user._id}`, accessToken, {
+    EX: 60 * 15,
+  });
 
-  const logedInUser = await User.findById(user._id).select(
-    "-password",
-  );
-  // set access and refresh tokens in httpOnly cookies
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
-  // send response with cookies
+  const logedInUser = await User.findById(user._id).select("-password");
+
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
     .cookie("refreshToken", refreshToken, options)
     .json(
-      new ApiResponse(200, {
-        user: logedInUser,
-        accessToken,
-        refreshToken,
-      },
-    "User signed in successfully"),
+      new ApiResponse(
+        200,
+        {
+          user: logedInUser,
+          accessToken,
+          refreshToken,
+        },
+        "User signed in successfully",
+      ),
     );
 });
-export { registerUser, signInUser };
+
+const logOutUser = asyncHandler(async (req, res) => {
+
+await redisClient.del(`refreshToken:${req.user._id}`);
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(200, {}, "User logged out successfully"));
+});
+
+export { registerUser, signInUser, logOutUser };
