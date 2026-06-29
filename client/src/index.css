@@ -1,101 +1,98 @@
+@import url("https://fonts.googleapis.com/css2?family=Sora:wght@100..800&display=swap");
 @import "tailwindcss";
 
-:root {
-  /* Base */
-  --bg: #08131f;
-  --bg-2: #0f1d2e;
-  --sf: #122338;
-  --card: #16263a;
-  --card-h: #1b314a;
-
-  /* Brand */
-  --pri: #14b8a6;
-  --pri-h: #0d9488;
-  --pri-a: #0f766e;
-
-  --sec: #3b82f6;
-  --sec-h: #2563eb;
-
-  --acc: #22d3ee;
-  --acc-h: #06b6d4;
-
-  /* Text */
-  --fg: #f8fafc;
-  --fg-m: #cbd5e1;
-  --fg-s: #94a3b8;
-  --fg-d: #64748b;
-
-  /* UI */
-  --bd: #27445d;
-  --bd-l: #355675;
-  --inp: #112437;
-  --inp-f: #1d3b56;
-
-  /* Chat */
-  --msg: #14b8a6;
-  --msg-r: #22364a;
-
-  /* Sidebar */
-  --side: #0c1725;
-  --side-h: #152538;
-  --side-a: #14b8a6;
-
-  /* Status */
-  --ok: #22c55e;
-  --warn: #f59e0b;
-  --err: #ef4444;
-  --info: #38bdf8;
-  --off: #64748b;
-
-  /* Misc */
-  --ov: rgba(0, 0, 0, 0.55);
-  --back: rgba(8, 19, 31, 0.75);
-
-  /* Radius */
-  --r-sm: 8px;
-  --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 24px;
-  --r-full: 9999px;
+@theme {
+  --font-sans: "Sora", sans-serif;
 }
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
 
-html {
-  scroll-behavior: smooth;
-}
+@theme {
+  /* ===============================
+     BACKGROUNDS
+  =============================== */
 
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: "Inter", sans-serif;
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-}
+  --color-bg: #08131f;
+  --color-bg-secondary: #0f1d2e;
+  --color-surface: #122338;
+  --color-card: #16263a;
+  --color-card-hover: #1b314a;
 
-img {
-  display: block;
-  max-width: 100%;
-}
-a {
-  color: inherit;
-  text-decoration: none;
-}
-button {
-  cursor: pointer;
-  border: none;
-  outline: none;
-}
+  /* ===============================
+     BRAND
+  =============================== */
 
-input,
-textarea,
-select {
-  font: inherit;
-  outline: none;
+  --color-primary: #14b8a6;
+  --color-primary-hover: #0d9488;
+  --color-primary-active: #0f766e;
+
+  --color-secondary: #3b82f6;
+  --color-secondary-hover: #2563eb;
+
+  --color-accent: #22d3ee;
+  --color-accent-hover: #06b6d4;
+
+  /* ===============================
+     TEXT
+  =============================== */
+
+  --color-text: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-text-disabled: #64748b;
+
+  /* ===============================
+     BORDER
+  =============================== */
+
+  --color-border: #27445d;
+  --color-border-light: #355675;
+
+  /* ===============================
+     INPUT
+  =============================== */
+
+  --color-input: #112437;
+  --color-input-focus: #1d3b56;
+
+  /* ===============================
+     CHAT
+  =============================== */
+
+  --color-message-sent: #14b8a6;
+  --color-message-received: #22364a;
+
+  /* ===============================
+     SIDEBAR
+  =============================== */
+
+  --color-sidebar: #0c1725;
+  --color-sidebar-hover: #152538;
+  --color-sidebar-active: #14b8a6;
+
+  /* ===============================
+     STATUS
+  =============================== */
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #38bdf8;
+  --color-offline: #64748b;
+
+  /* ===============================
+     OVERLAY
+  =============================== */
+
+  --color-overlay: rgba(0, 0, 0, 0.55);
+  --color-backdrop: rgba(8, 19, 31, 0.75);
+
+  /* ===============================
+     RADIUS
+  =============================== */
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
 }
