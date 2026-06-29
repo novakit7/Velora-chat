@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyJWT } from "../middleware/Auth.middleware";
+import { verifyJWT } from "../middleware/Auth.middleware.js";
 import {
   acceptFriendRequest,
   cancelFriendRequest,
@@ -9,11 +9,11 @@ import {
   rejectFriendRequest,
   removeFriend,
   sendFriendRequest,
-} from "../controllers/FriendRequest.controller";
+} from "../controllers/FriendRequest.controller.js";
 
 const FriendRequestRouter = Router();
 FriendRequestRouter.use(verifyJWT);
-FriendRequestRouter.route("/send/:reciverId").post(sendFriendRequest);
+FriendRequestRouter.route("/send/:receiverId").post(sendFriendRequest);
 
 FriendRequestRouter.route("/accept/:requestId").patch(acceptFriendRequest);
 

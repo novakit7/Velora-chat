@@ -1,6 +1,9 @@
-import { Mongoose } from "mongoose";
-import { FriendRequest } from "../models/FriendRequest.model";
-import { asyncHandler } from "../utils/AsyncHandler";
+import mongoose from "mongoose";
+import { FriendRequest } from "../models/FriendRequest.model.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
+import { sendToUser } from "../services/socket.services.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 const sendFriendRequest = asyncHandler(async (req, res) => {
   const { receiverId } = req.params;
@@ -35,6 +38,10 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
     sender: req.user._id,
     receiver: receiverId,
   });
+  sendToUser(receiverId, "friend_request", {
+    senderId: req.user._id,
+    message: "New Friend Request",
+  });
 
   return res
     .status(201)
@@ -48,6 +55,9 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
 
   if (!request) {
     throw new ApiError(404, "Friend request not found");
+  }
+  if (request.status !== "pending") {
+    throw new ApiError(400, "no pending request with this id");
   }
 
   if (!request.receiver.equals(req.user._id)) {
@@ -73,6 +83,9 @@ const rejectFriendRequest = asyncHandler(async (req, res) => {
 
   if (!request) {
     throw new ApiError(404, "Friend request not found");
+  }
+  if (request.status !== "pending") {
+    throw new ApiError(400, "no pending request with this id");
   }
 
   if (!request.receiver.equals(req.user._id)) {
@@ -142,13 +155,24 @@ const getSentRequests = asyncHandler(async (req, res) => {
 });
 
 const getFriends = asyncHandler(async (req, res) => {
+
   const requests = await FriendRequest.find({
-    sender: req.user._id,
+    $or: [{ sender: req.user._id }, { receiver: req.user._id }],
     status: "accepted",
+  })
+    .populate("sender", "fullName avatar username email")
+    .populate("receiver", "fullName avatar username email");
+
+  const friendsList = requests.map((requests) => {
+    if (requests.sender._id.toString() === req.user._id.toString()) {
+      return requests.receiver;
+    }
+
+    return requests.sender;
   });
   return res
     .status(200)
-    .json(new ApiResponse(200, requests, "friends are fetched sucessfully"));
+    .json(new ApiResponse(200, friendsList, "friends are fetched sucessfully"));
 });
 
 const removeFriend = asyncHandler(async (req, res) => {
@@ -172,7 +196,7 @@ const removeFriend = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Friend not found");
   }
 
-  return res.status(200).json(new ApiResponse(200, {}, "Friend removed"));
+  return res.status(200).json(new ApiResponse(200, friendship, "Friend removed"));
 });
 
 export {
@@ -184,5 +208,4 @@ export {
   cancelFriendRequest,
   rejectFriendRequest,
   acceptFriendRequest,
-  sendFriendRequest,
 };
