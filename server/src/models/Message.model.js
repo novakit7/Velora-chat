@@ -16,12 +16,10 @@ const messageSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    attachments: [
-      {
-        type: String,
-        default: "",
-      },
-    ],
+    attachments: {
+      type: [String],
+      default: [],
+    },
     readBy: [
       {
         type: Schema.Types.ObjectId,

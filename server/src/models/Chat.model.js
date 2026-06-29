@@ -25,8 +25,14 @@ const chatSchema = new mongoose.Schema(
       default: "",
     },
     groupAvatar: {
-      type: String,
-      default: "",
+      url: {
+        type: String,
+        default: "",
+      },
+      publicId: {
+        type: String,
+        default: "",
+      },
     },
     admins: [
       {
@@ -42,10 +48,47 @@ const chatSchema = new mongoose.Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    lastActivity: {
+      type: Date,
+      default: Date.now,
+    },
+
+    deletedFor: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    description: {
+      type: String,
+      default: "",
+    },
+    hiddenFor: [
+      {
+        user: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+        deletedAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
+
   { timestamps: true },
 );
 
 chatSchema.index({ participants: 1 });
+
+chatSchema.pre("save", function (next) {
+  this.participants = [
+    ...new Set(this.participants.map((id) => id.toString())),
+  ].map((id) => new mongoose.Types.ObjectId(id));
+
+  next();
+});
 
 export const Chat = mongoose.model("Chat", chatSchema);

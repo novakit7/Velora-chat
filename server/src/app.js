@@ -29,10 +29,14 @@ app.get("/", (req, res) => {
 //route decleration
 import UserRouter from "./routes/User.routes.js";
 import FriendRequestRouter from "./routes/FriendRequest.routes.js";
+import messageRouter from "./routes/Message.routes.js";
+import chatRouter from "./routes/Chat.routes.js";
 
 //routes
 app.use("/api/v1/user" ,UserRouter);
 app.use("/api/v1/friend-request", FriendRequestRouter);
+app.use("/api/v1/chat", chatRouter)
+app.use("/api/v1/message", messageRouter)
 
 
 export default app;
