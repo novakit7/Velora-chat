@@ -32,7 +32,7 @@ import FriendRequestRouter from "./routes/FriendRequest.routes.js";
 
 //routes
 app.use("/api/v1/user" ,UserRouter);
-app.use("/api/v1/frined-request", FriendRequestRouter);
+app.use("/api/v1/frined", FriendRequestRouter);
 
 
 export default app;
