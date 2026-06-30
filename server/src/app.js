@@ -31,12 +31,14 @@ import UserRouter from "./routes/User.routes.js";
 import FriendRequestRouter from "./routes/FriendRequest.routes.js";
 import messageRouter from "./routes/Message.routes.js";
 import chatRouter from "./routes/Chat.routes.js";
+import AIRoutes from "./routes/AIConversationRoutes.js";
 
 //routes
 app.use("/api/v1/user" ,UserRouter);
 app.use("/api/v1/friend-request", FriendRequestRouter);
-app.use("/api/v1/chat", chatRouter)
-app.use("/api/v1/message", messageRouter)
+app.use("/api/v1/chat", chatRouter);
+app.use("/api/v1/message", messageRouter);
+app.use("/api/v1/ai", AIRoutes);
 
 
 export default app;
