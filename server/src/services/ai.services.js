@@ -14,8 +14,6 @@ const askAI = async ({
     temperature,
   });
 
-  console.dir(result, { depth: null });
-
   const response = result?.choices?.[0]?.message?.content?.trim();
 
   if (!response) {
@@ -37,7 +35,7 @@ const summarize = async (text) => {
       {
         role: "system",
         content:
-          "You are an expert summarizer. Summarize the provided text into approximately 100 words while preserving the key ideas, main arguments, and important details. Use clear, concise and coherent language. Return only the summary.",
+          "You are an expert summarizer. Summarize the provided text into approximately 50 words while preserving the key ideas, main arguments, and important details. Use clear, concise and coherent language. Return only the summary.",
       },
       {
         role: "user",
@@ -85,7 +83,7 @@ const makeQuery = async (messages) => {
   return askAI({
     modelName: "Qwen/Qwen3-8B",
     messages,
-    maxTokens: 2048,
+    maxTokens: 1600,
     temperature: 0.7,
   });
 };
