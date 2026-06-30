@@ -1185,7 +1185,143 @@ const renameGroup = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, updatedGroup, "Group renamed successfully."));
 });
 
-// add rename description
+const renameGroupDescription = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+  const { description } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(chatId)) {
+    throw new ApiError(400, "Invalid chat id");
+  }
+
+  if (!description?.trim()) {
+    throw new ApiError(400, "Group description is required");
+  }
+
+  const group = await Chat.findById(chatId);
+
+  if (!group) {
+    throw new ApiError(404, "Group chat not found");
+  }
+
+  if (!group.isGroupChat) {
+    throw new ApiError(400, "This is not a group chat");
+  }
+
+  const isAdmin = group.admins.some(
+    (admin) => admin.toString() === req.user._id.toString(),
+  );
+
+  if (!isAdmin) {
+    throw new ApiError(403, "Only group admins can change description of the group");
+  }
+
+  group.description = description.trim();
+  group.lastActivity = new Date();
+
+  await group.save();
+
+  const [updatedGroup] = await Chat.aggregate([
+    {
+      $match: {
+        _id: group._id,
+      },
+    },
+
+    {
+      $lookup: {
+        from: "users",
+        localField: "participants",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              fullName: 1,
+              avatar: 1,
+              email: 1,
+            },
+          },
+        ],
+        as: "participants",
+      },
+    },
+
+    {
+      $lookup: {
+        from: "users",
+        localField: "admins",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              fullName: 1,
+              avatar: 1,
+            },
+          },
+        ],
+        as: "admins",
+      },
+    },
+
+    {
+      $lookup: {
+        from: "users",
+        localField: "createdBy",
+        foreignField: "_id",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              fullName: 1,
+              avatar: 1,
+            },
+          },
+        ],
+        as: "createdBy",
+      },
+    },
+
+    {
+      $addFields: {
+        createdBy: {
+          $first: "$createdBy",
+        },
+
+        participantsCount: {
+          $size: "$participants",
+        },
+
+        isAdmin: {
+          $in: [req.user._id, "$admins._id"],
+        },
+      },
+    },
+
+    {
+      $project: {
+        _id: 1,
+        groupName: 1,
+        groupAvatar: 1,
+        description: 1,
+        isGroupChat: 1,
+        participants: 1,
+        participantsCount: 1,
+        admins: 1,
+        createdBy: 1,
+        isAdmin: 1,
+        latestMessage: 1,
+        lastActivity: 1,
+        createdAt: 1,
+        updatedAt: 1,
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedGroup, "Group desctiption is updated successfully."));
+});
 
 const updateGroupAvatar = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
@@ -2181,4 +2317,5 @@ export {
   makeAdmin,
   removeAdmin,
   deleteChat,
+  renameGroupDescription
 };

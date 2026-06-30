@@ -15,6 +15,7 @@ import {
   removeAdmin,
   removeParticipant,
   renameGroup,
+  renameGroupDescription,
   updateGroupAvatar,
 } from "../controllers/Chat.controller.js";
 
@@ -31,6 +32,7 @@ chatRouter
   .route("/group/update-avatar/:chatId")
   .patch(upload.single("avatar"), updateGroupAvatar);
 
+chatRouter.route("/group/:chatId/description").patch(renameGroupDescription);
 chatRouter.route("/group/:chatId/remove-participant/:userId").patch(removeParticipant);
 chatRouter.route("/group/:chatId/add-participants").patch(addParticipants);
 chatRouter.route("/group/:chatId/leave").patch(leaveGroup);
