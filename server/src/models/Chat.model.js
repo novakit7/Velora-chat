@@ -83,12 +83,10 @@ const chatSchema = new mongoose.Schema(
 
 chatSchema.index({ participants: 1 });
 
-chatSchema.pre("save", function (next) {
+chatSchema.pre("save", async function () {
   this.participants = [
     ...new Set(this.participants.map((id) => id.toString())),
   ].map((id) => new mongoose.Types.ObjectId(id));
-
-  next();
 });
 
 export const Chat = mongoose.model("Chat", chatSchema);

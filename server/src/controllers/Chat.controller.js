@@ -4,7 +4,9 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 import { FriendRequest } from "../models/FriendRequest.model.js";
 import { Chat } from "../models/chat.model.js";
-import { User } from "../models/user.model.js";
+import { User } from "../models/User.model.js";
+import { Message } from "../models/Message.model.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 
 const createPrivateChat = asyncHandler(async (req, res) => {
   const { userId } = req.params;
@@ -204,7 +206,7 @@ const createPrivateChat = asyncHandler(async (req, res) => {
 });
 
 const createGroupChat = asyncHandler(async (req, res) => {
-  const { groupName, participants } = req.body;
+  const { groupName, participants, description } = req.body;
 
   // Validate group name
   if (!groupName?.trim()) {
@@ -292,6 +294,7 @@ const createGroupChat = asyncHandler(async (req, res) => {
     participants: [...uniqueParticipants, req.user._id],
     isGroupChat: true,
     groupName: groupName.trim(),
+    description: description,
     createdBy: req.user._id,
     admins: [req.user._id],
     lastActivity: new Date(),
@@ -407,6 +410,8 @@ const createGroupChat = asyncHandler(async (req, res) => {
         _id: 1,
 
         groupName: 1,
+
+        description: 1,
 
         groupAvatar: 1,
 
@@ -1160,6 +1165,7 @@ const renameGroup = asyncHandler(async (req, res) => {
         _id: 1,
         groupName: 1,
         groupAvatar: 1,
+        description: 1,
         isGroupChat: 1,
         participants: 1,
         participantsCount: 1,
@@ -1178,6 +1184,8 @@ const renameGroup = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, updatedGroup, "Group renamed successfully."));
 });
+
+// add rename description
 
 const updateGroupAvatar = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
@@ -1688,7 +1696,7 @@ const removeParticipant = asyncHandler(async (req, res) => {
     );
 });
 
-const leaveGroup = asyncHandler(async (req, res) => {
+const leaveGroup = asyncHandler(async (req, res) => { 
   const { chatId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(chatId)) {
@@ -1759,7 +1767,7 @@ const leaveGroup = asyncHandler(async (req, res) => {
   }
 
   await Chat.findByIdAndUpdate(chatId, update, {
-    new: true,
+    returnDocument: "after"
   });
 
   return res
@@ -1864,7 +1872,7 @@ const makeAdmin = asyncHandler(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after"
     },
   );
 
@@ -2015,7 +2023,7 @@ const removeAdmin = asyncHandler(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after"
     },
   );
 
@@ -2149,7 +2157,7 @@ const deleteChat = asyncHandler(async (req, res) => {
       },
     },
     {
-      new: true,
+      returnDocument: "after"
     },
   );
 
