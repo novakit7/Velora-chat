@@ -1,9 +1,8 @@
 // services/notification.service.js
 
 import { Notification } from "../models/Notification.model.js";
-import { getReceiverSocketId, io } from "../socket/index.js";
 
-export const sendNotification = async ({
+const sendNotification = async ({
   sender,
   receiver,
   chat = null,
@@ -27,15 +26,7 @@ export const sendNotification = async ({
     .populate("chat")
     .populate("message");
 
-  // Emit if receiver is online
-  const receiverSocketId = getReceiverSocketId(receiver.toString());
-
-  if (receiverSocketId) {
-    io.to(receiverSocketId).emit(
-      "new_notification",
-      populatedNotification
-    );
-  }
-
   return populatedNotification;
 };
+
+export {sendNotification}

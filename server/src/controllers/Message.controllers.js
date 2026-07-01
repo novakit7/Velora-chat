@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
+import {sendNotification} from "../services/notification.services.js";
 
 const sendMessage = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
