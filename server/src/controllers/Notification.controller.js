@@ -37,7 +37,7 @@ const getNotificationById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Notification not found");
   }
 
-  if (notification.receiver.toString() !== req.user._id.toString()) {
+  if (notification.receiver._id.toString() !== req.user._id.toString()) {
     throw new ApiError(403, "You are not authorized to view this notification");
   }
 

@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
-import {sendNotification} from "../services/notification.services.js";
+import { sendNotification } from "../services/notification.services.js";
 
 const sendMessage = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
@@ -39,6 +39,19 @@ const sendMessage = asyncHandler(async (req, res) => {
     "sender",
     "username fullname avatar",
   );
+
+  const receiver = chat.participants.find(
+    (participant) => participant.toString() !== req.user._id.toString(),
+  );
+
+  const notification = await sendNotification({
+    sender: req.user._id,
+    receiver,
+    chat: chat._id,
+    message: message._id,
+    type: "message",
+    text: `${req.user.username} sent you a message`,
+  });
   return res
     .status(201)
     .json(new ApiResponse(201, populatedMessage, "Message sent successfully"));

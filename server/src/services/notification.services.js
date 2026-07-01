@@ -1,5 +1,3 @@
-// services/notification.service.js
-
 import { Notification } from "../models/Notification.model.js";
 
 const sendNotification = async ({
@@ -20,13 +18,7 @@ const sendNotification = async ({
     text,
   });
 
-  // Populate if needed
-  const populatedNotification = await Notification.findById(notification._id)
-    .populate("sender", "username fullname avatar")
-    .populate("chat")
-    .populate("message");
-
-  return populatedNotification;
+  return notification;
 };
 
 export {sendNotification}
