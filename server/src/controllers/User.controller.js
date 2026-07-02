@@ -251,7 +251,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   res
     .status(200)
     .json(new ApiResponse(200, user, "Accout details Updated Successfully.."));
-});
+});  //if email change  ask for otp.... fix it in next version
 
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;

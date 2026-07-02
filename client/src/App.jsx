@@ -1,24 +1,15 @@
-import Loader from "./components/common/Loader";
-import { notify } from "./utils/toast";
+import React from 'react'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import { Routes, Route, Link } from 'react-router-dom'
 
-function App() {
+export default function App() {
   return (
     <div>
-      <div className="relative h-100 border bg-bg">
-        <Loader text="Loading chats..." />
-      </div>
-      <div className="relative flex-1">
-  <Loader text="Loading messages..." />
-</div>
-<div className="relative h-24">
-  <Loader
-    text="Saving..."
-    size="sm"
-    overlay={false}
-  />
-</div>
+      <Routes>
+        <Route path="/" element={<Login/>} />
+        <Route path="/register" element={<Register/>} />
+      </Routes>
     </div>
-  );
+  )
 }
-
-export default App;
