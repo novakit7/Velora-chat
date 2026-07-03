@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, Links } from "react-router-dom";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,7 +40,7 @@ export default function Login() {
             </div>
 
             {/* Reserved Area (No Layout Shift) */}
-            <div className="min-h-[170px]">
+            <div className="min-h-42.5">
               {!forgotPassword ? (
                 <>
                   {/* Password */}
@@ -130,6 +130,7 @@ export default function Login() {
             >
               {forgotPassword ? "Verify OTP" : "Sign In"}
             </button>
+            <Link to='/home'className="text-primary">bypass login</Link>
 
             {!forgotPassword && (
               <p className="text-center text-sm text-text-secondary">

@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   return (
     <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-8 font-sans">
