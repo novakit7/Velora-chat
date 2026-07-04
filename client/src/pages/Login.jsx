@@ -1,17 +1,40 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { Link, Links } from "react-router-dom";
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axois";
 
 export default function Login() {
+  const { user, setUser } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const navigate = useNavigate();
+  useEffect(() => {
+    console.log(user);
+  }, [user]);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    setUser({
+      name: "Kit",
+      email,
+    });
+
+    navigate("/home");
+  };
 
   return (
-    <div className="min-h-screen bg-bg flex items-center justify-center px-4 py-8 font-sans">
-      <div className="w-full max-w-5xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-bg text-text font-sans flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-5xl bg-card border border-border rounded-xl shadow-xl overflow-hidden flex flex-col lg:flex-row">
         {/* Left Side */}
         <div className="w-full lg:w-1/2 p-8 sm:p-10 lg:p-12 flex flex-col justify-center">
-          <h1 className="text-4xl sm:text-5xl font-bold text-text">
+          <h1 className="text-5xl font-bold tracking-tight text-text">
             Hello<span className="text-primary">.</span>
           </h1>
 
@@ -34,8 +57,10 @@ export default function Login() {
 
               <input
                 type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="alex@gmail.com"
-                className="w-full rounded-lg border border-border bg-input px-4 py-3 text-text placeholder:text-text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full rounded-md border border-border bg-input px-4 py-3 text-text placeholder:text-text-muted outline-none transition-colors duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
               />
             </div>
 
@@ -53,7 +78,9 @@ export default function Login() {
                       <input
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
-                        className="w-full rounded-lg border border-border bg-input px-4 py-3 pr-12 text-text placeholder:text-text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="w-full rounded-md border border-border bg-input px-4 py-3 text-text placeholder:text-text-muted outline-none transition-colors duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
                       />
 
                       <button
@@ -125,12 +152,15 @@ export default function Login() {
 
             {/* Button */}
             <button
-              type="submit"
+              type="button"
+              onClick={handleLogin}
               className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition hover:bg-primary-hover active:bg-primary-active"
             >
               {forgotPassword ? "Verify OTP" : "Sign In"}
             </button>
-            <Link to='/home'className="text-primary">bypass login</Link>
+            <Link to="/home" className="text-primary">
+              bypass login
+            </Link>
 
             {!forgotPassword && (
               <p className="text-center text-sm text-text-secondary">
@@ -147,11 +177,11 @@ export default function Login() {
         </div>
 
         {/* Right Side */}
-        <div className="hidden lg:block lg:w-1/2">
+        <div className="hidden lg:flex lg:w-1/2 bg-bg-secondary items-center justify-center">
           <img
             src="/logo-hero.png"
             alt="Login"
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover"
           />
         </div>
       </div>
