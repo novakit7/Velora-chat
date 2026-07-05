@@ -1,7 +1,7 @@
 import { useState,useEffect } from "react";
 
 const Loader = ({
-  size = "sm",
+  size = "md",
   overlay = true,
   className = "",
 }) => {

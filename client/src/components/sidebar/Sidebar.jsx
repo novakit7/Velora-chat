@@ -1,4 +1,7 @@
 import React from "react";
+import api from "../../api/axois";
+import AuthContext from "../../context/AuthContext";
+import { useContext } from "react";
 import {
   FiHome,
   FiMessageCircle,
@@ -8,6 +11,20 @@ import {
 import { Link } from "react-router-dom";
 
 export default function Sidebar() {
+
+    const { user, setUser } = useContext(AuthContext);
+    
+  const handleLogout = async(e)=>{
+    e.preventDefault();
+    try {
+      const res = await api.post("/user/logout");
+      console.log(res?.message);
+      setUser(null);
+      
+    } catch (error) {
+      console.error(error);
+    }
+  }
   return (
     <aside className="w-20 bg-slate-900 border border-slate-800 rounded-2xl flex flex-col py-4">
       {/* Navigation */}
@@ -27,9 +44,9 @@ export default function Sidebar() {
 
       {/* Logout */}
       <div className="flex justify-center pt-4 border-t border-slate-800">
-        <Link to= "/" className="w-14 h-14 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition">
+        <button onClick ={handleLogout} className="w-14 h-14 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 transition">
           <FiLogOut size={24} />
-        </Link>
+        </button>
       </div>
     </aside>
   );

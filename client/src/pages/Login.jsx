@@ -5,6 +5,8 @@ import { useContext } from "react";
 import AuthContext from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axois";
+import Loader from "../components/common/Loader";
+import { notify } from "../utils/toast";
 
 export default function Login() {
   const { user, setUser } = useContext(AuthContext);
@@ -12,22 +14,69 @@ export default function Login() {
   const [forgotPassword, setForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const [loading, setLoading] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    otp: "",
+    newPassword: "",
+  });
   const navigate = useNavigate();
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  //login..
+  const handleLogin = async (e) => {
+  e.preventDefault();
 
-    setUser({
-      name: "Kit",
+  if (!email.trim()) {
+    setErrors((prev) => ({
+      ...prev,
+      email: "Email is required",
+    }));
+    return;
+  }
+
+  if (!password.trim()) {
+    setErrors((prev) => ({
+      ...prev,
+      password: "Password is required",
+    }));
+    return;
+  }
+
+  if (password.length < 8) {
+    setErrors((prev) => ({
+      ...prev,
+      password: "Password must be at least 8 characters",
+    }));
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const res = await api.post("/user/login", {
       email,
+      password,
     });
 
+    setUser(res.data.data.user);
+    notify.success("Login Successful!");
     navigate("/home");
-  };
+  } catch (error) {
+    notify.error(
+      error.response?.data?.message ||
+      "Something went wrong. Try again."
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+//pending
+  const handleForgetPassword = async () => {};
+
+  const handleVerifyOtp = async () => {};
 
   return (
     <div className="min-h-screen bg-bg text-text font-sans flex items-center justify-center px-4 py-8">
@@ -58,10 +107,26 @@ export default function Login() {
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+
+                  setErrors((prev) => ({
+                    ...prev,
+                    email: "",
+                  }));
+                }}
                 placeholder="alex@gmail.com"
-                className="w-full rounded-md border border-border bg-input px-4 py-3 text-text placeholder:text-text-muted outline-none transition-colors duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className={`w-full rounded-md border bg-input px-4 py-2 text-text placeholder:text-text-muted outline-none transition-colors duration-200
+      ${
+        errors.email
+          ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+          : "border-border focus:border-primary focus:ring-primary/20"
+      }`}
               />
+
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-500">{errors.email}</p>
+              )}
             </div>
 
             {/* Reserved Area (No Layout Shift) */}
@@ -79,17 +144,26 @@ export default function Login() {
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full rounded-md border border-border bg-input px-4 py-3 text-text placeholder:text-text-muted outline-none transition-colors duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+
+                          setErrors((prev) => ({
+                            ...prev,
+                            password: "",
+                          }));
+                        }}
+                        className={`w-full rounded-md border bg-input px-4 py-2 pr-12 text-text placeholder:text-text-muted outline-none transition-colors duration-200
+        ${
+          errors.password
+            ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+            : "border-border focus:border-primary focus:ring-primary/20"
+        }`}
                       />
 
                       <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-text-muted hover:text-primary transition"
-                        aria-label={
-                          showPassword ? "Hide password" : "Show password"
-                        }
+                        className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-text-muted hover:text-primary"
                       >
                         {showPassword ? (
                           <FiEyeOff size={20} />
@@ -98,6 +172,12 @@ export default function Login() {
                         )}
                       </button>
                     </div>
+
+                    {errors.password && (
+                      <p className="mt-1 text-sm text-red-500">
+                        {errors.password}
+                      </p>
+                    )}
                   </div>
 
                   <div className="mt-4 flex justify-end">
@@ -122,7 +202,7 @@ export default function Login() {
                         type="text"
                         maxLength={6}
                         placeholder="123456"
-                        className="flex-1 rounded-lg border border-border bg-input px-4 py-3 text-text placeholder:text-text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        className="flex-1 rounded-lg border border-border bg-input px-4 py-2 text-text placeholder:text-text-muted outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
                       />
 
                       <button
@@ -132,6 +212,16 @@ export default function Login() {
                         Send
                       </button>
                     </div>
+                    <label className="mb-2 mt-5 block text-sm text-text-secondary">
+                      New Password
+                    </label>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full rounded-md border border-border bg-input px-4 py-2 text-text placeholder:text-text-muted outline-none transition-colors duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    />
                   </div>
 
                   <p className="text-xs text-text-muted">
@@ -149,18 +239,14 @@ export default function Login() {
                 </div>
               )}
             </div>
-
             {/* Button */}
             <button
               type="button"
               onClick={handleLogin}
-              className="w-full rounded-lg bg-primary py-3 font-semibold text-white transition hover:bg-primary-hover active:bg-primary-active"
+              className="w-full rounded-lg bg-primary py-2 font-semibold text-white transition hover:bg-primary-hover active:bg-primary-active "
             >
-              {forgotPassword ? "Verify OTP" : "Sign In"}
+              {loading ? <Loader /> : forgotPassword ? "Verify OTP" : "Sign In"}
             </button>
-            <Link to="/home" className="text-primary">
-              bypass login
-            </Link>
 
             {!forgotPassword && (
               <p className="text-center text-sm text-text-secondary">
