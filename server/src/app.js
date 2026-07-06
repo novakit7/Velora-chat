@@ -45,4 +45,13 @@ app.use("/api/v1/notification", notificationRouter);
 app.use("/api/v1/health-check", healthCheckRouter);
 
 
+app.use((err, req, res, next) => {
+  return res.status(err.statusCode || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+    errors: err.errors || [],
+    data: err.data || null,
+  });
+});
+
 export default app;

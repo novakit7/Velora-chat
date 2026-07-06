@@ -2,10 +2,13 @@ import { useState } from "react";
 import { FiBell, FiUser } from "react-icons/fi";
 import NotificationModal from "../models/NotificationModel";
 import UserModal from "../models/UserModel.";
+import { useContext } from "react";
+import AuthContext from "../../context/AuthContext";
 
 export default function Navbar() {
   const [openNotification, setOpenNotification] = useState(false);
   const [openUser, setOpenUser] = useState(false);
+    const { user, setUser } = useContext(AuthContext);
 
   return (
     <div className="flex justify-center">
@@ -28,7 +31,7 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setOpenNotification(!openNotification)}
-            className="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition"
+            className="w-10 h-10 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center transition cursor-pointer"
           >
             <FiBell className="text-gray-300" size={18} />
           </button>
@@ -38,11 +41,21 @@ export default function Navbar() {
           />
 
           <button
-            className="w-10 h-10 rounded-full bg-cyan-500 hover:bg-cyan-600 flex items-center justify-center transition"
-            onClick={() => setOpenUser((prev) => !prev)}
-          >
-            <FiUser className="text-white" size={18} />
-          </button>
+              onClick={() => setOpenUser(!openUser)}
+              className="h-10 w-10 overflow-hidden rounded-full border-2 border-cyan-500 bg-cyan-500 flex items-center justify-center cursor-pointer"
+            >
+              {user?.avatar?.url ? (
+                <img
+                  src={user.avatar.url}
+                  alt={user.username}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-semibold text-lg">
+                  {user?.username?.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </button>
           <UserModal open={openUser} onClose={() => setOpenUser(false)} />
         </div>
       </header>

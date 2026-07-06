@@ -1,80 +1,74 @@
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 
-const Loader = ({
-  size = "md",
-  overlay = true,
-  className = "",
-}) => {
- const dotSize = {
-  sm: "h-2 w-2",      // Inline/button loader
-  md: "h-3 w-3",      // Card/form loader
-  lg: "h-10 w-10",      // Section loader
-};
+const Loader = ({ size = "md", variant = "fullscreen", className = "" }) => {
+  const dotSize = {
+    sm: "h-2 w-2",
+    md: "h-3 w-3",
+    lg: "h-5 w-5",
+    xl: "h-7 w-7",
+  };
+
   const loadingTexts = [
-  "Connecting...",
-  "Starting Velora...",
-  "Loading conversations...",
-  "Finding your friends...",
-  "Syncing messages...",
-  "Preparing your chats...",
-  "Almost there..."
-];
+    "Connecting...",
+    "Starting Velora...",
+    "Loading conversations...",
+    "Finding your friends...",
+    "Syncing messages...",
+    "Preparing your chats...",
+    "Almost there...",
+  ];
+
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
+    if (variant === "button") return;
+
     const interval = setInterval(() => {
       setIndex((prev) => (prev + 1) % loadingTexts.length);
     }, 1500);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [variant]);
 
+  // Button Loader
+  if (variant === "button") {
+    return (
+      <div className="inline-flex items-center justify-center gap-1.5">
+        {[0, 0.15, 0.3].map((delay) => (
+          <span
+            key={delay}
+            className={`${dotSize[size]} rounded-full bg-white animate-bounce`}
+            style={{ animationDelay: `${delay}s` }}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  const containerClass = {
+    fullscreen:
+      "fixed inset-0 z-50 flex flex-col items-center justify-center bg-bg backdrop-blur-sm",
+    section:
+      "absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-bg/70 backdrop-blur-sm",
+  };
 
   return (
-    <div
-      className={`
-        absolute inset-0 z-50
-        flex flex-col items-center justify-center
-        ${overlay ? "bg-bg-secondary backdrop-blur-[2px]" : ""}
-        ${className}
-      `}
-    >
-      {/* Dots */}
+    <div className={`${containerClass[variant]} ${className}`}>
       <div className="flex items-center gap-2">
-        <span
-          className={`${dotSize[size]} rounded-full bg-primary animate-bounce`}
-          style={{
-            animationDelay: "-0.3s",
-            animationDuration: "1.1s",
-          }}
-        />
-        <span
-          className={`${dotSize[size]} rounded-full bg-primary animate-bounce`}
-          style={{
-            animationDelay: "-0.15s",
-            animationDuration: "1.1s",
-          }}
-        />
-        <span
-          className={`${dotSize[size]} rounded-full bg-primary animate-bounce`}
-          style={{
-            animationDuration: "1.1s",
-          }}
-        />
+        {[0, 0.15, 0.3].map((delay) => (
+          <span
+            key={delay}
+            className={`${dotSize[size]} rounded-full bg-primary animate-bounce`}
+            style={{ animationDelay: `${delay}s` }}
+          />
+        ))}
       </div>
-        <p className="mt-4 text-md font-medium text-text tracking-wide">
-          {loadingTexts[index]}
-        </p>
+
+      <p className="mt-5 text-sm font-medium tracking-wide text-text">
+        {loadingTexts[index]}
+      </p>
     </div>
   );
 };
 
 export default Loader;
-
-
-{/* <div className="relative h-24">
-  <Loader
-    text="Saving..."
-    size="sm"
-    overlay={false}
-  /> */}

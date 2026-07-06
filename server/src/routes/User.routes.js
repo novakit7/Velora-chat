@@ -25,7 +25,7 @@ UserRouter.route("/register").post(upload.single("avatar"), registerUser);
 
 UserRouter.route("/verify").post(verifyOTP);
 
-UserRouter.route("/forgot-passowrd").post(forgotPassword).patch(resetPassword);
+UserRouter.route("/forgot-password").post(forgotPassword).patch(resetPassword);
 
 UserRouter.route("/change-password").post(verifyJWT, changePassword);
 UserRouter.route("/")
