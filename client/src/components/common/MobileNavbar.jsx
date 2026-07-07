@@ -1,50 +1,84 @@
-import React from "react";
+import { useContext, useState } from "react";
 import {
   FiBell,
-  FiUser,
-  FiHome,
   FiMessageCircle,
   FiUsers,
-  FiSettings,
+  FiPlusCircle,
+  FiCpu,
+  FiUserCheck,
 } from "react-icons/fi";
+
 import NotificationModal from "../models/NotificationModel";
 import UserModal from "../models/UserModel.";
-import { useState } from "react";
-import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
 
-export default function MobileNavbar() {
+export default function MobileNavbar({
+  activeTab,
+  setActiveTab,
+}) {
   const [openNotification, setOpenNotification] = useState(false);
   const [openUser, setOpenUser] = useState(false);
-  const { user, setUser } = useContext(AuthContext);
+
+  const { user } = useContext(AuthContext);
+
+  const menuItems = [
+    {
+      name: "Chats",
+      icon: <FiMessageCircle size={22} />,
+    },
+    {
+      name: "Groups",
+      icon: <FiUsers size={22} />,
+    },
+    {
+      name: "New Chat",
+      icon: <FiPlusCircle size={24} />,
+    },
+    {
+      name: "AI",
+      icon: <FiCpu size={22} />,
+    },
+    {
+      name: "Friends",
+      icon: <FiUserCheck size={22} />,
+    },
+  ];
+
   return (
     <>
-      {/* Top Navbar */}
-      <header className="md:hidden sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800">
+      {/* ---------- Top Navbar ---------- */}
+
+      <header className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-800">
+
         <div className="flex items-center justify-between px-4 py-3">
+
           <div className="flex items-center gap-3">
             <img
               src="/favicon.png"
               alt="Velora"
-              className="w-10 h-10 rounded-xl object-cover"
+              className="w-10 h-10 rounded-xl"
             />
 
             <div>
-              <h2 className="text-base font-semibold text-white">Velora</h2>
-              <p className="text-xs text-secondary">
-                • Where Conversations Flow.
+              <h2 className="text-white font-semibold">
+                Velora
+              </h2>
+
+              <p className="text-xs text-gray-400">
+                Where Conversations Flow.
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
+
             <button
-              onClick={() => setOpenNotification(!openNotification)}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 transition hover:bg-slate-700"
+              onClick={() => setOpenNotification(true)}
+              className="relative h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center"
             >
               <FiBell size={20} className="text-gray-300" />
 
-              <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500"></span>
+              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500" />
             </button>
 
             <NotificationModal
@@ -53,45 +87,62 @@ export default function MobileNavbar() {
             />
 
             <button
-              onClick={() => setOpenUser(!openUser)}
-              className="h-10 w-10 overflow-hidden rounded-full border-2 border-cyan-500 bg-cyan-500 flex items-center justify-center"
+              onClick={() => setOpenUser(true)}
+              className="w-10 h-10 rounded-full border-2 border-cyan-500 overflow-hidden"
             >
               {user?.avatar?.url ? (
                 <img
                   src={user.avatar.url}
-                  alt={user.username}
-                  className="h-full w-full object-cover"
+                  alt=""
+                  className="w-full h-full object-cover"
                 />
               ) : (
-                <span className="text-white font-semibold text-lg">
+                <div className="w-full h-full bg-cyan-500 flex items-center justify-center text-white font-bold">
                   {user?.username?.charAt(0).toUpperCase()}
-                </span>
+                </div>
               )}
             </button>
 
-            <UserModal open={openUser} onClose={() => setOpenUser(false)} />
+            <UserModal
+              open={openUser}
+              onClose={() => setOpenUser(false)}
+            />
+
           </div>
+
         </div>
+
       </header>
-      {/* Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] bg-slate-900 border border-slate-800 rounded-2xl shadow-xl">
-        <div className="flex justify-around py-3">
-          <button className="text-gray-400 hover:text-cyan-400">
-            <FiHome size={24} />
-          </button>
 
-          <button className="text-cyan-400">
-            <FiMessageCircle size={24} />
-          </button>
+      {/* ---------- Bottom Navigation ---------- */}
 
-          <button className="text-gray-400 hover:text-cyan-400">
-            <FiUsers size={24} />
-          </button>
+      <nav className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-md rounded-2xl border border-slate-800 bg-slate-900/95 backdrop-blur-lg shadow-2xl">
 
-          <button className="text-gray-400 hover:text-cyan-400">
-            <FiSettings size={24} />
-          </button>
+        <div className="flex items-center justify-around py-3">
+
+          {menuItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => setActiveTab(item.name)}
+              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200
+
+                ${
+                  activeTab === item.name
+                    ? item.primary
+                      ? "bg-linear-to-br from-cyan-500 to-blue-600 text-white scale-110 shadow-lg"
+                      : "bg-cyan-500 text-white scale-105 shadow-md"
+                    : item.primary
+                    ? "bg-linear-to-br from-cyan-500/80 to-blue-600/80 text-white"
+                    : "text-gray-400 hover:text-cyan-400"
+                }
+              `}
+            >
+              {item.icon}
+            </button>
+          ))}
+
         </div>
+
       </nav>
     </>
   );

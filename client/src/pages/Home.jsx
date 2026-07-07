@@ -1,26 +1,82 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/common/Navbar";
 import MobileNavbar from "../components/common/MobileNavbar";
 import Sidebar from "../components/sidebar/Sidebar";
 import ChatList from "../components/sidebar/ChatList";
+import GroupList from "../components/sidebar/GroupList";
+import NewChat from "../components/sidebar/NewChat";
+import AISection from "../components/sidebar/AISection";
+import FriendList from "../components/sidebar/FriendList";
+import AddFriend from "../components/sidebar/AddFriend";
 import Conversation from "../components/chat/Conversation";
 
 export default function Home() {
   const [selectedChat, setSelectedChat] = useState(null);
+  const [activeTab, setActiveTab] = useState("Chats");
+
+  // Clear the selected conversation whenever the section changes
+  useEffect(() => {
+    setSelectedChat(null);
+  }, [activeTab]);
+
+  const renderLeftPanel = () => {
+    switch (activeTab) {
+      case "Chats":
+        return (
+          <ChatList
+            selectedChat={selectedChat}
+            onSelectChat={setSelectedChat}
+          />
+        );
+
+      case "Groups":
+        return (
+          <GroupList
+            selectedChat={selectedChat}
+            onSelectChat={setSelectedChat}
+          />
+        );
+
+      case "New Chat":
+        return <NewChat />;
+
+      case "AI":
+        return (
+          <AISection
+            selectedChat={selectedChat}
+            onSelectChat={setSelectedChat}
+          />
+        );
+
+      case "Friends":
+        return <FriendList />;
+
+      case "Add Friend":
+        return <AddFriend />;
+
+      default:
+        return null;
+    }
+  };
+
+  const showConversation =
+    activeTab === "Chats" ||
+    activeTab === "Groups" ||
+    activeTab === "AI";
 
   return (
     <>
       {/* ================= MOBILE ================= */}
-      <div className="md:hidden h-screen bg-slate-950 flex flex-col">
+      <div className="md:hidden h-dvh bg-slate-950 flex flex-col">
         {!selectedChat ? (
           <>
-            <MobileNavbar />
+            <MobileNavbar
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
 
-            <div className="flex-1 overflow-hidden">
-              <ChatList
-                selectedChat={selectedChat}
-                onSelectChat={setSelectedChat}
-              />
+            <div className="flex-1 overflow-hidden pb-20">
+              {renderLeftPanel()}
             </div>
           </>
         ) : (
@@ -32,28 +88,43 @@ export default function Home() {
       </div>
 
       {/* ================= DESKTOP ================= */}
-      <div className="hidden md:flex h-screen bg-slate-950 p-3 flex-col gap-3">
+      <div className="hidden md:flex h-screen bg-slate-950 p-4 lg:p-5 flex-col gap-4">
         <Navbar />
 
-        <div className="flex flex-1 gap-3 overflow-hidden">
-          {/* Sidebar */}
-          <Sidebar />
+        <div className="flex flex-1 gap-4 overflow-hidden min-h-0">
 
-          {/* Chat List */}
-          <div className="w-80 rounded-2xl overflow-hidden">
-            <ChatList
-              selectedChat={selectedChat}
-              onSelectChat={setSelectedChat}
-            />
+          <Sidebar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+
+          {/* Left Panel */}
+          <div className="w-[320px] lg:w-90 xl:w-100 2xl:w-107.5 rounded-2xl overflow-hidden shrink-0">
+            {renderLeftPanel()}
           </div>
 
-          {/* Conversation */}
-          <div className="flex-1 rounded-2xl overflow-hidden">
-            <Conversation
-              chat={selectedChat}
-              onBack={() => setSelectedChat(null)}
-            />
+          {/* Right Panel */}
+          <div className="flex-1 min-w-0 rounded-2xl overflow-hidden">
+            {showConversation ? (
+              <Conversation
+                chat={selectedChat}
+                onBack={() => setSelectedChat(null)}
+              />
+            ) : (
+              <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
+                <div className="text-center">
+                  <h2 className="text-2xl font-semibold text-white">
+                    {activeTab}
+                  </h2>
+
+                  <p className="mt-2 text-gray-400">
+                    Select an option from the left panel.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
+
         </div>
       </div>
     </>
