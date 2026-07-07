@@ -210,7 +210,7 @@ export default function Login() {
                   }));
                 }}
                 placeholder="alex@gmail.com"
-                className={`w-full rounded-md border bg-input px-4 py-2 text-text placeholder:text-text-muted outline-none transition-colors duration-200
+                className={`w-full rounded-md border bg-input-focus px-4 py-2 text-text placeholder:text-text-muted outline-none transition-colors duration-200
       ${
         errors.email
           ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
@@ -247,7 +247,7 @@ export default function Login() {
                             password: "",
                           }));
                         }}
-                        className={`w-full rounded-md border bg-input px-4 py-2 pr-12 text-text placeholder:text-text-muted outline-none transition-colors duration-200
+                        className={`w-full rounded-md border bg-input-focus px-4 py-2 pr-12 text-text placeholder:text-text-muted outline-none transition-colors duration-200
             ${
               errors.password
                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
@@ -335,7 +335,7 @@ export default function Login() {
                           otp: "",
                         }));
                       }}
-                      className={`w-full rounded-lg border bg-input px-4 py-2 text-text outline-none transition
+                      className={`w-full rounded-lg border bg-input-focus px-4 py-2 text-text outline-none transition
           ${
             errors.otp
               ? "border-red-500 focus:border-red-500"
@@ -368,7 +368,7 @@ export default function Login() {
                             newPassword: "",
                           }));
                         }}
-                        className={`w-full rounded-md border bg-input px-4 py-2 pr-12 text-text outline-none transition
+                        className={`w-full rounded-md border bg-input-focus px-4 py-2 pr-12 text-text outline-none transition
             ${
               errors.newPassword
                 ? "border-red-500 focus:border-red-500"

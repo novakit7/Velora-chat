@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import api from "../../api/axois";
 import AuthContext from "../../context/AuthContext";
+import Loader from "../common/Loader";
 
 import {
   FiMessageCircle,
@@ -15,6 +16,7 @@ import {
 export default function Sidebar({ activeTab, setActiveTab }) {
   const { setUser } = useContext(AuthContext);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const menuItems = [
     {
@@ -45,11 +47,13 @@ export default function Sidebar({ activeTab, setActiveTab }) {
 
   const handleLogout = async () => {
     try {
+      setLoading(true);
       await api.post("/user/logout");
       setUser(null);
     } catch (error) {
       console.error(error);
     } finally {
+      setLoading(false);
       setShowLogoutModal(false);
     }
   };
@@ -125,7 +129,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
                 onClick={handleLogout}
                 className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 transition"
               >
-                Logout
+                {loading ? <Loader variant="button"/>: "Logout"}
               </button>
             </div>
           </div>
