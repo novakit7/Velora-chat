@@ -5,6 +5,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import ProtectedRoute from "./routes/ProtectedRoutes";
 import PublicRoute from "./routes/PublicRoutes";
+import NotFound from "./pages/NotFound";
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFound/>}/>
       </Routes>
     </div>
   );

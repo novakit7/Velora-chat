@@ -9,12 +9,13 @@ import AISection from "../components/sidebar/AISection";
 import FriendList from "../components/sidebar/FriendList";
 import AddFriend from "../components/sidebar/AddFriend";
 import Conversation from "../components/chat/Conversation";
+import useIsMobile from "../hooks/useIsMobile";
 
 export default function Home() {
+  const isMobile = useIsMobile();
   const [selectedChat, setSelectedChat] = useState(null);
   const [activeTab, setActiveTab] = useState("Chats");
 
-  // Clear the selected conversation whenever the section changes
   useEffect(() => {
     setSelectedChat(null);
   }, [activeTab]);
@@ -60,73 +61,59 @@ export default function Home() {
   };
 
   const showConversation =
-    activeTab === "Chats" ||
-    activeTab === "Groups" ||
-    activeTab === "AI";
+    activeTab === "Chats" || activeTab === "Groups" || activeTab === "AI";
 
-  return (
-    <>
-      {/* ================= MOBILE ================= */}
-      <div className="md:hidden h-dvh bg-slate-950 flex flex-col">
-        {!selectedChat ? (
-          <>
-            <MobileNavbar
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-            />
+  return isMobile ? (
+    // ================= MOBILE =================
+    <div className="h-dvh bg-slate-950 flex flex-col">
+      {!selectedChat ? (
+        <>
+          <MobileNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-            <div className="flex-1 overflow-hidden pb-20">
-              {renderLeftPanel()}
-            </div>
-          </>
-        ) : (
-          <Conversation
-            chat={selectedChat}
-            onBack={() => setSelectedChat(null)}
-          />
-        )}
-      </div>
-
-      {/* ================= DESKTOP ================= */}
-      <div className="hidden md:flex h-screen bg-slate-950 p-4 lg:p-5 flex-col gap-4">
-        <Navbar />
-
-        <div className="flex flex-1 gap-4 overflow-hidden min-h-0">
-
-          <Sidebar
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-
-          {/* Left Panel */}
-          <div className="w-[320px] lg:w-90 xl:w-100 2xl:w-107.5 rounded-2xl overflow-hidden shrink-0">
+          <div className="flex-1 overflow-hidden pb-20">
             {renderLeftPanel()}
           </div>
+        </>
+      ) : (
+        <Conversation
+          chat={selectedChat}
+          onBack={() => setSelectedChat(null)}
+        />
+      )}
+    </div>
+  ) : (
+    // ================= DESKTOP =================
+    <div className="h-screen bg-slate-950 p-4 lg:p-5 flex flex-col gap-4">
+      <Navbar />
 
-          {/* Right Panel */}
-          <div className="flex-1 min-w-0 rounded-2xl overflow-hidden">
-            {showConversation ? (
-              <Conversation
-                chat={selectedChat}
-                onBack={() => setSelectedChat(null)}
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
-                <div className="text-center">
-                  <h2 className="text-2xl font-semibold text-white">
-                    {activeTab}
-                  </h2>
+      <div className="flex flex-1 gap-4 overflow-hidden min-h-0">
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-                  <p className="mt-2 text-gray-400">
-                    Select an option from the left panel.
-                  </p>
-                </div>
+        <div className="w-[320px] lg:w-90 xl:w-100 2xl:w-107.5 rounded-2xl overflow-hidden shrink-0">
+          {renderLeftPanel()}
+        </div>
+
+        <div className="flex-1 min-w-0 rounded-2xl overflow-hidden">
+          {showConversation ? (
+            <Conversation
+              chat={selectedChat}
+              onBack={() => setSelectedChat(null)}
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
+              <div className="text-center">
+                <h2 className="text-2xl font-semibold text-white">
+                  {activeTab}
+                </h2>
+
+                <p className="mt-2 text-gray-400">
+                  Select an option from the left panel.
+                </p>
               </div>
-            )}
-          </div>
-
+            </div>
+          )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

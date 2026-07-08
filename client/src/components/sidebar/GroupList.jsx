@@ -1,51 +1,43 @@
-import React from "react";
-import { FiSearch, FiUsers } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { FiSearch } from "react-icons/fi";
+import api from "../../api/axois";
+import Loader from "../common/Loader";
+import { notify } from "../../utils/toast";
+import { formatRelativeDate } from "../../utils/date";
 
-const groups = [
-  {
-    id: 1,
-    name: "React Developers",
-    message: "Ankit: Push your latest changes 🚀",
-    time: "10:30",
-    unread: 5,
-    members: 24,
-  },
-  {
-    id: 2,
-    name: "College Friends",
-    message: "Rahul: Party this weekend? 🎉",
-    time: "09:10",
-    unread: 2,
-    members: 12,
-  },
-  {
-    id: 3,
-    name: "Office Team",
-    message: "Priya: Meeting starts in 15 mins",
-    time: "Yesterday",
-    unread: 0,
-    members: 18,
-  },
-  {
-    id: 4,
-    name: "Gaming Squad",
-    message: "Aman: Ready for tonight? 🎮",
-    time: "Yesterday",
-    unread: 1,
-    members: 8,
-  },
-];
+export default function GroupList({ onSelectChat, selectedChat }) {
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default function GroupList({
-  selectedChat,
-  onSelectChat,
-}) {
+  useEffect(() => {
+    const getGroups = async () => {
+      try {
+        setLoading(true);
+
+        const res = await api.get("/chat");
+
+        const data = res.data.data.filter(
+          (chat) => chat.isGroupChat
+        );
+
+        setGroups(data);
+      } catch (error) {
+        console.error(error);
+        notify.error(
+          error?.response?.data?.message || "Something went wrong"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getGroups();
+  }, []);
+
   return (
     <div className="h-full bg-slate-900 rounded-2xl flex flex-col">
-
       {/* Header */}
       <div className="sticky top-0 z-10 bg-slate-900 p-4 border-b border-slate-800">
-
         <h2 className="text-xl font-semibold text-white">
           Groups
         </h2>
@@ -56,73 +48,90 @@ export default function GroupList({
           <input
             type="text"
             placeholder="Search groups..."
-            className="ml-2 flex-1 bg-transparent text-white outline-none placeholder:text-gray-400"
+            className="ml-2 flex-1 bg-transparent outline-none text-white placeholder:text-gray-400"
           />
         </div>
-
       </div>
 
-      {/* Groups */}
       <div className="flex-1 overflow-y-auto">
+        {loading ? (
+          <div className="relative flex h-full items-center justify-center">
+            <Loader variant="section" />
+          </div>
+        ) : groups.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center gap-4">
+            <h3 className="text-lg font-semibold text-white">
+              No groups yet
+            </h3>
 
-        {groups.map((group) => (
-          <button
-            key={group.id}
-            onClick={() => onSelectChat?.(group)}
-            className={`w-full flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${
-              selectedChat?.id === group.id
-                ? "bg-slate-800"
-                : ""
-            }`}
-          >
+            <p className="text-center text-gray-400">
+              Create a group and start chatting.
+            </p>
 
-            <div className="flex items-center gap-3">
+            <button className="rounded-lg bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600">
+              Create Group
+            </button>
+          </div>
+        ) : (
+          groups.map((group) => {
+            const avatar = group.groupAvatar?.url;
+            const message =
+              group.latestMessage?.content || "No messages yet";
 
-              {/* Group Avatar */}
-              <div className="relative">
+            return (
+              <button
+                key={group._id}
+                onClick={() => onSelectChat(group)}
+                className={`w-full flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${
+                  selectedChat?._id === group._id
+                    ? "bg-slate-800"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  {/* Avatar */}
+                  <div className="relative">
+                    {avatar ? (
+                      <img
+                        src={avatar}
+                        alt={group.groupName}
+                        className="h-12 w-12 rounded-full object-cover border-2 border-slate-700"
+                      />
+                    ) : (
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-semibold text-white">
+                        {group.groupName?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
 
-                <div className="w-12 h-12 rounded-full bg-violet-600 flex items-center justify-center">
-                  <FiUsers className="text-white text-xl" />
+                    <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-[10px] text-white">
+                      {group.participantsCount}
+                    </span>
+                  </div>
+
+                  {/* Details */}
+                  <div className="text-left">
+                    <h3 className="font-medium text-white">
+                      {group.groupName}
+                    </h3>
+
+                    <p className="max-w-44 truncate text-sm text-gray-400">
+                      <span className="font-medium">
+                        {group.latestMessage?.sender?.fullName}:
+                      </span>{" "}
+                      {message}
+                    </p>
+                  </div>
                 </div>
 
-                <span className="absolute -bottom-1 -right-1 rounded-full bg-slate-900 px-1 text-[10px] text-gray-300">
-                  {group.members}
+                <span className="text-xs text-gray-400">
+                  {formatRelativeDate(
+                    group.latestMessage?.createdAt
+                  )}
                 </span>
-
-              </div>
-
-              {/* Group Details */}
-              <div className="text-left">
-
-                <h3 className="font-medium text-white">
-                  {group.name}
-                </h3>
-
-                <p className="max-w-44 truncate text-sm text-gray-400">
-                  {group.message}
-                </p>
-
-              </div>
-
-            </div>
-
-            <div className="flex flex-col items-end">
-
-              <span className="text-xs text-gray-400">
-                {group.time}
-              </span>
-
-              {group.unread > 0 && (
-                <span className="mt-2 flex h-5 w-5 items-center justify-center rounded-full bg-violet-500 text-xs text-white">
-                  {group.unread}
-                </span>
-              )}
-
-            </div>
-
-          </button>
-        ))}
-
+              </button>
+            );
+          })
+        )}
       </div>
     </div>
   );

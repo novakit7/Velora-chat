@@ -1,35 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { notify } from "../../utils/toast";
 import {
   FiArrowLeft,
-  FiPhone,
-  FiVideo,
+  FiEdit2,
   FiMoreVertical,
   FiSend,
+  FiTrash2,
 } from "react-icons/fi";
-
-const messages = [
-  {
-    id: 1,
-    name: "Ankit",
-    type: "chat",
-    online: true,
-  },
-  {
-    id: 2,
-    name: "React Developers",
-    type: "group",
-  },
-  {
-    id: 3,
-    name: "Velora AI",
-    type: "ai",
-  },
-];
+import Loader from "../common/Loader";
+import { useContext } from "react";
+import AuthContext from "../../context/AuthContext";
+import { formatDateTime } from "../../utils/date";
+import api from "../../api/axois";
 
 export default function Conversation({ chat, onBack }) {
+  const [loading, setLoading] = useState(false);
+  const { user } = useContext(AuthContext);
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    const getChats = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/chat/message/${chat?._id}?page=1&limit=10`);
+        setMessages(res.data?.data?.messages);
+      } catch (error) {
+        console.error(error);
+        notify.error(error?.response?.data?.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if(chat){
+      getChats();
+    }
+  }, [chat]);
+
   if (!chat) {
     return (
-      <div className="h-full flex items-center justify-center bg-slate-900 rounded-2xl">
+      <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
         <div className="text-center">
           <h2 className="text-2xl font-semibold text-white">
             Welcome to Velora
@@ -43,141 +53,119 @@ export default function Conversation({ chat, onBack }) {
     );
   }
 
-  const isAI = chat.type === "ai";
-  const isGroup = chat.type === "group";
-
   return (
     <div className="flex h-full flex-col rounded-2xl bg-slate-900">
       {/* Header */}
-      <div className="flex h-16 items-center justify-between border-b border-slate-800 px-4">
+      <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
         <div className="flex items-center gap-3">
-          <button
-            onClick={onBack}
-            className="text-white md:hidden"
-          >
+          <button className="md:hidden text-white">
             <FiArrowLeft size={22} />
           </button>
 
-          {/* Avatar */}
           <div className="relative">
-            <div
-              className={`flex h-11 w-11 items-center justify-center rounded-full font-bold text-white ${
-                isAI
-                  ? "bg-linear-to-br from-cyan-500 to-blue-600"
-                  : isGroup
-                  ? "bg-violet-600"
-                  : "bg-cyan-500"
-              }`}
-            >
-              {isAI ? "🤖" : isGroup ? "👥" : chat.name[0]}
+            <div className="h-12 w-12 rounded-full bg-cyan-500">
+              <img
+                src={
+                  chat.isGroupChat
+                    ? chat.groupAvatar?.url
+                    : chat.otherMember?.avatar.url
+                }
+                className="rounded-full"
+                alt=""
+              />
             </div>
 
-            {!isAI && chat.online && (
-              <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-500" />
-            )}
+            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-500" />
           </div>
 
-          {/* Details */}
           <div>
-            <h2 className="font-semibold text-white">
-              {chat.name}
+            <h2 className="font-semibold text-white text-lg">
+              {chat.isGroupChat ? chat.groupName : chat.otherMember?.username}
             </h2>
 
-            <p
-              className={`text-sm ${
-                isAI
-                  ? "text-cyan-400"
-                  : isGroup
-                  ? "text-violet-400"
-                  : chat.online
-                  ? "text-green-400"
-                  : "text-gray-400"
-              }`}
-            >
-              {isAI
-                ? "AI Assistant"
-                : isGroup
-                ? `${chat.members || 0} Members`
-                : chat.online
-                ? "Online"
-                : "Offline"}
-            </p>
+            <p className="text-sm text-gray-400">Online</p>
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-4 text-gray-300">
-          {!isAI && (
-            <>
-              <FiPhone
-                size={20}
-                className="cursor-pointer transition hover:text-cyan-400"
-              />
+          <button className="hover:text-cyan-400 transition">
+            <FiEdit2 size={20} />
+          </button>
 
-              <FiVideo
-                size={20}
-                className="cursor-pointer transition hover:text-cyan-400"
-              />
-            </>
-          )}
+          <button className="hover:text-red-500 transition">
+            <FiTrash2 size={20} />
+          </button>
 
-          <FiMoreVertical
-            size={20}
-            className="cursor-pointer transition hover:text-cyan-400"
-          />
+          <button className="hover:text-cyan-400 transition">
+            <FiMoreVertical size={20} />
+          </button>
         </div>
       </div>
 
-      {/* AI Toolbar */}
-      {isAI && (
-        <div className="border-b border-slate-800 px-4 py-3">
-          <div className="flex gap-2 overflow-x-auto no-scrollbar">
-            {[
-              "Translate",
-              "Summarize",
-              "Grammar",
-              "Rewrite",
-              "Explain",
-            ].map((tool) => (
-              <button
-                key={tool}
-                className="whitespace-nowrap rounded-full bg-slate-800 px-4 py-2 text-sm text-gray-300 transition hover:bg-slate-700"
-              >
-                {tool}
-              </button>
-            ))}
+      <div className="flex-1 overflow-y-auto px-6 py-5">
+        {loading ? (
+          <div className="relative flex h-full items-center justify-center">
+            <Loader variant="section" />
           </div>
-        </div>
-      )}
+        ) : (
+          <div className="space-y-4">
+            {messages.map((message) => {
+              const isMe = message.sender._id === user._id;
 
-      {/* Messages */}
-      <div className="flex-1 space-y-4 overflow-y-auto px-6 py-4">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${
-              msg.sender === "me"
-                ? "justify-end"
-                : "justify-start"
-            }`}
-          >
-            <div
-              className={`max-w-xs rounded-2xl px-4 py-3 md:max-w-md ${
-                msg.sender === "me"
-                  ? "rounded-br-none bg-cyan-500 text-white"
-                  : isAI
-                  ? "rounded-bl-none border border-cyan-500/20 bg-slate-800 text-white"
-                  : "rounded-bl-none bg-slate-800 text-white"
-              }`}
-            >
-              <p>{msg.text}</p>
+              return (
+                <div
+                  key={message._id}
+                  className={`flex mb-4 ${isMe ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`flex items-end gap-2 max-w-[75%] ${
+                      isMe ? "flex-row-reverse" : ""
+                    }`}
+                  >
+                    {/* Avatar */}
+                    <img
+                      src={message.sender?.avatar?.url}
+                      alt={message.sender?.username}
+                      className="h-10 w-10 rounded-full object-cover border border-slate-700"
+                    />
 
-              <p className="mt-1 text-right text-xs opacity-70">
-                {msg.time}
-              </p>
-            </div>
+                    {/* Bubble */}
+                    <div
+                      className={`px-4 py-3 max-w-md wrap-break-words rounded-2xl shadow ${
+                        isMe
+                          ? "bg-cyan-500 text-white rounded-br-md"
+                          : "bg-slate-800 text-slate-100 rounded-bl-md border border-slate-700"
+                      }`}
+                    >
+                      {/* Username */}
+                      {!isMe && (
+                        <p className="mb-1 text-xs font-semibold text-cyan-400">
+                          {message.sender?.username}
+                        </p>
+                      )}
+
+                      {/* Message */}
+                      <p className="text-sm leading-6">{message.content}</p>
+
+                      {/* Time + Tick */}
+                      <div
+                        className={`mt-2 flex items-center justify-end gap-1 text-[11px] ${
+                          isMe ? "text-white/80" : "text-slate-400"
+                        }`}
+                      >
+                        <span>{formatDateTime(message.createdAt)}</span>
+
+                        {isMe && (
+                          <span className="font-bold tracking-tight">✓✓</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ))}
+        )}
       </div>
 
       {/* Input */}
@@ -185,11 +173,7 @@ export default function Conversation({ chat, onBack }) {
         <form className="flex items-center gap-3">
           <input
             type="text"
-            placeholder={
-              isAI
-                ? "Ask Velora AI..."
-                : "Type a message..."
-            }
+            placeholder="Type a message..."
             className="flex-1 rounded-full bg-slate-800 px-5 py-3 text-white outline-none placeholder:text-gray-400"
           />
 
