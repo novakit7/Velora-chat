@@ -61,6 +61,7 @@ export default function Login() {
 
       const res = await api.post("/user/login", {
         email,
+        username: email,
         password,
       });
 
@@ -194,7 +195,7 @@ export default function Login() {
             {/* Email */}
             <div>
               <label className="mb-2 block text-sm font-medium text-text-secondary">
-                Email
+                {forgotPassword ?  "Email": "Email/Username"}
               </label>
 
               <input

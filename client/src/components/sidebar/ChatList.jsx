@@ -56,15 +56,11 @@ export default function ChatList({ onSelectChat, selectedChat }) {
             <p className="text-gray-400 text-center">
               Start a conversation with a friend or create a group.
             </p>
-
-            <button className="rounded-lg bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600">
-              Create Chat
-            </button>
           </div>
         ) : (
           chats.map((chat) => {
             const avatar = chat.otherMember?.avatar?.url;
-            const name = chat.otherMember?.fullName;
+            const username = chat.otherMember?.username;
             const message = chat.latestMessage?.content || "No messages yet";
 
             return (
@@ -81,12 +77,12 @@ export default function ChatList({ onSelectChat, selectedChat }) {
                     {avatar ? (
                       <img
                         src={avatar}
-                        alt={name}
+                        alt={username}
                         className="h-12 w-12 rounded-full object-cover border-2 border-slate-700"
                       />
                     ) : (
                       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-semibold text-white">
-                        {name?.charAt(0).toUpperCase()}
+                        {username?.charAt(0).toUpperCase()}
                       </div>
                     )}
 
@@ -100,7 +96,7 @@ export default function ChatList({ onSelectChat, selectedChat }) {
 
                   {/* Details */}
                   <div className="text-left">
-                    <h3 className="font-medium text-white">{name}</h3>
+                    <h3 className="font-medium text-white">{username}</h3>
 
                     <p className="max-w-44 truncate text-sm text-gray-400">
                       {message}

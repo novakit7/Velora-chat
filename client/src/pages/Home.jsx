@@ -17,8 +17,14 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("Chats");
 
   useEffect(() => {
+  if (
+    activeTab !== "Chats" &&
+    activeTab !== "Groups" &&
+    activeTab !== "AI"
+  ) {
     setSelectedChat(null);
-  }, [activeTab]);
+  }
+}, [activeTab]);
 
   const renderLeftPanel = () => {
     switch (activeTab) {
@@ -39,7 +45,12 @@ export default function Home() {
         );
 
       case "New Chat":
-        return <NewChat />;
+        return (
+          <NewChat
+            onSelectChat={setSelectedChat}
+            setActiveTab={setActiveTab}
+          />
+        );
 
       case "AI":
         return (

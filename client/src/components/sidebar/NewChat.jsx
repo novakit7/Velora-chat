@@ -1,37 +1,50 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   FiSearch,
   FiMessageCircle,
 } from "react-icons/fi";
+import { notify } from "../../utils/toast";
+import Loader from "../common/Loader";
+import api from "../../api/axois";
+import { useNavigate } from "react-router-dom";
 
-const users = [
-  {
-    id: 1,
-    username: "Ankit",
-    bio: "Full Stack Developer",
-    online: true,
-  },
-  {
-    id: 2,
-    username: "Rahul",
-    bio: "React Developer",
-    online: false,
-  },
-  {
-    id: 3,
-    username: "Priya",
-    bio: "UI/UX Designer",
-    online: true,
-  },
-  {
-    id: 4,
-    username: "Aman",
-    bio: "Backend Engineer",
-    online: true,
-  },
-];
+export default function NewChat({ onSelectChat, setActiveTab }) {
+  const [loading, setLoading] = useState(false);
+  const [users, setUsers] = useState([]);
+  const navigate = useNavigate();
 
-export default function NewChat() {
+  useEffect(() => {
+    const getFriends = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get("/friend-request/friends");
+        setUsers(res.data.data)
+      } catch (error) {
+        console.error(error);
+        notify.error(error?.response?.data?.message || "Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+    getFriends();
+  }, []);
+
+
+  const createChat = async (id) => {
+    try {
+      setLoading(true);
+      const res = await api.post(`/chat/create-chat/${id}`)
+      notify.success(res.data?.message);
+      setActiveTab("Chats");
+      onSelectChat(res.data.data);
+
+    } catch (error) {
+      console.error(error);
+      notify.error(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <div className="h-full rounded-2xl bg-slate-900 flex flex-col">
 
@@ -57,28 +70,36 @@ export default function NewChat() {
         </div>
 
       </div>
-
+      {loading && <div className="relative flex h-full items-center justify-center">
+        <Loader variant="section" />
+      </div>}
       {/* Users */}
       <div className="flex-1 overflow-y-auto">
 
         {users.map((user) => (
           <div
-            key={user.id}
+            key={user._id}
             className="flex items-center justify-between border-b border-slate-800 px-4 py-4 hover:bg-slate-800 transition"
           >
 
             <div className="flex items-center gap-3">
 
               <div className="relative">
-
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-semibold text-white">
-                  {user.username[0]}
-                </div>
+                {user.avatar?.url ? (
+                  <img
+                    src={user.avatar.url}
+                    alt={user.username}
+                    className="h-12 w-12 rounded-full object-cover border-2 border-slate-700"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-semibold text-white">
+                    {user.username?.charAt(0).toUpperCase()}
+                  </div>
+                )}
 
                 {user.online && (
                   <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-500" />
                 )}
-
               </div>
 
               <div>
@@ -88,14 +109,16 @@ export default function NewChat() {
                 </h3>
 
                 <p className="text-sm text-gray-400">
-                  {user.bio}
+                  {user.fullName}
                 </p>
 
               </div>
 
             </div>
 
-            <button className="flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-600">
+            <button
+              onClick={() => createChat(user._id)}
+              className="flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-600">
 
               <FiMessageCircle />
 

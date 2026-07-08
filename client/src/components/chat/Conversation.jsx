@@ -17,6 +17,7 @@ export default function Conversation({ chat, onBack }) {
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
+  const [msg, setMsg] = useState("");
 
   useEffect(() => {
     const getChats = async () => {
@@ -52,13 +53,32 @@ export default function Conversation({ chat, onBack }) {
       </div>
     );
   }
+  const sendMessage = async (e)=>{
+   e.preventDefault();
+   if (!msg.trim()) return;
+    try {
+      setLoading(true);
+      const res = await api.post(`/message/${chat._id}/message`,{
+        content: msg,
+      });
+      setMessages((prev)=>[
+        ...prev, res.data?.data
+      ])
+    } catch (error) {
+      console.error(error);
+      notify.error(error?.response?.data?.message || "Something went wrong while sending a message.");
+    } finally{
+      setMsg("")
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex h-full flex-col rounded-2xl bg-slate-900">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
         <div className="flex items-center gap-3">
-          <button className="md:hidden text-white">
+          <button className="md:hidden text-white" onClick={onBack}>
             <FiArrowLeft size={22} />
           </button>
 
@@ -173,12 +193,16 @@ export default function Conversation({ chat, onBack }) {
         <form className="flex items-center gap-3">
           <input
             type="text"
+            value={msg}
+            onChange={(e)=>setMsg(e.target.value)}
             placeholder="Type a message..."
             className="flex-1 rounded-full bg-slate-800 px-5 py-3 text-white outline-none placeholder:text-gray-400"
           />
 
           <button
             type="submit"
+            disabled ={loading}
+            onClick={sendMessage}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600"
           >
             <FiSend size={20} className="text-white" />
