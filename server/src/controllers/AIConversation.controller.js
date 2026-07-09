@@ -5,6 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { summarize, translate, grammarCheck } from "../services/ai.services.js";
+import { makeQuery } from "../services/ai.services.js";
 
 const createChat = asyncHandler(async (req, res) => {
   const { title } = req.body;
@@ -75,8 +76,6 @@ const sendMessage = asyncHandler(async (req, res) => {
     role: "user",
     content: prompt.trim(),
   });
-
-  console.log(messages);
   const response = await makeQuery(messages);
 
   const conversation = await AIConversation.create({
@@ -104,12 +103,54 @@ const sendMessage = asyncHandler(async (req, res) => {
 });
 
 const getChats = asyncHandler(async (req, res) => {
-  const chats = await AIChat.find({
-    user: req.user._id,
-  })
-    .sort({ lastActivity: -1 })
-    .lean();
-
+  const chats = await AIChat.aggregate([
+    {
+      $match: {
+        user: req.user._id,
+      },
+    },
+    {
+      $lookup: {
+        from: "aiconversations", // MongoDB collection name
+        let: { chatId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$chat", "$$chatId"],
+              },
+            },
+          },
+          {
+            $sort: {
+              createdAt: -1,
+            },
+          },
+          {
+            $limit: 1,
+          },
+          {
+            $project: {
+              prompt: 1,
+              response: 1,
+            },
+          },
+        ],
+        as: "latestConversation",
+      },
+    },
+    {
+      $unwind: {
+        path: "$latestConversation",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
+      $sort: {
+        lastActivity: -1,
+      },
+    },
+  ]);
   return res
     .status(200)
     .json(new ApiResponse(200, chats, "AI chats fetched successfully."));

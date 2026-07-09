@@ -8,11 +8,11 @@ import {
   FiMessageCircle,
   FiUsers,
   FiPlusCircle,
-  FiCpu,
   FiUserCheck,
   FiUserPlus,
   FiLogOut,
 } from "react-icons/fi";
+import { Brain } from "lucide-react";
 
 export default function Sidebar({ activeTab, setActiveTab }) {
   const { setUser } = useContext(AuthContext);
@@ -34,7 +34,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     },
     {
       name: "AI",
-      icon: <FiCpu size={22} />,
+      icon: <Brain size={22} />,
     },
     {
       name: "Friends",

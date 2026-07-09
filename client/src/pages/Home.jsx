@@ -10,21 +10,23 @@ import FriendList from "../components/sidebar/FriendList";
 import AddFriend from "../components/sidebar/AddFriend";
 import Conversation from "../components/chat/Conversation";
 import useIsMobile from "../hooks/useIsMobile";
+import AIChat from "../components/chat/AIChat";
 
 export default function Home() {
   const isMobile = useIsMobile();
   const [selectedChat, setSelectedChat] = useState(null);
   const [activeTab, setActiveTab] = useState("Chats");
+  const [creatingAIChat, setCreatingAIChat] = useState(false);
 
   useEffect(() => {
-  if (
-    activeTab !== "Chats" &&
-    activeTab !== "Groups" &&
-    activeTab !== "AI"
-  ) {
-    setSelectedChat(null);
-  }
-}, [activeTab]);
+    if (
+      activeTab !== "Chats" &&
+      activeTab !== "Groups" &&
+      activeTab !== "AI"
+    ) {
+      setSelectedChat(null);
+    }
+  }, [activeTab]);
 
   const renderLeftPanel = () => {
     switch (activeTab) {
@@ -57,6 +59,11 @@ export default function Home() {
           <AISection
             selectedChat={selectedChat}
             onSelectChat={setSelectedChat}
+            onCreateChat={() => {
+              setSelectedChat(null);
+              setCreatingAIChat(true);
+              setActiveTab("AI");
+            }}
           />
         );
 
@@ -77,14 +84,30 @@ export default function Home() {
   return isMobile ? (
     // ================= MOBILE =================
     <div className="h-dvh bg-slate-950 flex flex-col">
-      {!selectedChat ? (
+      {(!selectedChat && !creatingAIChat) ? (
         <>
-          <MobileNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <MobileNavbar
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
 
           <div className="flex-1 overflow-hidden pb-20">
             {renderLeftPanel()}
           </div>
         </>
+      ) : activeTab === "AI" ? (
+        <AIChat
+          chat={selectedChat}
+          creating={creatingAIChat}
+          onChatCreated={(newChat) => {
+            setSelectedChat(newChat);
+            setCreatingAIChat(false);
+          }}
+          onBack={() => {
+            setCreatingAIChat(false);
+            setSelectedChat(null);
+          }}
+        />
       ) : (
         <Conversation
           chat={selectedChat}
@@ -106,10 +129,25 @@ export default function Home() {
 
         <div className="flex-1 min-w-0 rounded-2xl overflow-hidden">
           {showConversation ? (
-            <Conversation
-              chat={selectedChat}
-              onBack={() => setSelectedChat(null)}
-            />
+            activeTab === "AI" ? (
+              <AIChat
+                chat={selectedChat}
+                creating={creatingAIChat}
+                onChatCreated={(newChat) => {
+                  setSelectedChat(newChat);
+                  setCreatingAIChat(false);
+                }}
+                onBack={() => {
+                  setCreatingAIChat(false);
+                  setSelectedChat(null);
+                }}
+              />
+            ) : (
+              <Conversation
+                chat={selectedChat}
+                onBack={() => setSelectedChat(null)}
+              />
+            )
           ) : (
             <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
               <div className="text-center">
