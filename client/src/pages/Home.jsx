@@ -58,7 +58,10 @@ export default function Home() {
         return (
           <AISection
             selectedChat={selectedChat}
-            onSelectChat={setSelectedChat}
+            onSelectChat={(chat) => {
+              setCreatingAIChat(false);
+              setSelectedChat(chat);
+            }}
             onCreateChat={() => {
               setSelectedChat(null);
               setCreatingAIChat(true);

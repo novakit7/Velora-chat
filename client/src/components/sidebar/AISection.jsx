@@ -48,7 +48,7 @@ export default function AISection({
       <div className="sticky top-0 z-10 bg-slate-900 p-4 border-b border-slate-800">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-white">
-            AI Chats
+            Velora-AI
           </h2>
 
           <button

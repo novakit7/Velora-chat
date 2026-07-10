@@ -103,3 +103,27 @@
    --color-message-sent-hover: #0d9488;
    --color-message-received-hover: #2b455c;
 }
+
+
+.all-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent;
+}
+
+.all-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.all-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.all-scroll::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+.all-scroll::-webkit-scrollbar-thumb:hover {
+  background: #06b6d4;
+}

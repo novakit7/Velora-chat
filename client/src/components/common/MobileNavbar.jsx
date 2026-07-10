@@ -7,10 +7,15 @@ import {
   FiCpu,
   FiUserCheck,
 } from "react-icons/fi";
-
+import LogoutModal from "../models/LogoutModel";
 import NotificationModal from "../models/NotificationModel";
 import UserModal from "../models/UserModel.";
 import AuthContext from "../../context/AuthContext";
+import { Brain } from "lucide-react";
+import api from "../../api/axois";
+import { notify } from "../../utils/toast";
+import { useNavigate } from "react-router-dom";
+
 
 export default function MobileNavbar({
   activeTab,
@@ -18,8 +23,34 @@ export default function MobileNavbar({
 }) {
   const [openNotification, setOpenNotification] = useState(false);
   const [openUser, setOpenUser] = useState(false);
+  const [openLogout, setOpenLogout] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const { user } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { setUser, user } = useContext(AuthContext);
+
+  const handleLogout = async () => {
+    try {
+      setLoading(true);
+
+      await api.post("/user/logout");
+
+      localStorage.removeItem("accessToken");
+
+      setUser(null);
+
+      navigate("/", { replace: true });
+
+      notify.success("Logged out successfully");
+    } catch (error) {
+      notify.error(
+        error?.response?.data?.message || "Logout failed"
+      );
+    } finally {
+      setLoading(false);
+      setOpenLogout(false);
+    }
+  };
 
   const menuItems = [
     {
@@ -36,7 +67,7 @@ export default function MobileNavbar({
     },
     {
       name: "AI",
-      icon: <FiCpu size={22} />,
+      icon: <Brain size={22} />,
     },
     {
       name: "Friends",
@@ -106,6 +137,10 @@ export default function MobileNavbar({
             <UserModal
               open={openUser}
               onClose={() => setOpenUser(false)}
+              onLogout={() => {
+                setOpenUser(false);
+                setOpenLogout(true);
+              }}
             />
 
           </div>
@@ -126,12 +161,11 @@ export default function MobileNavbar({
               onClick={() => setActiveTab(item.name)}
               className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200
 
-                ${
-                  activeTab === item.name
-                    ? item.primary
-                      ? "bg-linear-to-br from-cyan-500 to-blue-600 text-white scale-110 shadow-lg"
-                      : "bg-cyan-500 text-white scale-105 shadow-md"
-                    : item.primary
+                ${activeTab === item.name
+                  ? item.primary
+                    ? "bg-linear-to-br from-cyan-500 to-blue-600 text-white scale-110 shadow-lg"
+                    : "bg-cyan-500 text-white scale-105 shadow-md"
+                  : item.primary
                     ? "bg-linear-to-br from-cyan-500/80 to-blue-600/80 text-white"
                     : "text-gray-400 hover:text-cyan-400"
                 }
@@ -144,6 +178,12 @@ export default function MobileNavbar({
         </div>
 
       </nav>
+      <LogoutModal
+        open={openLogout}
+        onClose={() => setOpenLogout(false)}
+        onConfirm={handleLogout}
+        loading={loading}
+      />
     </>
   );
 }

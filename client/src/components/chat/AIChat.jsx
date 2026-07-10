@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { notify } from "../../utils/toast";
 import {
   FiArrowLeft,
@@ -8,33 +8,40 @@ import {
   FiTrash2,
 } from "react-icons/fi";
 import { Brain } from "lucide-react";
-import Loader from "../common/Loader";
+import TypingIndicator from "./TypingIndicator";
 import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
 import { formatDateTime } from "../../utils/date";
 import api from "../../api/axois";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-
+import { Loader } from "lucide-react";
 export default function AIChat({
   chat,
   creating,
   onBack,
   onChatCreated,
 }) {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { user } = useContext(AuthContext);
   const [prompt, setprompt] = useState("");
   const [messages, setMessages] = useState([]);
   const [title, setTitle] = useState("");
+  const messagesEndRef = useRef(null);
+  const [sending, setSending] = useState(false);
 
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages, sending]);
   useEffect(() => {
     const getChats = async () => {
       try {
         setLoading(true);
         const res = await api.get(`ai/chat/${chat._id}`);
-
-        console.log(res.data);
         setMessages(res.data?.data?.conversations);
       } catch (error) {
         console.error(error);
@@ -87,6 +94,41 @@ export default function AIChat({
       setLoading(false);
     }
   };
+
+  const editTitle = async () => {
+    try {
+      setLoading(true);
+      const res = await api.patch(`/ai/chat/${chat._id}`);
+
+    } catch (error) {
+      console.error(error);
+      notify.error(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!prompt.trim()) return;
+    console.log(prompt);
+    try {
+      setSending(true);
+      const res = await api.post(`/ai/chat/${chat._id}/message`, {
+        prompt,
+      });
+      setMessages((prev) => [
+        ...prev, res.data?.data
+      ])
+    } catch (error) {
+      console.error(error);
+      notify.error(error?.response?.data?.message || "Something went wrong while sending a message.");
+    } finally {
+      setprompt("")
+      setSending(false);
+    }
+  };
+
 
   if (!chat && !creating) {
     return (
@@ -166,27 +208,6 @@ export default function AIChat({
       </div>
     );
   }
-  const sendMessage = async (e) => {
-    e.preventDefault();
-    if (!prompt.trim()) return;
-    console.log(prompt);
-    try {
-      setLoading(true);
-      const res = await api.post(`/ai/chat/${chat._id}/message`, {
-        prompt,
-      });
-      setMessages((prev) => [
-        ...prev, res.data?.data
-      ])
-    } catch (error) {
-      console.error(error);
-      notify.error(error?.response?.data?.message || "Something went wrong while sending a message.");
-    } finally {
-      setprompt("")
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="flex h-full flex-col rounded-2xl bg-slate-900">
       {/* Header */}
@@ -209,7 +230,7 @@ export default function AIChat({
               {chat.title}
             </h2>
 
-            <p className="text-sm text-gray-400">Online</p>
+            <p className="text-sm text-gray-400">Velora-AI</p>
           </div>
         </div>
 
@@ -228,52 +249,58 @@ export default function AIChat({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-6 py-5">
-        {loading ? (
+      <div className="flex-1 overflow-y-auto px-6 py-5 all-scroll">
+        {loading && (
           <div className="relative flex h-full items-center justify-center">
             <Loader variant="section" />
           </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="space-y-6">
-              {messages.map((message) => (
-                <React.Fragment key={message._id}>
-                  {/* User Prompt */}
-                  <div className="flex justify-end">
-                    <div className="max-w-[75%] rounded-2xl rounded-br-md bg-cyan-500 px-4 py-3 text-white shadow">
-                      <p className="whitespace-pre-wrap text-sm">
-                        {message.prompt}
-                      </p>
-
-                      <div className="mt-2 text-right text-[11px] text-white/80">
-                        {formatDateTime(message.createdAt)}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* AI Response */}
-                  <div className="flex justify-start">
-                    <div className="max-w-[75%] rounded-2xl rounded-bl-md border border-slate-700 bg-slate-800 px-4 py-3 text-slate-100 shadow">
-                      <p className="mb-2 text-xs font-semibold text-cyan-400">
-                        Velora AI
-                      </p>
-
-                      <div className="prose prose-invert max-w-none prose-p:my-2 prose-pre:bg-slate-900">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {message.response}
-                        </ReactMarkdown>
-                      </div>
-
-                      <div className="mt-3 text-right text-[11px] text-slate-400">
-                        {formatDateTime(message.createdAt)}
-                      </div>
-                    </div>
-                  </div>
-                </React.Fragment>
-              ))}
-            </div>
-          </div>
         )}
+        <div className="space-y-4">
+          <div className="space-y-6">
+            {messages.map((message) => (
+              <React.Fragment key={message._id}>
+                {/* User Prompt */}
+                <div className="flex justify-end">
+                  <div className="max-w-[75%] rounded-2xl rounded-br-md bg-cyan-500 px-4 py-3 text-white shadow">
+                    <p className="whitespace-pre-wrap text-sm">
+                      {message.prompt}
+                    </p>
+
+                    <div className="mt-2 text-right text-[11px] text-white/80">
+                      {formatDateTime(message.createdAt)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* AI Response */}
+                <div className="flex justify-start">
+                  <div className="max-w-[75%] rounded-2xl rounded-bl-md border border-slate-700 bg-slate-800 px-4 py-3 text-slate-100 shadow">
+                    <p className="mb-2 text-xs font-semibold text-cyan-400">
+                      Velora AI
+                    </p>
+
+                    <div className="prose prose-invert max-w-none prose-p:my-2 prose-pre:bg-slate-900">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {message.response}
+                      </ReactMarkdown>
+                    </div>
+
+                    <div className="mt-3 text-right text-[11px] text-slate-400">
+                      {formatDateTime(message.createdAt)}
+                    </div>
+                  </div>
+                </div>
+              </React.Fragment>
+            ))}
+            {sending && (
+              <div className="flex justify-start">
+                <TypingIndicator />
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+        </div>
       </div>
 
       {/* Input */}
