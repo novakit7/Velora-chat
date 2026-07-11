@@ -6,7 +6,6 @@ import ChatList from "../components/sidebar/ChatList";
 import GroupList from "../components/sidebar/GroupList";
 import NewChat from "../components/sidebar/NewChat";
 import AISection from "../components/sidebar/AISection";
-import FriendList from "../components/sidebar/FriendList";
 import AddFriend from "../components/sidebar/AddFriend";
 import Conversation from "../components/chat/Conversation";
 import useIsMobile from "../hooks/useIsMobile";
@@ -69,9 +68,6 @@ export default function Home() {
             }}
           />
         );
-
-      case "Friends":
-        return <FriendList />;
 
       case "Add Friend":
         return <AddFriend />;

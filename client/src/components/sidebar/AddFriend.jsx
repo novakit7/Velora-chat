@@ -1,52 +1,39 @@
-import React from "react";
-import {
-  FiSearch,
-  FiUserPlus,
-  FiCheck,
-} from "react-icons/fi";
-
-const users = [
-  {
-    id: 1,
-    username: "Ankit",
-    bio: "Full Stack Developer",
-    mutual: 8,
-    online: true,
-    requested: false,
-  },
-  {
-    id: 2,
-    username: "Rahul",
-    bio: "React Developer",
-    mutual: 5,
-    online: false,
-    requested: true,
-  },
-  {
-    id: 3,
-    username: "Priya",
-    bio: "UI/UX Designer",
-    mutual: 12,
-    online: true,
-    requested: false,
-  },
-  {
-    id: 4,
-    username: "Aman",
-    bio: "Backend Engineer",
-    mutual: 2,
-    online: true,
-    requested: false,
-  },
-];
+import React, { useState, useEffect } from "react";
+import { FiSearch, FiUserPlus, FiCheck } from "react-icons/fi";
+import api from "../../api/axois";
+import { notify } from "../../utils/toast";
+import Loader from "../common/Loader";
 
 export default function AddFriend() {
+  const [users, setUsers] = useState([]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const searchUsers = async (searchQuery = "") => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/search/user?query=${searchQuery}`);
+      setUsers(res.data.data);
+    } catch (error) {
+      console.log(error);
+      notify.error(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      searchUsers(query.trim());
+    }, 700);
+
+    return () => clearTimeout(timer);
+  }, [query]);
+
+
   return (
     <div className="h-full rounded-2xl bg-slate-900 flex flex-col">
-
       {/* Header */}
       <div className="border-b border-slate-800 p-4">
-
         <h2 className="text-xl font-semibold text-white">
           Add Friends
         </h2>
@@ -60,77 +47,65 @@ export default function AddFriend() {
 
           <input
             type="text"
-            placeholder="Search username..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search users..."
             className="ml-2 flex-1 bg-transparent text-white outline-none placeholder:text-gray-400"
           />
         </div>
-
       </div>
-
-      {/* Suggestions */}
-
-      <div className="flex-1 overflow-y-auto">
-
-        {users.map((user) => (
-          <div
-            key={user.id}
-            className="flex items-center justify-between border-b border-slate-800 px-4 py-4 hover:bg-slate-800 transition"
-          >
-
-            <div className="flex items-center gap-3">
-
-              <div className="relative">
-
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 text-lg font-semibold text-white">
-                  {user.username[0]}
-                </div>
-
-                {user.online && (
-                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-500" />
+      {/* Users */}
+      <div className="flex-1 overflow-y-auto all-scroll">
+        {loading &&
+          <div className="relative flex h-full items-center justify-center">
+            <Loader variant="section" />
+          </div>}
+        {users.length === 0 ? (
+          <div className="flex h-full items-center justify-center text-gray-400">
+            No users found
+          </div>
+        ) : (
+          users.map((user) => (
+            <div
+              key={user._id}
+              className="flex items-center justify-between border-b border-slate-800 px-4 py-4 hover:bg-slate-800 transition"
+            >
+              <div className="flex items-center gap-3">
+                {user.avatar ? (
+                  <img
+                    src={user.avatar.url}
+                    alt={user.username}
+                    className="h-12 w-12 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 text-lg font-semibold text-white">
+                    {user.username?.charAt(0).toUpperCase()}
+                  </div>
                 )}
 
+                <div>
+                  <h3 className="font-medium text-white">
+                    {user.username}
+                  </h3>
+
+                  <p className="text-sm text-gray-400">
+                    {user.fullName}
+                  </p>
+
+                  <p className="text-xs text-gray-500">
+                    {user.email}
+                  </p>
+                </div>
               </div>
 
-              <div>
-
-                <h3 className="font-medium text-white">
-                  {user.username}
-                </h3>
-
-                <p className="text-sm text-gray-400">
-                  {user.bio}
-                </p>
-
-                <p className="text-xs text-gray-500 mt-1">
-                  {user.mutual} Mutual Friends
-                </p>
-
-              </div>
-
-            </div>
-
-            {user.requested ? (
-              <button
-                disabled
-                className="flex items-center gap-2 rounded-xl bg-slate-700 px-4 py-2 text-sm text-gray-300"
-              >
-                <FiCheck />
-                Sent
-              </button>
-            ) : (
-              <button
-                className="flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-600"
-              >
+              <button className="flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-white hover:bg-cyan-600">
                 <FiUserPlus />
                 Add
               </button>
-            )}
-
-          </div>
-        ))}
-
+            </div>
+          ))
+        )}
       </div>
-
     </div>
   );
 }

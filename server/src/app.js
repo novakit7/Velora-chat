@@ -34,6 +34,7 @@ import chatRouter from "./routes/Chat.routes.js";
 import AIRoutes from "./routes/AIConversationRoutes.js";
 import notificationRouter from "./routes/notification.routes.js";
 import healthCheckRouter from "./routes/healthCheck.router.js";
+import SearchRouter from "./routes/Search.routes.js";
 
 //routes
 app.use("/api/v1/user" ,UserRouter);
@@ -43,6 +44,7 @@ app.use("/api/v1/message", messageRouter);
 app.use("/api/v1/ai", AIRoutes);
 app.use("/api/v1/notification", notificationRouter);
 app.use("/api/v1/health-check", healthCheckRouter);
+app.use("/api/v1/search", SearchRouter);
 
 
 app.use((err, req, res, next) => {

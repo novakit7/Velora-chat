@@ -10,7 +10,6 @@ const Loader = ({ size = "md", variant = "fullscreen", className = "" }) => {
 
   const loadingTexts = [
     "Connecting...",
-    "Starting Velora...",
     "Loading conversations...",
     "Finding your friends...",
     "Syncing messages...",

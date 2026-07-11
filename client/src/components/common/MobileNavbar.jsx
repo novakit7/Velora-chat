@@ -5,7 +5,7 @@ import {
   FiUsers,
   FiPlusCircle,
   FiCpu,
-  FiUserCheck,
+  FiUserPlus,
 } from "react-icons/fi";
 import LogoutModal from "../models/LogoutModel";
 import NotificationModal from "../models/NotificationModel";
@@ -70,8 +70,8 @@ export default function MobileNavbar({
       icon: <Brain size={22} />,
     },
     {
-      name: "Friends",
-      icon: <FiUserCheck size={22} />,
+      name: "Add Friend",
+      icon: <FiUserPlus size={22} />,
     },
   ];
 

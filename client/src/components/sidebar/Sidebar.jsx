@@ -37,10 +37,6 @@ export default function Sidebar({ activeTab, setActiveTab }) {
       icon: <Brain size={22} />,
     },
     {
-      name: "Friends",
-      icon: <FiUserCheck size={22} />,
-    },
-    {
       name: "Add Friend",
       icon: <FiUserPlus size={22} />,
     },
