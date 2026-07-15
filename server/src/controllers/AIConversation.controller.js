@@ -76,7 +76,20 @@ const sendMessage = asyncHandler(async (req, res) => {
     role: "user",
     content: prompt.trim(),
   });
-  const response = await makeQuery(messages);
+  let response;
+
+  try {
+    response = await makeQuery(messages);
+  } catch (err) {
+    console.error("AI Provider Error:", err);
+    console.error("HF ERROR:", err.httpResponse?.body);
+  console.error("HF STATUS:", err.httpResponse?.status);
+
+    throw new ApiError(
+      500,
+      err.message || "Failed to generate AI response."
+    );
+  }
 
   const conversation = await AIConversation.create({
     user: req.user._id,

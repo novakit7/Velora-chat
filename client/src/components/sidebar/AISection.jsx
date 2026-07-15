@@ -7,32 +7,13 @@ import api from "../../api/axois";
 import { Brain } from "lucide-react";
 
 export default function AISection({
+  chats,
+  loading,
   selectedChat,
   onSelectChat,
   onCreateChat,
 }) {
-  const [chats, setChats] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const getChats = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get("/ai/chat");
-        setChats(res.data.data)
-
-      } catch (error) {
-        console.error(error);
-        notify.error(
-          error?.response?.data?.message || "Something went wrong"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getChats();
-  }, []);
 
   if (loading) {
     return (

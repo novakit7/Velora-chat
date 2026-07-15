@@ -81,7 +81,7 @@ const makeQuery = async (messages) => {
   }
 
   return askAI({
-    modelName: "Qwen/Qwen3-8B",
+    modelName: "Qwen/Qwen2.5-7B-Instruct",
     messages,
     maxTokens: 1600,
     temperature: 0.7,

@@ -9,8 +9,6 @@ import {
 } from "react-icons/fi";
 import { Brain } from "lucide-react";
 import TypingIndicator from "./TypingIndicator";
-import { useContext } from "react";
-import AuthContext from "../../context/AuthContext";
 import { formatDateTime } from "../../utils/date";
 import api from "../../api/axois";
 import ReactMarkdown from "react-markdown";
@@ -22,14 +20,13 @@ export default function AIChat({
   onBack,
   onChatCreated,
 }) {
-  const [loading, setLoading] = useState(true);
-  const { user } = useContext(AuthContext);
-  const [prompt, setprompt] = useState("");
+  const [loadingChat, setLoadingChat] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState([]);
   const [title, setTitle] = useState("");
-  const messagesEndRef = useRef(null);
-  const [sending, setSending] = useState(false);
 
+  const messagesEndRef = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({
@@ -37,94 +34,105 @@ export default function AIChat({
       block: "end",
     });
   }, [messages, sending]);
+
   useEffect(() => {
-    const getChats = async () => {
+    if (!chat?._id) {
+      setMessages([]);
+      return;
+    }
+
+    const getChat = async () => {
       try {
-        setLoading(true);
-        const res = await api.get(`ai/chat/${chat._id}`);
-        setMessages(res.data?.data?.conversations);
+        setLoadingChat(true);
+        setMessages([]);
+
+        const res = await api.get(`/ai/chat/${chat._id}`);
+
+        setMessages(res.data.data?.conversations || []);
       } catch (error) {
         console.error(error);
-        notify.error(error?.response?.data?.message || "Something went wrong");
+        notify.error(
+          error?.response?.data?.message || "Failed to load chat."
+        );
       } finally {
-        setLoading(false);
+        setLoadingChat(false);
       }
     };
 
-    if (chat) {
-      getChats();
-    }
-  }, [chat]);
-
+    getChat();
+  }, [chat?._id]);
 
   const createChat = async () => {
     if (!title.trim()) {
-      notify.error("Please enter a title.");
-      return;
+      return notify.error("Please enter a title.");
     }
 
     if (!prompt.trim()) {
-      notify.error("Please enter your first prompt.");
-      return;
+      return notify.error("Please enter your first prompt.");
     }
 
     try {
-      setLoading(true);
+      setSending(true);
 
       // Create chat
-      const chatRes = await api.post("/ai/chat", {
+      const { data: chatRes } = await api.post("/ai/chat", {
         title,
       });
 
-      const newChat = chatRes.data.data;
+      const newChat = chatRes.data;
 
       // Send first prompt
-      await api.post(`/ai/chat/${newChat._id}/message`, {
-        prompt,
-      });
+      const { data: messageRes } = await api.post(
+        `/ai/chat/${newChat._id}/message`,
+        {
+          prompt,
+        }
+      );
+
+      setMessages([messageRes.data]);
+
+      setTitle("");
+      setPrompt("");
 
       onChatCreated(newChat);
     } catch (error) {
       console.error(error);
 
       notify.error(
-        error?.response?.data?.message || "Failed to create conversation."
+        error?.response?.data?.message ||
+        "Failed to create conversation."
       );
     } finally {
-      setLoading(false);
-    }
-  };
-
-  const editTitle = async () => {
-    try {
-      setLoading(true);
-      const res = await api.patch(`/ai/chat/${chat._id}`);
-
-    } catch (error) {
-      console.error(error);
-      notify.error(error?.response?.data?.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+      setSending(false);
     }
   };
 
   const sendMessage = async (e) => {
     e.preventDefault();
+
     if (!prompt.trim()) return;
-    console.log(prompt);
+
     try {
       setSending(true);
-      const res = await api.post(`/ai/chat/${chat._id}/message`, {
-        prompt,
-      });
-      setMessages((prev) => [
-        ...prev, res.data?.data
-      ])
+
+      const { data } = await api.post(
+        `/ai/chat/${chat._id}/message`,
+        {
+          prompt,
+        }
+      );
+
+      setMessages((prev) => [...prev, data.data]);
+
+      setPrompt("");
     } catch (error) {
       console.error(error);
-      notify.error(error?.response?.data?.message || "Something went wrong while sending a message.");
+
+      notify.error(
+        error?.response?.data?.message ||
+        "Failed to send message."
+      );
     } finally {
-      setprompt("")
       setSending(false);
     }
   };
@@ -190,18 +198,18 @@ export default function AIChat({
               <textarea
                 rows={6}
                 value={prompt}
-                onChange={(e) => setprompt(e.target.value)}
+                onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Ask me anything..."
                 className="w-full resize-none rounded-xl bg-slate-700 px-4 py-3 text-white outline-none focus:ring-2 focus:ring-cyan-500"
               />
             </div>
 
             <button
-              disabled={loading}
+              disabled={sending}
               onClick={createChat}
               className="w-full rounded-xl bg-cyan-500 py-3 font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-50"
             >
-              {loading ? "Creating..." : "Start Conversation"}
+              {sending ? "Creating..." : "Start Conversation"}
             </button>
           </div>
         </div>
@@ -213,7 +221,7 @@ export default function AIChat({
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
         <div className="flex items-center gap-3">
-          <button className="md:hidden text-white" onClick={onBack}>
+          <button className="text-white md:hidden" onClick={onBack}>
             <FiArrowLeft size={22} />
           </button>
 
@@ -226,99 +234,103 @@ export default function AIChat({
           </div>
 
           <div>
-            <h2 className="font-semibold text-white text-lg">
-              {chat.title}
+            <h2 className="text-lg font-semibold text-white">
+              {chat?.title}
             </h2>
 
-            <p className="text-sm text-gray-400">Velora-AI</p>
+            <p className="text-sm text-gray-400">
+              Velora AI
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-4 text-gray-300">
-          <button className="hover:text-cyan-400 transition">
+          <button className="transition hover:text-cyan-400">
             <FiEdit2 size={20} />
           </button>
 
-          <button className="hover:text-red-500 transition">
+          <button className="transition hover:text-red-500">
             <FiTrash2 size={20} />
           </button>
 
-          <button className="hover:text-cyan-400 transition">
+          <button className="transition hover:text-cyan-400">
             <FiMoreVertical size={20} />
           </button>
         </div>
       </div>
 
+      {/* Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-5 all-scroll">
-        {loading && (
-          <div className="relative flex h-full items-center justify-center">
+        {loadingChat ? (
+          <div className="flex h-full items-center justify-center">
             <Loader variant="section" />
           </div>
-        )}
-        <div className="space-y-4">
+        ) : (
           <div className="space-y-6">
             {messages.map((message) => (
               <React.Fragment key={message._id}>
-                {/* User Prompt */}
+                {/* User */}
                 <div className="flex justify-end">
-                  <div className="max-w-[75%] rounded-2xl rounded-br-md bg-cyan-500 px-4 py-3 text-white shadow">
-                    <p className="whitespace-pre-wrap text-sm">
+                  <div className="max-w-[75%] rounded-2xl rounded-br-md bg-cyan-500 px-4 py-3 text-white">
+                    <p className="whitespace-pre-wrap">
                       {message.prompt}
                     </p>
 
-                    <div className="mt-2 text-right text-[11px] text-white/80">
+                    <div className="mt-2 text-right text-xs text-white/80">
                       {formatDateTime(message.createdAt)}
                     </div>
                   </div>
                 </div>
 
-                {/* AI Response */}
+                {/* AI */}
                 <div className="flex justify-start">
-                  <div className="max-w-[75%] rounded-2xl rounded-bl-md border border-slate-700 bg-slate-800 px-4 py-3 text-slate-100 shadow">
+                  <div className="max-w-[75%] rounded-2xl rounded-bl-md border border-slate-700 bg-slate-800 px-4 py-3">
                     <p className="mb-2 text-xs font-semibold text-cyan-400">
                       Velora AI
                     </p>
 
-                    <div className="prose prose-invert max-w-none prose-p:my-2 prose-pre:bg-slate-900">
+                    <div className="prose prose-invert max-w-none text-text">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {message.response}
                       </ReactMarkdown>
                     </div>
 
-                    <div className="mt-3 text-right text-[11px] text-slate-400">
+                    <div className="mt-3 text-right text-xs text-slate-400">
                       {formatDateTime(message.createdAt)}
                     </div>
                   </div>
                 </div>
               </React.Fragment>
             ))}
+
             {sending && (
-              <div className="flex justify-start">
-                <TypingIndicator />
-              </div>
+              <TypingIndicator />
             )}
 
             <div ref={messagesEndRef} />
           </div>
-        </div>
+        )}
       </div>
 
       {/* Input */}
       <div className="border-t border-slate-800 p-4">
-        <form className="flex items-center gap-3">
+        <form
+          onSubmit={sendMessage}
+          className="flex items-center gap-3"
+        >
           <input
             type="text"
             value={prompt}
-            onChange={(e) => setprompt(e.target.value)}
+            onChange={(e) => setPrompt(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 rounded-full bg-slate-800 px-5 py-3 text-white outline-none placeholder:text-gray-400"
+            disabled={sending}
+            className="flex-1 rounded-full bg-slate-800 px-5 py-3 text-white outline-none placeholder:text-gray-400 disabled:opacity-60"
           />
 
           <button
             type="submit"
-            disabled={loading}
-            onClick={sendMessage}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600"
+            disabled={sending || !prompt.trim()}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <FiSend size={20} className="text-white" />
           </button>

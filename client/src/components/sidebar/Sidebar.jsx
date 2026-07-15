@@ -3,6 +3,7 @@ import api from "../../api/axois";
 import AuthContext from "../../context/AuthContext";
 import Loader from "../common/Loader";
 import { notify } from "../../utils/toast";
+import { useNavigate } from "react-router-dom";
 
 import {
   FiMessageCircle,
@@ -18,6 +19,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
   const { setUser } = useContext(AuthContext);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const menuItems = [
     {

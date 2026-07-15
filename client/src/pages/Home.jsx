@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import Navbar from "../components/common/Navbar";
 import MobileNavbar from "../components/common/MobileNavbar";
 import Sidebar from "../components/sidebar/Sidebar";
@@ -10,22 +11,75 @@ import AddFriend from "../components/sidebar/AddFriend";
 import Conversation from "../components/chat/Conversation";
 import useIsMobile from "../hooks/useIsMobile";
 import AIChat from "../components/chat/AIChat";
+import api from "../api/axois";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { chatId } = useParams();
   const isMobile = useIsMobile();
+
   const [selectedChat, setSelectedChat] = useState(null);
   const [activeTab, setActiveTab] = useState("Chats");
-  const [creatingAIChat, setCreatingAIChat] = useState(false);
+
+  const [aiChats, setAiChats] = useState([]);
+  const [loadingAIChats, setLoadingAIChats] = useState(true);
+
+  // URL is now the source of truth
+  const isAIHome = location.pathname === "/home/ai";
+  const isAINew = location.pathname === "/home/ai/new";
+  const isAIChat =
+    location.pathname.startsWith("/home/ai/") && !isAINew;
+
+  const creatingAIChat = isAINew;
+
+  const fetchAIChats = async () => {
+    try {
+      setLoadingAIChats(true);
+
+      const res = await api.get("/ai/chat");
+
+      const chats = res.data.data;
+      setAiChats(chats);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingAIChats(false);
+    }
+  };
 
   useEffect(() => {
-    if (
-      activeTab !== "Chats" &&
-      activeTab !== "Groups" &&
-      activeTab !== "AI"
-    ) {
+    fetchAIChats();
+  }, []);
+
+  // Sync active tab with URL
+  useEffect(() => {
+    if (location.pathname.startsWith("/home/ai")) {
+      setActiveTab("AI");
+    } else if (location.pathname.startsWith("/home/chat")) {
+      setActiveTab("Chats");
+    } else if (location.pathname.startsWith("/home/group")) {
+      setActiveTab("Groups");
+    }
+  }, [location.pathname]);
+
+  // Update selected AI chat whenever URL changes
+  useEffect(() => {
+    if (isAIHome) {
+      setSelectedChat(null);
+      return;
+    }
+
+    if (!chatId || aiChats.length === 0) return;
+
+    const chat = aiChats.find((c) => c._id === chatId);
+
+    if (chat) {
+      setSelectedChat(chat);
+    } else {
       setSelectedChat(null);
     }
-  }, [activeTab]);
+  }, [chatId, aiChats, isAIHome]);
 
   const renderLeftPanel = () => {
     switch (activeTab) {
@@ -56,15 +110,14 @@ export default function Home() {
       case "AI":
         return (
           <AISection
+            chats={aiChats}
+            loading={loadingAIChats}
             selectedChat={selectedChat}
             onSelectChat={(chat) => {
-              setCreatingAIChat(false);
-              setSelectedChat(chat);
+              navigate(`/home/ai/${chat._id}`);
             }}
             onCreateChat={() => {
-              setSelectedChat(null);
-              setCreatingAIChat(true);
-              setActiveTab("AI");
+              navigate("/home/ai/new");
             }}
           />
         );
@@ -78,12 +131,14 @@ export default function Home() {
   };
 
   const showConversation =
-    activeTab === "Chats" || activeTab === "Groups" || activeTab === "AI";
+    isAIChat ||
+    isAINew ||
+    location.pathname.startsWith("/home/chat/") ||
+    location.pathname.startsWith("/home/group/");
 
   return isMobile ? (
-    // ================= MOBILE =================
     <div className="h-dvh bg-slate-950 flex flex-col">
-      {(!selectedChat && !creatingAIChat) ? (
+      {!showConversation ? (
         <>
           <MobileNavbar
             activeTab={activeTab}
@@ -99,52 +154,62 @@ export default function Home() {
           chat={selectedChat}
           creating={creatingAIChat}
           onChatCreated={(newChat) => {
-            setSelectedChat(newChat);
-            setCreatingAIChat(false);
+            setAiChats((prev) => [newChat, ...prev]);
+            fetchAIChats();
+            navigate(`/home/ai/${newChat._id}`);
           }}
           onBack={() => {
-            setCreatingAIChat(false);
-            setSelectedChat(null);
+            navigate("/home/ai");
           }}
         />
       ) : (
         <Conversation
           chat={selectedChat}
-          onBack={() => setSelectedChat(null)}
+          onBack={() => {
+            navigate("/home");
+          }}
         />
       )}
     </div>
   ) : (
-    // ================= DESKTOP =================
     <div className="h-screen bg-slate-950 p-4 lg:p-5 flex flex-col gap-4">
       <Navbar />
 
       <div className="flex flex-1 gap-4 overflow-hidden min-h-0">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
 
         <div className="w-[320px] lg:w-90 xl:w-100 2xl:w-107.5 rounded-2xl overflow-hidden shrink-0">
           {renderLeftPanel()}
         </div>
 
-        <div className="flex-1 min-w-0 rounded-2xl overflow-hidden">
+        <div className="flex-1 min-w-0 rounded-2xl overflow-hidden all-scroll">
           {showConversation ? (
             activeTab === "AI" ? (
               <AIChat
                 chat={selectedChat}
                 creating={creatingAIChat}
                 onChatCreated={(newChat) => {
-                  setSelectedChat(newChat);
-                  setCreatingAIChat(false);
+                  setAiChats((prev) => [newChat, ...prev]);
+
+                  // Refresh sidebar with latest chat data
+                  fetchAIChats();
+
+                  // Open the newly created chat
+                  navigate(`/home/ai/${newChat._id}`);
                 }}
                 onBack={() => {
-                  setCreatingAIChat(false);
-                  setSelectedChat(null);
+                  navigate("/home/ai");
                 }}
               />
             ) : (
               <Conversation
                 chat={selectedChat}
-                onBack={() => setSelectedChat(null)}
+                onBack={() => {
+                  navigate("/home");
+                }}
               />
             )
           ) : (
@@ -163,5 +228,5 @@ export default function Home() {
         </div>
       </div>
     </div>
-  );
+  )
 }
