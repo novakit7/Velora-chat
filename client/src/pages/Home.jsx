@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import Navbar from "../components/common/Navbar";
 import MobileNavbar from "../components/common/MobileNavbar";
 import Sidebar from "../components/sidebar/Sidebar";
@@ -11,17 +11,11 @@ import AddFriend from "../components/sidebar/AddFriend";
 import Conversation from "../components/chat/Conversation";
 import useIsMobile from "../hooks/useIsMobile";
 import AIChat from "../components/chat/AIChat";
-import api from "../api/axois";
 
 export default function Home() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { chatId } = useParams();
   const isMobile = useIsMobile();
-
-  const [selectedChat, setSelectedChat] = useState(null);
-  const [aiChats, setAiChats] = useState([]);
-  const [loadingAIChats, setLoadingAIChats] = useState(true);
 
   // URL is now the source of truth
   const isAIHome = location.pathname === "/home/ai";
@@ -32,78 +26,36 @@ export default function Home() {
   const creatingAIChat = isAINew;
   const isAIPage = location.pathname.startsWith("/home/ai");
 
-
-  const fetchAIChats = async () => {
-    try {
-      setLoadingAIChats(true);
-
-      const res = await api.get("/ai/chat");
-
-      const chats = res.data.data;
-      setAiChats(chats);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingAIChats(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAIChats();
-  }, []);
-
-  // Update selected AI chat whenever URL changes
-  useEffect(() => {
-    if (isAIHome) {
-      setSelectedChat(null);
-      return;
-    }
-
-    if (!chatId || aiChats.length === 0) return;
-
-    const chat = aiChats.find((c) => c._id === chatId);
-
-    if (chat) {
-      setSelectedChat(chat);
-    } else {
-      setSelectedChat(null);
-    }
-  }, [chatId, aiChats, isAIHome]);
-
   const renderLeftPanel = () => {
-  if (location.pathname.startsWith("/home/ai")) {
+    if (location.pathname.startsWith("/home/ai")) {
+      return (
+        <AISection
+          onCreateChat={() => navigate("/home/ai/new")}
+        />
+      );
+    }
+
+    if (location.pathname.startsWith("/home/group")) {
+      return (
+        <GroupList />
+      );
+    }
+
+    if (location.pathname.startsWith("/home/new-chat")) {
+      return (
+        <NewChat />
+      );
+    }
+
+    if (location.pathname.startsWith("/home/add-friend")) {
+      return <AddFriend />;
+    }
+
+    // Default
     return (
-      <AISection
-        chats={aiChats}
-        loading={loadingAIChats}
-        selectedChat={selectedChat}
-        onSelectChat={(chat) => navigate(`/home/ai/${chat._id}`)}
-        onCreateChat={() => navigate("/home/ai/new")}
-      />
+      <ChatList />
     );
-  }
-
-  if (location.pathname.startsWith("/home/group")) {
-    return (
-      <GroupList/>
-    );
-  }
-
-  if (location.pathname.startsWith("/home/new-chat")) {
-    return (
-      <NewChat/>
-    );
-  }
-
-  if (location.pathname.startsWith("/home/add-friend")) {
-    return <AddFriend />;
-  }
-
-  // Default
-  return (
-    <ChatList/>
-  );
-};
+  };
   const showConversation =
     isAIChat ||
     isAINew ||
@@ -132,18 +84,14 @@ export default function Home() {
         </>
       ) : isAIPage ? (
         <AIChat
-          chat={selectedChat}
           creating={creatingAIChat}
           onChatCreated={(newChat) => {
-            setAiChats((prev) => [newChat, ...prev]);
-            fetchAIChats();
             navigate(`/home/ai/${newChat._id}`);
           }}
           onBack={() => navigate("/home/ai")}
         />
       ) : (
         <Conversation
-          chat={selectedChat}
           onBack={() => navigate("/home")}
         />
       )}
@@ -163,18 +111,14 @@ export default function Home() {
           {showConversation ? (
             isAIPage ? (
               <AIChat
-                chat={selectedChat}
                 creating={creatingAIChat}
                 onChatCreated={(newChat) => {
-                  setAiChats((prev) => [newChat, ...prev]);
-                  fetchAIChats();
                   navigate(`/home/ai/${newChat._id}`);
                 }}
                 onBack={() => navigate("/home/ai")}
               />
             ) : (
               <Conversation
-                chat={selectedChat}
                 onBack={() => navigate("/home")}
               />
             )

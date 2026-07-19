@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import { notify } from "../../utils/toast";
 import {
   FiArrowLeft,
@@ -15,7 +16,6 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Loader } from "lucide-react";
 export default function AIChat({
-  chat,
   creating,
   onBack,
   onChatCreated,
@@ -25,15 +25,37 @@ export default function AIChat({
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState([]);
   const [title, setTitle] = useState("");
-
+  const { chatId } = useParams();
+  const [chat, setChat] = useState(null);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
-  }, [messages, sending]);
+    if (!chatId || creating) {
+      setChat(null);
+      setMessages([]);
+      return;
+    }
+
+    const getChat = async () => {
+      try {
+        setLoadingChat(true);
+
+        const res = await api.get(`/ai/chat/${chatId}`);
+
+        setChat(res.data.data);
+        setMessages(res.data.data.conversations || []);
+      } catch (error) {
+        console.error(error);
+        notify.error(
+          error?.response?.data?.message || "Failed to load chat."
+        );
+      } finally {
+        setLoadingChat(false);
+      }
+    };
+
+    getChat();
+  }, [chatId, creating]);
 
   useEffect(() => {
     if (!chat?._id) {

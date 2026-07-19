@@ -1,17 +1,36 @@
-import React from "react";
 import { FiSearch, FiPlus } from "react-icons/fi";
 import { formatRelativeDate } from "../../utils/date";
 import Loader from "../common/Loader";
 import { Brain } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../../api/axois";
+import { notify } from "../../utils/toast";
 
-export default function AISection({
-  chats,
-  loading,
-  onSelectChat,
-  onCreateChat,
-}) {
-  const { chatId } = useParams();
+export default function AISection({ onCreateChat }) {
+const [chats, setChats] = useState([]);
+const [loading, setLoading] = useState(true);
+const navigate = useNavigate();
+const { chatId } = useParams();
+
+const fetchAIChats = async () => {
+  try {
+    setLoading(true);
+
+    const res = await api.get("/ai/chat");
+
+    setChats(res.data.data);
+  } catch (error) {
+    console.error(error);
+    notify.error("Couldn't load AI chats");
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+    fetchAIChats();
+}, []);
 
   if (loading) {
     return (
@@ -54,10 +73,9 @@ export default function AISection({
         {chats.map((chat) => (
           <button
             key={chat._id}
-            onClick={() => onSelectChat(chat)}
-            className={`flex w-full items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${
-              chatId === chat._id ? "bg-slate-800" : ""
-            }`}
+            onClick={() => navigate(`/home/ai/${chat._id}`)}
+            className={`flex w-full items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${chatId === chat._id ? "bg-slate-800" : ""
+              }`}
           >
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-bold text-white">
