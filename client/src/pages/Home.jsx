@@ -20,8 +20,6 @@ export default function Home() {
   const isMobile = useIsMobile();
 
   const [selectedChat, setSelectedChat] = useState(null);
-  const [activeTab, setActiveTab] = useState("Chats");
-
   const [aiChats, setAiChats] = useState([]);
   const [loadingAIChats, setLoadingAIChats] = useState(true);
 
@@ -32,6 +30,8 @@ export default function Home() {
     location.pathname.startsWith("/home/ai/") && !isAINew;
 
   const creatingAIChat = isAINew;
+  const isAIPage = location.pathname.startsWith("/home/ai");
+
 
   const fetchAIChats = async () => {
     try {
@@ -52,17 +52,6 @@ export default function Home() {
     fetchAIChats();
   }, []);
 
-  // Sync active tab with URL
-  useEffect(() => {
-    if (location.pathname.startsWith("/home/ai")) {
-      setActiveTab("AI");
-    } else if (location.pathname.startsWith("/home/chat")) {
-      setActiveTab("Chats");
-    } else if (location.pathname.startsWith("/home/group")) {
-      setActiveTab("Groups");
-    }
-  }, [location.pathname]);
-
   // Update selected AI chat whenever URL changes
   useEffect(() => {
     if (isAIHome) {
@@ -82,74 +71,66 @@ export default function Home() {
   }, [chatId, aiChats, isAIHome]);
 
   const renderLeftPanel = () => {
-    switch (activeTab) {
-      case "Chats":
-        return (
-          <ChatList
-            selectedChat={selectedChat}
-            onSelectChat={setSelectedChat}
-          />
-        );
+  if (location.pathname.startsWith("/home/ai")) {
+    return (
+      <AISection
+        chats={aiChats}
+        loading={loadingAIChats}
+        selectedChat={selectedChat}
+        onSelectChat={(chat) => navigate(`/home/ai/${chat._id}`)}
+        onCreateChat={() => navigate("/home/ai/new")}
+      />
+    );
+  }
 
-      case "Groups":
-        return (
-          <GroupList
-            selectedChat={selectedChat}
-            onSelectChat={setSelectedChat}
-          />
-        );
+  if (location.pathname.startsWith("/home/group")) {
+    return (
+      <GroupList/>
+    );
+  }
 
-      case "New Chat":
-        return (
-          <NewChat
-            onSelectChat={setSelectedChat}
-            setActiveTab={setActiveTab}
-          />
-        );
+  if (location.pathname.startsWith("/home/new-chat")) {
+    return (
+      <NewChat/>
+    );
+  }
 
-      case "AI":
-        return (
-          <AISection
-            chats={aiChats}
-            loading={loadingAIChats}
-            selectedChat={selectedChat}
-            onSelectChat={(chat) => {
-              navigate(`/home/ai/${chat._id}`);
-            }}
-            onCreateChat={() => {
-              navigate("/home/ai/new");
-            }}
-          />
-        );
+  if (location.pathname.startsWith("/home/add-friend")) {
+    return <AddFriend />;
+  }
 
-      case "Add Friend":
-        return <AddFriend />;
-
-      default:
-        return null;
-    }
-  };
-
+  // Default
+  return (
+    <ChatList/>
+  );
+};
   const showConversation =
     isAIChat ||
     isAINew ||
     location.pathname.startsWith("/home/chat/") ||
     location.pathname.startsWith("/home/group/");
 
+  const currentTab = isAIPage
+    ? "AI"
+    : location.pathname.startsWith("/home/group")
+      ? "Groups"
+      : location.pathname.startsWith("/home/new-chat")
+        ? "New Chat"
+        : location.pathname.startsWith("/home/add-friend")
+          ? "Add Friend"
+          : "Chats";
+
   return isMobile ? (
     <div className="h-dvh bg-slate-950 flex flex-col">
       {!showConversation ? (
         <>
-          <MobileNavbar
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
+          <MobileNavbar />
 
           <div className="flex-1 overflow-hidden pb-20">
             {renderLeftPanel()}
           </div>
         </>
-      ) : activeTab === "AI" ? (
+      ) : isAIPage ? (
         <AIChat
           chat={selectedChat}
           creating={creatingAIChat}
@@ -158,16 +139,12 @@ export default function Home() {
             fetchAIChats();
             navigate(`/home/ai/${newChat._id}`);
           }}
-          onBack={() => {
-            navigate("/home/ai");
-          }}
+          onBack={() => navigate("/home/ai")}
         />
       ) : (
         <Conversation
           chat={selectedChat}
-          onBack={() => {
-            navigate("/home");
-          }}
+          onBack={() => navigate("/home")}
         />
       )}
     </div>
@@ -176,10 +153,7 @@ export default function Home() {
       <Navbar />
 
       <div className="flex flex-1 gap-4 overflow-hidden min-h-0">
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
+        <Sidebar />
 
         <div className="w-[320px] lg:w-90 xl:w-100 2xl:w-107.5 rounded-2xl overflow-hidden shrink-0">
           {renderLeftPanel()}
@@ -187,36 +161,28 @@ export default function Home() {
 
         <div className="flex-1 min-w-0 rounded-2xl overflow-hidden all-scroll">
           {showConversation ? (
-            activeTab === "AI" ? (
+            isAIPage ? (
               <AIChat
                 chat={selectedChat}
                 creating={creatingAIChat}
                 onChatCreated={(newChat) => {
                   setAiChats((prev) => [newChat, ...prev]);
-
-                  // Refresh sidebar with latest chat data
                   fetchAIChats();
-
-                  // Open the newly created chat
                   navigate(`/home/ai/${newChat._id}`);
                 }}
-                onBack={() => {
-                  navigate("/home/ai");
-                }}
+                onBack={() => navigate("/home/ai")}
               />
             ) : (
               <Conversation
                 chat={selectedChat}
-                onBack={() => {
-                  navigate("/home");
-                }}
+                onBack={() => navigate("/home")}
               />
             )
           ) : (
             <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
               <div className="text-center">
                 <h2 className="text-2xl font-semibold text-white">
-                  {activeTab}
+                  {currentTab}
                 </h2>
 
                 <p className="mt-2 text-gray-400">
@@ -228,5 +194,5 @@ export default function Home() {
         </div>
       </div>
     </div>
-  )
+  );
 }

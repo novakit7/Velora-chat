@@ -1,19 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { FiSearch, FiPlus } from "react-icons/fi";
 import { formatRelativeDate } from "../../utils/date";
-import { notify } from "../../utils/toast";
 import Loader from "../common/Loader";
-import api from "../../api/axois";
 import { Brain } from "lucide-react";
+import { useParams } from "react-router-dom";
 
 export default function AISection({
   chats,
   loading,
-  selectedChat,
   onSelectChat,
   onCreateChat,
 }) {
-
+  const { chatId } = useParams();
 
   if (loading) {
     return (
@@ -24,9 +22,9 @@ export default function AISection({
   }
 
   return (
-    <div className="h-full bg-slate-900 rounded-2xl flex flex-col">
+    <div className="h-full rounded-2xl bg-slate-900 flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-slate-900 p-4 border-b border-slate-800">
+      <div className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900 p-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-white">
             Velora-AI
@@ -34,19 +32,19 @@ export default function AISection({
 
           <button
             onClick={onCreateChat}
-            className="w-10 h-10 rounded-xl bg-cyan-500 hover:bg-cyan-600 flex items-center justify-center text-white transition"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition hover:bg-cyan-600"
           >
             <FiPlus />
           </button>
         </div>
 
-        <div className="mt-4 flex items-center bg-slate-800 rounded-xl px-3 py-2">
+        <div className="mt-4 flex items-center rounded-xl bg-slate-800 px-3 py-2">
           <FiSearch className="text-gray-400" />
 
           <input
             type="text"
             placeholder="Search AI chats..."
-            className="ml-2 flex-1 bg-transparent outline-none text-white placeholder:text-gray-400"
+            className="ml-2 flex-1 bg-transparent text-white outline-none placeholder:text-gray-400"
           />
         </div>
       </div>
@@ -57,35 +55,33 @@ export default function AISection({
           <button
             key={chat._id}
             onClick={() => onSelectChat(chat)}
-            className={`w-full flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${
-              selectedChat?._id === chat._id ? "bg-slate-800" : ""
+            className={`flex w-full items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${
+              chatId === chat._id ? "bg-slate-800" : ""
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-full bg-cyan-500 flex items-center justify-center text-white font-bold">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-bold text-white">
                 <Brain size={24} />
               </div>
 
               <div className="text-left">
-                <h3 className="text-white font-medium">
+                <h3 className="font-medium text-white">
                   {chat.title}
                 </h3>
 
-                <p className="text-sm text-gray-400 truncate max-w-44">
+                <p className="max-w-44 truncate text-sm text-gray-400">
                   {chat.latestConversation?.prompt || "No messages yet"}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col items-end">
-              <span className="text-xs text-gray-400">
-                {formatRelativeDate(chat.lastActivity)}
-              </span>
-            </div>
+            <span className="text-xs text-gray-400">
+              {formatRelativeDate(chat.lastActivity)}
+            </span>
           </button>
         ))}
 
-        {!loading && chats.length === 0 && (
+        {chats.length === 0 && (
           <div className="flex h-full items-center justify-center text-gray-400">
             No chats found
           </div>

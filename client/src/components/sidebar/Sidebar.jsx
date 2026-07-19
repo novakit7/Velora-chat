@@ -4,6 +4,7 @@ import AuthContext from "../../context/AuthContext";
 import Loader from "../common/Loader";
 import { notify } from "../../utils/toast";
 import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import {
   FiMessageCircle,
@@ -15,11 +16,23 @@ import {
 } from "react-icons/fi";
 import { Brain } from "lucide-react";
 
-export default function Sidebar({ activeTab, setActiveTab }) {
+export default function Sidebar() {
   const { setUser } = useContext(AuthContext);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const activeTab =
+  location.pathname.startsWith("/home/ai")
+    ? "AI"
+    : location.pathname.startsWith("/home/group")
+    ? "Groups"
+    : location.pathname.startsWith("/home/new-chat")
+    ? "New Chat"
+    : location.pathname.startsWith("/home/add-friend")
+    ? "Add Friend"
+    : "Chats";
 
   const menuItems = [
     {
@@ -59,6 +72,36 @@ export default function Sidebar({ activeTab, setActiveTab }) {
     }
   };
 
+  const handleNavigation = (tab) => {
+  switch (tab) {
+    case "Chats":
+      navigate("/home");
+      break;
+
+    case "Groups":
+      navigate("/home/group");
+      break;
+
+    case "New Chat":
+      navigate("/home/new-chat");
+      break;
+
+    case "AI":
+      navigate("/home/ai");
+      break;
+
+    case "Add Friend":
+      navigate("/home/add-friend");
+      break;
+
+    default:
+      navigate("/home");
+  }
+};
+
+console.log("Path:", location.pathname);
+console.log("Active Tab:", activeTab);
+
   return (
     <>
       <aside className="w-19.5 lg:w-20 bg-bg border border-border rounded-2xl flex flex-col py-4 shrink-0">
@@ -67,7 +110,7 @@ export default function Sidebar({ activeTab, setActiveTab }) {
             <button
               key={item.name}
               title={item.name}
-              onClick={() => setActiveTab(item.name)}
+              onClick={() => handleNavigation(item.name)}
               className={`group relative w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer
 
                 ${

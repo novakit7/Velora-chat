@@ -8,7 +8,7 @@ import Loader from "../common/Loader";
 import api from "../../api/axois";
 import { useNavigate } from "react-router-dom";
 
-export default function NewChat({ onSelectChat, setActiveTab }) {
+export default function NewChat() {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
@@ -33,18 +33,22 @@ export default function NewChat({ onSelectChat, setActiveTab }) {
   const createChat = async (id) => {
     try {
       setLoading(true);
-      const res = await api.post(`/chat/create-chat/${id}`)
-      notify.success(res.data?.message);
-      setActiveTab("Chats");
-      onSelectChat(res.data.data);
 
+      const res = await api.post(`/chat/create-chat/${id}`);
+
+      notify.success(res.data?.message);
+
+      navigate(`/home/chat/${res.data.data._id}`);
     } catch (error) {
       console.error(error);
-      notify.error(error?.response?.data?.message || "Something went wrong");
+      notify.error(
+        error?.response?.data?.message || "Something went wrong"
+      );
     } finally {
       setLoading(false);
     }
   };
+
   return (
     <div className="h-full rounded-2xl bg-slate-900 flex flex-col">
 

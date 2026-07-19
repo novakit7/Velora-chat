@@ -45,7 +45,33 @@ export default function App() {
         }
       />
       <Route
-        path="/home/group/:groupId"
+        path="/home/group/:chatId"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/home/group"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/home/new-chat"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/home/add-friend"
         element={
           <ProtectedRoute>
             <Home />

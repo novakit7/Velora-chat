@@ -14,20 +14,54 @@ import AuthContext from "../../context/AuthContext";
 import { Brain } from "lucide-react";
 import api from "../../api/axois";
 import { notify } from "../../utils/toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 
-export default function MobileNavbar({
-  activeTab,
-  setActiveTab,
-}) {
+export default function MobileNavbar() {
   const [openNotification, setOpenNotification] = useState(false);
   const [openUser, setOpenUser] = useState(false);
   const [openLogout, setOpenLogout] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
+  const location = useLocation();
   const { setUser, user } = useContext(AuthContext);
+
+  const activeTab =
+    location.pathname.startsWith("/home/ai")
+      ? "AI"
+      : location.pathname.startsWith("/home/group")
+        ? "Groups"
+        : location.pathname.startsWith("/home/new-chat")
+          ? "New Chat"
+          : location.pathname.startsWith("/home/add-friend")
+            ? "Add Friend"
+            : "Chats";
+  const handleNavigation = (tab) => {
+    switch (tab) {
+      case "Chats":
+        navigate("/home");
+        break;
+
+      case "Groups":
+        navigate("/home/group");
+        break;
+
+      case "New Chat":
+        navigate("/home/new-chat");
+        break;
+
+      case "AI":
+        navigate("/home/ai");
+        break;
+
+      case "Add Friend":
+        navigate("/home/add-friend");
+        break;
+
+      default:
+        navigate("/home");
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -158,18 +192,11 @@ export default function MobileNavbar({
           {menuItems.map((item) => (
             <button
               key={item.name}
-              onClick={() => setActiveTab(item.name)}
-              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200
-
-                ${activeTab === item.name
-                  ? item.primary
-                    ? "bg-linear-to-br from-cyan-500 to-blue-600 text-white scale-110 shadow-lg"
-                    : "bg-cyan-500 text-white scale-105 shadow-md"
-                  : item.primary
-                    ? "bg-linear-to-br from-cyan-500/80 to-blue-600/80 text-white"
-                    : "text-gray-400 hover:text-cyan-400"
-                }
-              `}
+               onClick={() => handleNavigation(item.name)}
+              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 ${activeTab === item.name
+                  ? "bg-cyan-500 text-white scale-105 shadow-md"
+                  : "text-gray-400 hover:text-cyan-400"
+                }`}
             >
               {item.icon}
             </button>

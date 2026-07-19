@@ -4,10 +4,13 @@ import api from "../../api/axois";
 import Loader from "../common/Loader";
 import { notify } from "../../utils/toast";
 import { formatRelativeDate } from "../../utils/date";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function ChatList({ onSelectChat, selectedChat }) {
+export default function ChatList() {
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+const { chatId } = useParams();
   useEffect(() => {
     const getChats = async () => {
       try {
@@ -66,9 +69,9 @@ export default function ChatList({ onSelectChat, selectedChat }) {
             return (
               <button
                 key={chat._id}
-                onClick={() => onSelectChat(chat)}
+                onClick={() => navigate(`/home/chat/${chat._id}`)}
                 className={`w-full flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${
-                  selectedChat?._id === chat._id ? "bg-slate-800" : ""
+                  chatId === chat._id ? "bg-slate-800" : ""
                 }`}
               >
                 <div className="flex items-center gap-3">

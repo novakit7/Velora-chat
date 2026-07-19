@@ -4,13 +4,16 @@ import api from "../../api/axois";
 import Loader from "../common/Loader";
 import { notify } from "../../utils/toast";
 import { formatRelativeDate } from "../../utils/date";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function GroupList({ onSelectChat, selectedChat }) {
+export default function GroupList() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [selectedFriends, setSelectedFriends] = useState([]);
+  const navigate = useNavigate();
+const { chatId } = useParams();
 
   useEffect(() => {
     const getGroups = async () => {
@@ -126,9 +129,9 @@ export default function GroupList({ onSelectChat, selectedChat }) {
               return (
                 <button
                   key={group._id}
-                  onClick={() => onSelectChat(group)}
+                  onClick={() => navigate(`/home/group/${group._id}`)}
                   className={`w-full flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${
-                    selectedChat?._id === group._id ? "bg-slate-800" : ""
+                    chatId === group._id ? "bg-slate-800" : ""
                   }`}
                 >
                   <div className="flex items-center gap-3">

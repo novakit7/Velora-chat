@@ -12,12 +12,30 @@ import { useContext } from "react";
 import AuthContext from "../../context/AuthContext";
 import { formatDateTime } from "../../utils/date";
 import api from "../../api/axois";
+import { useParams } from "react-router-dom";
 
-export default function Conversation({ chat, onBack }) {
+export default function Conversation({ onBack }) {
   const [loading, setLoading] = useState(false);
   const { user } = useContext(AuthContext);
   const [messages, setMessages] = useState([]);
   const [msg, setMsg] = useState("");
+  const { chatId } = useParams();
+  const [chat, setChat] = useState(null);
+
+  useEffect(() => {
+    const fetchChat = async () => {
+      try {
+        const res = await api.get(`/chat/${chatId}`);
+        setChat(res.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (chatId) {
+      fetchChat();
+    }
+  }, [chatId]);
 
   useEffect(() => {
     const getChats = async () => {
@@ -33,7 +51,7 @@ export default function Conversation({ chat, onBack }) {
       }
     };
 
-    if(chat){
+    if (chat) {
       getChats();
     }
   }, [chat]);
@@ -53,21 +71,21 @@ export default function Conversation({ chat, onBack }) {
       </div>
     );
   }
-  const sendMessage = async (e)=>{
-   e.preventDefault();
-   if (!msg.trim()) return;
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!msg.trim()) return;
     try {
       setLoading(true);
-      const res = await api.post(`/message/${chat._id}/message`,{
+      const res = await api.post(`/message/${chat._id}/message`, {
         content: msg,
       });
-      setMessages((prev)=>[
+      setMessages((prev) => [
         ...prev, res.data?.data
       ])
     } catch (error) {
       console.error(error);
       notify.error(error?.response?.data?.message || "Something went wrong while sending a message.");
-    } finally{
+    } finally {
       setMsg("")
       setLoading(false);
     }
@@ -138,9 +156,8 @@ export default function Conversation({ chat, onBack }) {
                   className={`flex mb-4 ${isMe ? "justify-end" : "justify-start"}`}
                 >
                   <div
-                    className={`flex items-end gap-2 max-w-[75%] ${
-                      isMe ? "flex-row-reverse" : ""
-                    }`}
+                    className={`flex items-end gap-2 max-w-[75%] ${isMe ? "flex-row-reverse" : ""
+                      }`}
                   >
                     {/* Avatar */}
                     <img
@@ -151,11 +168,10 @@ export default function Conversation({ chat, onBack }) {
 
                     {/* Bubble */}
                     <div
-                      className={`px-4 py-3 max-w-md wrap-break-words rounded-2xl shadow ${
-                        isMe
+                      className={`px-4 py-3 max-w-md wrap-break-words rounded-2xl shadow ${isMe
                           ? "bg-cyan-500 text-white rounded-br-md"
                           : "bg-slate-800 text-slate-100 rounded-bl-md border border-slate-700"
-                      }`}
+                        }`}
                     >
                       {/* Username */}
                       {!isMe && (
@@ -169,9 +185,8 @@ export default function Conversation({ chat, onBack }) {
 
                       {/* Time + Tick */}
                       <div
-                        className={`mt-2 flex items-center justify-end gap-1 text-[11px] ${
-                          isMe ? "text-white/80" : "text-slate-400"
-                        }`}
+                        className={`mt-2 flex items-center justify-end gap-1 text-[11px] ${isMe ? "text-white/80" : "text-slate-400"
+                          }`}
                       >
                         <span>{formatDateTime(message.createdAt)}</span>
 
@@ -194,14 +209,14 @@ export default function Conversation({ chat, onBack }) {
           <input
             type="text"
             value={msg}
-            onChange={(e)=>setMsg(e.target.value)}
+            onChange={(e) => setMsg(e.target.value)}
             placeholder="Type a message..."
             className="flex-1 rounded-full bg-slate-800 px-5 py-3 text-white outline-none placeholder:text-gray-400"
           />
 
           <button
             type="submit"
-            disabled ={loading}
+            disabled={loading}
             onClick={sendMessage}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600"
           >
