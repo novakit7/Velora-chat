@@ -29,6 +29,13 @@ export default function AIChat({
   const [chat, setChat] = useState(null);
   const messagesEndRef = useRef(null);
 
+  const scrollToBottom = (behavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior,
+      block: "end",
+    });
+  };
+
   useEffect(() => {
     if (!chatId || creating) {
       setChat(null);
@@ -58,31 +65,18 @@ export default function AIChat({
   }, [chatId, creating]);
 
   useEffect(() => {
-    if (!chat?._id) {
-      setMessages([]);
-      return;
+    if (!loadingChat && messages.length > 0) {
+      setTimeout(() => {
+        scrollToBottom("auto");
+      }, 100);
     }
+  }, [loadingChat]);
 
-    const getChat = async () => {
-      try {
-        setLoadingChat(true);
-        setMessages([]);
-
-        const res = await api.get(`/ai/chat/${chat._id}`);
-
-        setMessages(res.data.data?.conversations || []);
-      } catch (error) {
-        console.error(error);
-        notify.error(
-          error?.response?.data?.message || "Failed to load chat."
-        );
-      } finally {
-        setLoadingChat(false);
-      }
-    };
-
-    getChat();
-  }, [chat?._id]);
+  useEffect(() => {
+    if (messages.length > 0) {
+      scrollToBottom("smooth");
+    }
+  }, [messages]);
 
   const createChat = async () => {
     if (!title.trim()) {
@@ -100,7 +94,6 @@ export default function AIChat({
       const { data: chatRes } = await api.post("/ai/chat", {
         title,
       });
-
       const newChat = chatRes.data;
 
       // Send first prompt
@@ -110,7 +103,6 @@ export default function AIChat({
           prompt,
         }
       );
-
       setMessages([messageRes.data]);
 
       setTitle("");
@@ -136,9 +128,8 @@ export default function AIChat({
 
     try {
       setSending(true);
-
       const { data } = await api.post(
-        `/ai/chat/${chat._id}/message`,
+        `/ai/chat/${chat.chat._id}/message`,
         {
           prompt,
         }
@@ -328,10 +319,9 @@ export default function AIChat({
             {sending && (
               <TypingIndicator />
             )}
-
-            <div ref={messagesEndRef} />
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}

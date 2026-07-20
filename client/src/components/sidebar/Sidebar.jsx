@@ -99,9 +99,6 @@ export default function Sidebar() {
   }
 };
 
-console.log("Path:", location.pathname);
-console.log("Active Tab:", activeTab);
-
   return (
     <>
       <aside className="w-19.5 lg:w-20 bg-bg border border-border rounded-2xl flex flex-col py-4 shrink-0">

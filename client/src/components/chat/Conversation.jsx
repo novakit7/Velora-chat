@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { notify } from "../../utils/toast";
 import {
   FiArrowLeft,
@@ -21,6 +21,28 @@ export default function Conversation({ onBack }) {
   const [msg, setMsg] = useState("");
   const { chatId } = useParams();
   const [chat, setChat] = useState(null);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = (behavior = "smooth") => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior,
+      block: "end",
+    });
+  };
+   useEffect(() => {
+      if (!loading && messages.length > 0) {
+        setTimeout(() => {
+          scrollToBottom("auto");
+        }, 100);
+      }
+    }, [loading]);
+  
+    useEffect(() => {
+      if (messages.length > 0) {
+        scrollToBottom("smooth");
+      }
+    }, [messages]);
+  
 
   useEffect(() => {
     const fetchChat = async () => {
@@ -201,6 +223,7 @@ export default function Conversation({ onBack }) {
             })}
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input */}
