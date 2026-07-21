@@ -1,11 +1,10 @@
-import { AIChat } from "../models/aiChat.model.js";
+import { AIChat } from "../models/AIChat.model.js";
 import mongoose from "mongoose";
-import { AIConversation } from "../models/aiConversation.model.js";
+import { AIConversation } from "../models/AIConversation.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { summarize, translate, grammarCheck } from "../services/ai.services.js";
-import { makeQuery } from "../services/ai.services.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
+import { summarize, translate, grammarCheck,  makeQuery } from "../services/ai.services.js";
 
 const createChat = asyncHandler(async (req, res) => {
   const { title } = req.body;

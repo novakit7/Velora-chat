@@ -3,10 +3,10 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 import { FriendRequest } from "../models/FriendRequest.model.js";
-import { Chat } from "../models/chat.model.js";
+import { Chat } from "../models/Chat.model.js";
 import { User } from "../models/User.model.js";
 import { Message } from "../models/Message.model.js";
-import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/Cloudinary.js";
 
 const createPrivateChat = asyncHandler(async (req, res) => {
   const { userId } = req.params;
