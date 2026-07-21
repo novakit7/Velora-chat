@@ -10,7 +10,7 @@ import {
   sendMessage,
   summarizeText,
   translateText,
-} from "../controllers/AIconversation.controller.js";
+} from "../controllers/AIConversation.controller.js";
 
 const AIRoutes = Router();
 
