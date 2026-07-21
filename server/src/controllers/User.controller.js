@@ -17,7 +17,7 @@ import generateAccessAndRefreshToken from "../utils/generateToken.js";
 const options = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 };
 
 const registerUser = asyncHandler(async (req, res) => {
