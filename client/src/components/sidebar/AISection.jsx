@@ -1,4 +1,4 @@
-import { FiSearch, FiPlus } from "react-icons/fi";
+import { FiSearch, FiPlus, FiX } from "react-icons/fi";
 import { formatRelativeDate } from "../../utils/date";
 import Loader from "../common/Loader";
 import { Brain } from "lucide-react";
@@ -8,29 +8,34 @@ import api from "../../api/axois";
 import { notify } from "../../utils/toast";
 
 export default function AISection({ onCreateChat }) {
-const [chats, setChats] = useState([]);
-const [loading, setLoading] = useState(true);
-const navigate = useNavigate();
-const { chatId } = useParams();
+  const [chats, setChats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { chatId } = useParams();
+  const [query, setQuery] = useState("");
 
-const fetchAIChats = async () => {
-  try {
-    setLoading(true);
+  const fetchAIChats = async () => {
+    try {
+      setLoading(true);
 
-    const res = await api.get("/ai/chat");
+      const res = await api.get("/ai/chat");
 
-    setChats(res.data.data);
-  } catch (error) {
-    console.error(error);
-    notify.error("Couldn't load AI chats");
-  } finally {
-    setLoading(false);
-  }
-};
+      setChats(res.data.data);
+    } catch (error) {
+      console.error(error);
+      notify.error("Couldn't load AI chats");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-useEffect(() => {
+  useEffect(() => {
     fetchAIChats();
-}, []);
+  }, []);
+
+  const filteredChats = chats.filter((chat) =>
+    chat.title.toLowerCase().includes(query.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -51,7 +56,7 @@ useEffect(() => {
 
           <button
             onClick={onCreateChat}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition hover:bg-cyan-600"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-cyan-500 text-white transition hover:bg-cyan-600"
           >
             <FiPlus />
           </button>
@@ -62,19 +67,30 @@ useEffect(() => {
 
           <input
             type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search AI chats..."
             className="ml-2 flex-1 bg-transparent text-white outline-none placeholder:text-gray-400"
           />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="ml-2 rounded-full p-1 text-gray-400 transition hover:bg-slate-700 hover:text-white"
+              aria-label="Clear search"
+            >
+              <FiX size={18} />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
-        {chats.map((chat) => (
+        {filteredChats.map((chat) => (
           <button
             key={chat._id}
             onClick={() => navigate(`/home/ai/${chat._id}`)}
-            className={`flex w-full items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${chatId === chat._id ? "bg-slate-800" : ""
+            className={`flex w-full items-center justify-between px-4 py-3 cursor-pointer transition hover:bg-slate-800 ${chatId === chat._id ? "bg-slate-800" : ""
               }`}
           >
             <div className="flex items-center gap-3">
@@ -99,7 +115,7 @@ useEffect(() => {
           </button>
         ))}
 
-        {chats.length === 0 && (
+        {filteredChats.length === 0 && (
           <div className="flex h-full items-center justify-center text-gray-400">
             No chats found
           </div>

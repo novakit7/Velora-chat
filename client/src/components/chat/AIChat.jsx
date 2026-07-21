@@ -171,16 +171,21 @@ export default function AIChat({
     return (
       <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900 p-6">
         <div className="w-full max-w-2xl rounded-2xl border border-slate-700 bg-slate-800 p-8 shadow-xl">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
+
+            <button
+              onClick={onBack}
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 text-white transition hover:bg-gray-600"
+            >
+              <FiArrowLeft size={20} />
+            </button>
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 text-white">
               <Brain size={24} />
             </div>
-
             <div>
               <h2 className="text-2xl font-bold text-white">
                 New AI Chat
               </h2>
-
               <p className="text-sm text-gray-400">
                 Give your chat a title and ask your first question.
               </p>
@@ -222,7 +227,7 @@ export default function AIChat({
               onClick={createChat}
               className="w-full rounded-xl bg-cyan-500 py-3 font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-50"
             >
-              {sending ? "Creating..." : "Start Conversation"}
+              {sending ? <Loader variant="button" /> : "Start Conversation"}
             </button>
           </div>
         </div>
@@ -251,23 +256,19 @@ export default function AIChat({
               {chat?.title}
             </h2>
 
-            <p className="text-sm text-gray-400">
-              Velora AI
-            </p>
+            <h1 className="text-xl font-semibold text-white text-center px-8 line-clamp-2 wrap-break-words">
+              {chat.chat.title}
+            </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-gray-300">
-          <button className="transition hover:text-cyan-400">
+        <div className="flex items-center gap-4 text-gray-300 px-3">
+          <button className="transition hover:text-cyan-400 md:px-1">
             <FiEdit2 size={20} />
           </button>
 
-          <button className="transition hover:text-red-500">
+          <button className="transition hover:text-red-500 md:px-1">
             <FiTrash2 size={20} />
-          </button>
-
-          <button className="transition hover:text-cyan-400">
-            <FiMoreVertical size={20} />
           </button>
         </div>
       </div>
