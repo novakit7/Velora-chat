@@ -7,7 +7,7 @@ import { generateOTP, sendOTP } from "../services/otp.services.js";
 import {
   deleteFromCloudinary,
   uploadOnCloudinary,
-} from "../utils/cloudinary.js";
+} from "../utils/Cloudinary.js";
 import fs from "fs";
 import { removeLocalFile } from "../utils/removeLocalFile.js";
 import { redisClient } from "../db/redis.db.js";
