@@ -1,5 +1,8 @@
-import { HfInference } from "@huggingface/inference";
+import OpenAI from "openai";
 
-const model = new HfInference(process.env.HF_TOKEN);
+const model = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
+});
 
 export default model;

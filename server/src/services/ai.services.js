@@ -7,17 +7,21 @@ const askAI = async ({
   maxTokens = 300,
   temperature = 0.3,
 }) => {
-  const result = await model.chatCompletion({
+  const result = await model.chat.completions.create({
     model: modelName,
     messages,
     max_tokens: maxTokens,
     temperature,
   });
 
-  const response = result?.choices?.[0]?.message?.content?.trim();
+  const response =
+    result.choices?.[0]?.message?.content?.trim();
 
   if (!response) {
-    throw new ApiError(502, "AI model returned an empty response.");
+    throw new ApiError(
+      502,
+      "AI model returned an empty response."
+    );
   }
 
   return response;
@@ -30,7 +34,7 @@ const summarize = async (text) => {
   }
 
   return askAI({
-    modelName: process.env.HF_MODEL,
+    modelName: process.env.AI_MODEL,
     messages: [
       {
         role: "system",
@@ -58,7 +62,7 @@ const translate = async (text, language) => {
   }
 
   return askAI({
-    modelName: process.env.HF_MODEL,
+    modelName: process.env.AI_MODEL,
     messages: [
       {
         role: "system",
@@ -113,7 +117,7 @@ const makeQuery = async (messages) => {
   }
 
   return askAI({
-    modelName: process.env.HF_MODEL,
+    modelName: process.env.AI_MODEL,
     messages: [
       {
         role: "system",
@@ -133,7 +137,7 @@ const grammarCheck = async (text) => {
   }
 
   return askAI({
-    modelName: process.env.HF_MODEL,
+    modelName: process.env.AI_MODEL,
     messages: [
       {
         role: "system",
