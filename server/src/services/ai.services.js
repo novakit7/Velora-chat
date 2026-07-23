@@ -30,7 +30,7 @@ const summarize = async (text) => {
   }
 
   return askAI({
-    modelName: "Qwen/Qwen2.5-7B-Instruct",
+    modelName: process.env.HF_MODEL,
     messages: [
       {
         role: "system",
@@ -58,7 +58,7 @@ const translate = async (text, language) => {
   }
 
   return askAI({
-    modelName: "Qwen/Qwen2.5-7B-Instruct",
+    modelName: process.env.HF_MODEL,
     messages: [
       {
         role: "system",
@@ -113,7 +113,7 @@ const makeQuery = async (messages) => {
   }
 
   return askAI({
-    modelName: "Qwen/Qwen2.5-7B-Instruct",
+    modelName: process.env.HF_MODEL,
     messages: [
       {
         role: "system",
@@ -133,7 +133,7 @@ const grammarCheck = async (text) => {
   }
 
   return askAI({
-    modelName: "Qwen/Qwen2.5-7B-Instruct",
+    modelName: process.env.HF_MODEL,
     messages: [
       {
         role: "system",

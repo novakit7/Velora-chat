@@ -45,7 +45,7 @@ const Loader = ({ size = "md", variant = "fullscreen", className = "" }) => {
         {[0, 0.15, 0.3].map((delay) => (
           <span
             key={delay}
-            className={`${dotSize[size]} rounded-full bg-white animate-bounce`}
+            className={`${dotSize[size]} rounded-full bg-white animate-wave`}
             style={{ animationDelay: `${delay}s` }}
           />
         ))}
@@ -59,7 +59,7 @@ const Loader = ({ size = "md", variant = "fullscreen", className = "" }) => {
     section:
       "absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-bg/70 backdrop-blur-sm",
   };
-  
+
   return (
     <div className={`${containerClass[variant]} ${className}`}>
       <div className="flex items-center gap-2">

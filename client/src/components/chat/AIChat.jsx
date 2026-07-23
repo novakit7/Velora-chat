@@ -21,7 +21,8 @@ export default function AIChat({
   onChatCreated,
 }) {
   const [loadingChat, setLoadingChat] = useState(false);
-  const [sending, setSending] = useState(false);
+  const [creatingChat, setCreatingChat] = useState(false);
+  const [sendingMessage, setSendingMessage] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState([]);
   const [title, setTitle] = useState("");
@@ -88,7 +89,7 @@ export default function AIChat({
     }
 
     try {
-      setSending(true);
+      setCreatingChat(true);
 
       // Create chat
       const { data: chatRes } = await api.post("/ai/chat", {
@@ -117,7 +118,7 @@ export default function AIChat({
         "Failed to create conversation."
       );
     } finally {
-      setSending(false);
+      setCreatingChat(false);
     }
   };
 
@@ -127,7 +128,7 @@ export default function AIChat({
     if (!prompt.trim()) return;
 
     try {
-      setSending(true);
+      setSendingMessage(true);
       const { data } = await api.post(
         `/ai/chat/${chat.chat._id}/message`,
         {
@@ -146,7 +147,7 @@ export default function AIChat({
         "Failed to send message."
       );
     } finally {
-      setSending(false);
+      setSendingMessage(false);
     }
   };
 
@@ -223,11 +224,11 @@ export default function AIChat({
             </div>
 
             <button
-              disabled={sending}
+              disabled={sendingMessage}
               onClick={createChat}
               className="w-full rounded-xl bg-cyan-500 py-3 font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-50"
             >
-              {sending ? <Loader variant="button" /> : "Start Conversation"}
+              {sendingMessage ? <Loader variant="button" /> : "Start Conversation"}
             </button>
           </div>
         </div>
@@ -317,9 +318,7 @@ export default function AIChat({
               </React.Fragment>
             ))}
 
-            {sending && (
-              <TypingIndicator />
-            )}
+            {sendingMessage && <TypingIndicator />}
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -336,13 +335,13 @@ export default function AIChat({
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Type a message..."
-            disabled={sending}
+            disabled={sendingMessage}
             className="flex-1 rounded-full bg-slate-800 px-5 py-3 text-white outline-none placeholder:text-gray-400 disabled:opacity-60"
           />
 
           <button
             type="submit"
-            disabled={sending || !prompt.trim()}
+            disabled={sendingMessage || !prompt.trim()}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <FiSend size={20} className="text-white" />
