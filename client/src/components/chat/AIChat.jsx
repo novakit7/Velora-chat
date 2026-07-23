@@ -15,6 +15,10 @@ import api from "../../api/axois";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Loader } from "lucide-react";
+import DeleteChatModal from "../models/DeleteModel";
+import { useNavigate } from "react-router-dom";
+
+
 export default function AIChat({
   creating,
   onBack,
@@ -29,6 +33,9 @@ export default function AIChat({
   const { chatId } = useParams();
   const [chat, setChat] = useState(null);
   const messagesEndRef = useRef(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const navigate = useNavigate();
 
   const scrollToBottom = (behavior = "smooth") => {
     messagesEndRef.current?.scrollIntoView({
@@ -112,6 +119,7 @@ export default function AIChat({
       onChatCreated(newChat);
     } catch (error) {
       console.error(error);
+      navigate(`/home/ai`);
 
       notify.error(
         error?.response?.data?.message ||
@@ -148,6 +156,25 @@ export default function AIChat({
       );
     } finally {
       setSendingMessage(false);
+    }
+  };
+
+  const deleteChat = async () => {
+    try {
+      setDeleting(true);
+
+      await api.delete(`/ai/chat/${chat.chat._id}`);
+
+      notify.success("Chat deleted");
+      navigate("/home/ai", { replace: true });
+      navigate(0);
+      setShowDeleteModal(false);
+    } catch (error) {
+      notify.error(
+        error?.response?.data?.message || "Failed to delete chat."
+      );
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -224,11 +251,11 @@ export default function AIChat({
             </div>
 
             <button
-              disabled={sendingMessage}
+              disabled={creatingChat}
               onClick={createChat}
               className="w-full rounded-xl bg-cyan-500 py-3 font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-50"
             >
-              {sendingMessage ? <Loader variant="button" /> : "Start Conversation"}
+              {creatingChat ? <Loader variant="button" /> : "Start Conversation"}
             </button>
           </div>
         </div>
@@ -253,10 +280,6 @@ export default function AIChat({
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold text-white">
-              {chat?.title}
-            </h2>
-
             <h1 className="text-xl font-semibold text-white text-center px-8 line-clamp-2 wrap-break-words">
               {chat.chat.title}
             </h1>
@@ -264,13 +287,21 @@ export default function AIChat({
         </div>
 
         <div className="flex items-center gap-4 text-gray-300 px-3">
-          <button className="transition hover:text-cyan-400 md:px-1">
-            <FiEdit2 size={20} />
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="group rounded-xl p-2 transition hover:bg-red-500/10"
+          >
+            <FiTrash2
+              size={20}
+              className="text-gray-400 transition group-hover:text-red-500"
+            />
           </button>
-
-          <button className="transition hover:text-red-500 md:px-1">
-            <FiTrash2 size={20} />
-          </button>
+          <DeleteChatModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onDelete={deleteChat}
+            loading={deleting}
+          />
         </div>
       </div>
 

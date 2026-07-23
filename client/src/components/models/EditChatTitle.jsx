@@ -1,13 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Loader from "../common/Loader";
 
-export default function LogoutModal({
+export default function EditTitleModal({
   open,
   onClose,
   onConfirm,
   loading,
+  initialTitle = "",
 }) {
+  const [title, setTitle] = useState("");
+
+  useEffect(() => {
+    if (open) {
+      setTitle(initialTitle);
+    }
+  }, [open, initialTitle]);
+
   if (!open) return null;
+
+  const handleSubmit = () => {
+    if (!title.trim()) return;
+    onConfirm(title.trim());
+  };
 
   return (
     <div
@@ -16,15 +30,23 @@ export default function LogoutModal({
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl"
+        className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl"
       >
         <h2 className="text-xl font-semibold text-white">
-          Confirm Logout
+          Edit Chat Title
         </h2>
 
         <p className="mt-2 text-sm text-gray-400">
-          Are you sure you want to logout from your account?
+          Update your chat title.
         </p>
+
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter title..."
+          className="mt-4 w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-white outline-none focus:border-blue-500"
+        />
 
         <div className="mt-6 flex justify-end gap-3">
           <button
@@ -36,11 +58,11 @@ export default function LogoutModal({
           </button>
 
           <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="flex min-w-22.5 items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-50"
+            onClick={handleSubmit}
+            disabled={loading || !title.trim()}
+            className="flex min-w-22.5 items-center justify-center rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600 disabled:opacity-50"
           >
-            {loading ? <Loader variant="button" /> : "Logout"}
+            {loading ? <Loader variant="button" /> : "Save"}
           </button>
         </div>
       </div>

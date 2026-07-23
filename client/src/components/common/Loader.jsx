@@ -28,15 +28,6 @@ const Loader = ({ size = "md", variant = "fullscreen", className = "" }) => {
 
     return () => clearInterval(interval);
   }, [variant]);
-  useEffect(() => {
-    document.body.style.cursor = "wait";
-    document.documentElement.style.cursor = "wait";
-
-    return () => {
-      document.body.style.cursor = "default";
-      document.documentElement.style.cursor = "default";
-    };
-  }, []);
 
   // Button Loader
   if (variant === "button") {
@@ -55,7 +46,7 @@ const Loader = ({ size = "md", variant = "fullscreen", className = "" }) => {
 
   const containerClass = {
     fullscreen:
-      "fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-bg/90 backdrop-blur-sm cursor-wait",
+      "fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-bg/90 backdrop-blur-sm cursor-auto",
     section:
       "absolute inset-0 flex flex-col items-center justify-center rounded-xl bg-bg/70 backdrop-blur-sm",
   };

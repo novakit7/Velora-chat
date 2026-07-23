@@ -1,4 +1,4 @@
-import { FiSearch, FiPlus, FiX } from "react-icons/fi";
+import { FiSearch, FiPlus, FiX, FiEdit } from "react-icons/fi";
 import { formatRelativeDate } from "../../utils/date";
 import Loader from "../common/Loader";
 import { Brain } from "lucide-react";
@@ -6,6 +6,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../../api/axois";
 import { notify } from "../../utils/toast";
+import EditTitleModal from "../models/EditChatTitle";
 
 export default function AISection({ onCreateChat }) {
   const [chats, setChats] = useState([]);
@@ -13,6 +14,14 @@ export default function AISection({ onCreateChat }) {
   const navigate = useNavigate();
   const { chatId } = useParams();
   const [query, setQuery] = useState("");
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [editLoading, setEditLoading] = useState(false);
+
+  const openEditModal = (chat) => {
+    setSelectedChat(chat);
+    setEditOpen(true);
+  };
 
   const fetchAIChats = async () => {
     try {
@@ -36,6 +45,41 @@ export default function AISection({ onCreateChat }) {
   const filteredChats = chats.filter((chat) =>
     chat.title.toLowerCase().includes(query.toLowerCase())
   );
+
+
+  const handleEditTitle = async (title) => {
+    try {
+      setEditLoading(true);
+
+      await api.patch(`/ai/chat/${selectedChat._id}`, {
+        title,
+      });
+
+      notify.success("Title updated");
+
+      // Update sidebar immediately
+      setChats((prev) =>
+        prev.map((chat) =>
+          chat._id === selectedChat._id
+            ? { ...chat, title }
+            : chat
+        )
+      );
+
+      navigate(`/home/ai/${selectedChat._id}`, { replace: true });
+      navigate(0);
+
+      setEditOpen(false);
+      setSelectedChat(null);
+    } catch (err) {
+      console.error(err);
+      notify.error(
+        err?.response?.data?.message || "Couldn't update title"
+      );
+    } finally {
+      setEditLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -112,6 +156,17 @@ export default function AISection({ onCreateChat }) {
             <span className="text-xs text-gray-400">
               {formatRelativeDate(chat.lastActivity)}
             </span>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  openEditModal(chat);
+                }}
+                className="rounded p-1 text-gray-400 hover:bg-slate-700 hover:text-white cursor-pointer"
+              >
+                <FiEdit />
+              </button>
+            </div>
           </button>
         ))}
 
@@ -121,6 +176,16 @@ export default function AISection({ onCreateChat }) {
           </div>
         )}
       </div>
+      <EditTitleModal
+        open={editOpen}
+        onClose={() => {
+          setEditOpen(false);
+          setSelectedChat(null);
+        }}
+        onConfirm={handleEditTitle}
+        loading={editLoading}
+        initialTitle={selectedChat?.title || ""}
+      />
     </div>
   );
 }
