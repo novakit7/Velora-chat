@@ -131,18 +131,21 @@ export default function AISection({ onCreateChat }) {
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
         {filteredChats.map((chat) => (
-          <button
+          <div
             key={chat._id}
-            onClick={() => navigate(`/home/ai/${chat._id}`)}
-            className={`flex w-full items-center justify-between px-4 py-3 cursor-pointer transition hover:bg-slate-800 ${chatId === chat._id ? "bg-slate-800" : ""
+            className={`flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${chatId === chat._id ? "bg-slate-800" : ""
               }`}
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-bold text-white">
+            {/* Clickable chat area */}
+            <button
+              onClick={() => navigate(`/home/ai/${chat._id}`)}
+              className="flex flex-1 items-center gap-3 text-left cursor-pointer"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 text-white">
                 <Brain size={24} />
               </div>
 
-              <div className="text-left">
+              <div>
                 <h3 className="font-medium text-white">
                   {chat.title}
                 </h3>
@@ -151,23 +154,22 @@ export default function AISection({ onCreateChat }) {
                   {chat.latestConversation?.prompt || "No messages yet"}
                 </p>
               </div>
-            </div>
+            </button>
 
-            <span className="text-xs text-gray-400">
-              {formatRelativeDate(chat.lastActivity)}
-            </span>
-            <div className="flex items-center gap-2">
+            {/* Right side */}
+            <div className="ml-4 flex items-center gap-3">
+              <span className="text-xs text-gray-400 whitespace-nowrap">
+                {formatRelativeDate(chat.lastActivity)}
+              </span>
+
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openEditModal(chat);
-                }}
-                className="rounded p-1 text-gray-400 hover:bg-slate-700 hover:text-white cursor-pointer"
+                onClick={() => openEditModal(chat)}
+                className="rounded-lg p-2 text-gray-400 transition hover:bg-slate-700 hover:text-white"
               >
-                <FiEdit />
+                <FiEdit size={18} />
               </button>
             </div>
-          </button>
+          </div>
         ))}
 
         {filteredChats.length === 0 && (

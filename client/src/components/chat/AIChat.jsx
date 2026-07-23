@@ -306,7 +306,7 @@ export default function AIChat({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 all-scroll">
+      <div className="flex-1 overflow-y-auto px-6 py-5 all-scroll relative">
         {loadingChat ? (
           <div className="flex h-full items-center justify-center">
             <Loader variant="section" />
@@ -349,7 +349,7 @@ export default function AIChat({
               </React.Fragment>
             ))}
 
-            {sendingMessage && <TypingIndicator />}
+            {sendingMessage && <div className="sticky bottom-0 z-10 flex justify-start"><TypingIndicator /></div>}
           </div>
         )}
         <div ref={messagesEndRef} />
