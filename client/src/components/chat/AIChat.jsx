@@ -306,7 +306,7 @@ export default function AIChat({
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 all-scroll relative">
+      <div className="flex-1 overflow-y-auto px-6 py-5 all-scroll ">
         {loadingChat ? (
           <div className="flex h-full items-center justify-center">
             <Loader variant="section" />
@@ -349,7 +349,7 @@ export default function AIChat({
               </React.Fragment>
             ))}
 
-            {sendingMessage && <div className="sticky bottom-0 z-10 flex justify-start"><TypingIndicator /></div>}
+            {sendingMessage && <div className="flex justify-start"><TypingIndicator /></div>}
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -375,7 +375,11 @@ export default function AIChat({
             disabled={sendingMessage || !prompt.trim()}
             className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <FiSend size={20} className="text-white" />
+            {sendingMessage ? (
+                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        ) : (
+                          <FiSend size={20} className="text-white" />
+                        )}
           </button>
         </form>
       </div>

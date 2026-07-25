@@ -105,16 +105,7 @@ export default function Conversation({ onBack }) {
 
     getMessages();
   }, [chat?._id]);
-
-  // Show loader while chat is loading
-  if (loadingChat) {
-    return (
-      <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
-        <Loader />
-      </div>
-    );
-  }
-
+  
   const sendMessage = async (e) => {
     e.preventDefault();
 
