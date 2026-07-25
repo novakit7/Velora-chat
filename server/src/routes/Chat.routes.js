@@ -36,7 +36,7 @@ chatRouter.route("/group/:chatId/description").patch(renameGroupDescription);
 chatRouter.route("/group/:chatId/remove-participant/:userId").patch(removeParticipant);
 chatRouter.route("/group/:chatId/add-participants").patch(addParticipants);
 chatRouter.route("/group/:chatId/leave").patch(leaveGroup);
-chatRouter.route("/delete/:chatId").patch(deleteChat);
+chatRouter.route("/delete/:chatId").delete(deleteChat);
 chatRouter.route("/group/:chatId/make-admin/:userId").patch(makeAdmin);
 chatRouter.route("/group/:chatId/remove-admin/:userId").patch(removeAdmin);
 chatRouter.route("/group/:chatId/delete").delete(deleteGroup);

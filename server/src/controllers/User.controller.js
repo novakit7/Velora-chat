@@ -14,10 +14,18 @@ import { redisClient } from "../db/redis.db.js";
 import jwt from "jsonwebtoken";
 import generateAccessAndRefreshToken from "../utils/generateToken.js";
 
-const options = {
+const accessCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 24 * 60 * 60 * 1000, // 1 day
+};
+
+const refreshCookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  maxAge: 10 * 24 * 60 * 60 * 1000, // 10 days
 };
 
 const registerUser = asyncHandler(async (req, res) => {
@@ -174,8 +182,8 @@ const signInUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, accessCookieOptions)
+    .cookie("refreshToken", refreshToken, refreshCookieOptions)
     .json(
       new ApiResponse(
         200,
@@ -194,8 +202,8 @@ const logOutUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .clearCookie("accessToken", options)
-    .clearCookie("refreshToken", options)
+    .clearCookie("accessToken", accessCookieOptions)
+    .clearCookie("refreshToken", refreshCookieOptions)
     .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
@@ -306,7 +314,10 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
+  console.log("========== REFRESH ==========");
   const incommingToken = req.cookies.refreshToken || req.body.refreshToken;
+  console.log("Incoming Token:", incommingToken);
+
   if (!incommingToken) {
     throw new ApiError(401, "unauthorized request");
   }
@@ -315,6 +326,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       incommingToken,
       process.env.REFRESH_TOKEN_SECRET,
     );
+    console.log("Decoded:", decodedToken);
     const user = await User.findById(decodedToken?._id);
     if (!user) {
       throw new ApiError(401, "invalid refresh token");
@@ -322,7 +334,9 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     const storedRefreshToken = await redisClient.get(
       `refreshToken:${user._id}`,
     );
-
+    console.log("Stored Token:", storedRefreshToken);
+    console.log("Incoming Token:", incommingToken);
+    console.log("Equal:", storedRefreshToken === incommingToken);
     if (!storedRefreshToken) {
       throw new ApiError(401, "Refresh token expired");
     }
@@ -333,14 +347,14 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       );
     }
     const { accessToken, refreshToken: newRefreshToken } =
-      generateAccessAndRefreshToken(user);
+      await generateAccessAndRefreshToken(user);
     await redisClient.set(`refreshToken:${user._id}`, newRefreshToken, {
       EX: 60 * 60 * 24 * 10,
     });
     return res
       .status(200)
-      .cookie("accessToken", accessToken, options)
-      .cookie("refreshToken", newRefreshToken, options)
+      .cookie("accessToken", accessToken, accessCookieOptions)
+      .cookie("refreshToken", newRefreshToken, refreshCookieOptions)
       .json(
         new ApiResponse(
           200,
@@ -349,6 +363,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
         ),
       );
   } catch (error) {
+    console.log("Refresh Error:", error);
     throw new ApiError(
       401,
       error?.message || "something ewnt wrong while refreshing access token",

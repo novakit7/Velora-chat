@@ -152,26 +152,27 @@ export default function Conversation({ onBack }) {
   };
 
   const deleteChat = async () => {
-    try {
-      setDeleting(true);
+  try {
+    setDeleting(true);
 
-      const res = await api.patch(`/chat/delete/${chat._id}`);
-      console.log(res);
+    await api.delete(`/chat/delete/${chat._id}`);
 
-      notify.success("Chat deleted");
+    notify.success("Chat deleted successfully.");
 
-      setShowDeleteModal(false);
+    setShowDeleteModal(false);
 
-      navigate("/home", { replace: true });
-    } catch (error) {
-      notify.error(
-        error?.response?.data?.message ||
-        "Failed to delete chat."
-      );
-    } finally {
-      setDeleting(false);
-    }
-  };
+    // Go back to chat list
+    navigate("/home", { replace: true });
+    navigate(0);
+
+  } catch (error) {
+    notify.error(
+      error?.response?.data?.message || "Failed to delete chat."
+    );
+  } finally {
+    setDeleting(false);
+  }
+};
 
   // No chat selected
   if (!chat) {

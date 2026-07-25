@@ -64,18 +64,6 @@ const chatSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    hiddenFor: [
-      {
-        user: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-        },
-        deletedAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
   },
 
   { timestamps: true },

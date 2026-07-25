@@ -448,9 +448,6 @@ const getUserChats = asyncHandler(async (req, res) => {
     {
       $match: {
         participants: req.user._id,
-        hiddenFor: {
-          $ne: req.user._id,
-        },
       },
     },
 
@@ -664,9 +661,6 @@ const getChatMessages = asyncHandler(async (req, res) => {
   const chat = await Chat.findOne({
     _id: chatId,
     participants: req.user._id,
-    hiddenFor: {
-        $ne: req.user._id,
-    },
   });
 
   if (!chat) {
@@ -830,9 +824,6 @@ const getChatById = asyncHandler(async (req, res) => {
       $match: {
         _id: new mongoose.Types.ObjectId(chatId),
         participants: req.user._id,
-        hiddenFor: {
-          $ne: req.user._id,
-        },
       },
     },
 
@@ -1832,7 +1823,7 @@ const removeParticipant = asyncHandler(async (req, res) => {
     );
 });
 
-const leaveGroup = asyncHandler(async (req, res) => { 
+const leaveGroup = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(chatId)) {
@@ -2265,10 +2256,6 @@ const removeAdmin = asyncHandler(async (req, res) => {
 const deleteChat = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(chatId)) {
-    throw new ApiError(400, "Invalid chat id");
-  }
-
   const chat = await Chat.findOne({
     _id: chatId,
     participants: req.user._id,
@@ -2278,24 +2265,18 @@ const deleteChat = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Chat not found");
   }
 
-  // Already deleted
-  if (
-    chat.hiddenFor.some((user) => user.toString() === req.user._id.toString())
-  ) {
-    throw new ApiError(400, "Chat already deleted for you");
+  // Prevent deleting groups here
+  if (chat.isGroupChat) {
+    throw new ApiError(400, "Use leave group or delete group endpoint");
   }
 
-  await Chat.findByIdAndUpdate(
-    chatId,
-    {
-      $addToSet: {
-        hiddenFor: req.user._id,
-      },
-    },
-    {
-      returnDocument: "after"
-    },
-  );
+  // Delete all messages
+  await Message.deleteMany({
+    chat: chat._id,
+  });
+
+  // Delete chat
+  await Chat.findByIdAndDelete(chat._id);
 
   return res
     .status(200)

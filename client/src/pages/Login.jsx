@@ -9,7 +9,7 @@ import Loader from "../components/common/Loader";
 import { notify } from "../utils/toast";
 
 export default function Login() {
-  const { setUser } = useContext(AuthContext);
+  const { setUser, checkUser } = useContext(AuthContext);
   const [showPassword, setShowPassword] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
   const [email, setEmail] = useState("");
@@ -65,8 +65,7 @@ export default function Login() {
         password,
       });
 
-      setUser(res.data.data.user);
-      localStorage.setItem("token", res.data.data.token);
+      await checkUser();
       notify.success("Login Successful!");
       navigate("/home");
     } catch (error) {
