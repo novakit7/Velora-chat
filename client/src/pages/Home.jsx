@@ -92,7 +92,7 @@ export default function Home() {
         />
       ) : (
         <Conversation
-          onBack={() => navigate("/home")}
+          onBack={() => navigate("/home", { replace: true })}
         />
       )}
     </div>

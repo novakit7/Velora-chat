@@ -13,15 +13,29 @@ import AuthContext from "../../context/AuthContext";
 import { formatDateTime } from "../../utils/date";
 import api from "../../api/axois";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import DeleteChatModal from "../models/DeleteModel";
 
 export default function Conversation({ onBack }) {
-  const [loading, setLoading] = useState(false);
+  const [loadingChat, setLoadingChat] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [sending, setSending] = useState(false);
+
   const { user } = useContext(AuthContext);
+
   const [messages, setMessages] = useState([]);
   const [msg, setMsg] = useState("");
-  const { chatId } = useParams();
   const [chat, setChat] = useState(null);
+
+  const { chatId } = useParams();
+
   const messagesEndRef = useRef(null);
+  const firstLoad = useRef(true);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const navigate = useNavigate();
 
   const scrollToBottom = (behavior = "smooth") => {
     messagesEndRef.current?.scrollIntoView({
@@ -29,55 +43,137 @@ export default function Conversation({ onBack }) {
       block: "end",
     });
   };
-   useEffect(() => {
-      if (!loading && messages.length > 0) {
-        setTimeout(() => {
-          scrollToBottom("auto");
-        }, 100);
-      }
-    }, [loading]);
-  
-    useEffect(() => {
-      if (messages.length > 0) {
-        scrollToBottom("smooth");
-      }
-    }, [messages]);
-  
 
   useEffect(() => {
+    if (!messages.length) return;
+
+    requestAnimationFrame(() => {
+      scrollToBottom(firstLoad.current ? "auto" : "smooth");
+      firstLoad.current = false;
+    });
+  }, [messages]);
+
+
+  useEffect(() => {
+    if (!chatId) return;
+
     const fetchChat = async () => {
       try {
+        setLoadingChat(true);
+
         const res = await api.get(`/chat/${chatId}`);
+
         setChat(res.data.data);
       } catch (err) {
         console.error(err);
+
+        notify.error(
+          err?.response?.data?.message ||
+          "Failed to load chat."
+        );
+      } finally {
+        setLoadingChat(false);
       }
     };
 
-    if (chatId) {
-      fetchChat();
-    }
+    fetchChat();
   }, [chatId]);
 
   useEffect(() => {
-    const getChats = async () => {
+    if (!chat?._id) return;
+
+    const getMessages = async () => {
       try {
-        setLoading(true);
-        const res = await api.get(`/chat/message/${chat?._id}?page=1&limit=10`);
-        setMessages(res.data?.data?.messages);
-      } catch (error) {
-        console.error(error);
-        notify.error(error?.response?.data?.message || "Something went wrong");
+        setLoadingMessages(true);
+
+        const res = await api.get(
+          `/chat/message/${chat._id}?page=1&limit=20`
+        );
+
+        setMessages(res.data.data.messages || []);
+      } catch (err) {
+        console.error(err);
+
+        notify.error(
+          err?.response?.data?.message ||
+          "Couldn't load messages."
+        );
       } finally {
-        setLoading(false);
+        setLoadingMessages(false);
       }
     };
 
-    if (chat) {
-      getChats();
-    }
-  }, [chat]);
+    getMessages();
+  }, [chat?._id]);
 
+  // Show loader while chat is loading
+  if (loadingChat) {
+    return (
+      <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
+        <Loader />
+      </div>
+    );
+  }
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+
+    const text = msg.trim();
+
+    if (!text || sending) return;
+
+    // Clear input immediately
+    setMsg("");
+
+    try {
+      setSending(true);
+
+      const res = await api.post(
+        `/message/${chat._id}/message`,
+        {
+          content: text,
+        }
+      );
+
+      setMessages((prev) => [...prev, res.data.data]);
+    } catch (error) {
+      console.error(error);
+
+      // Restore text if sending fails
+      setMsg(text);
+
+      notify.error(
+        error?.response?.data?.message ||
+        "Something went wrong while sending the message."
+      );
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const deleteChat = async () => {
+    try {
+      setDeleting(true);
+
+      const res = await api.patch(`/chat/delete/${chat._id}`);
+      console.log(res);
+
+      notify.success("Chat deleted");
+
+      setShowDeleteModal(false);
+
+      navigate("/home", { replace: true });
+    } catch (error) {
+      notify.error(
+        error?.response?.data?.message ||
+        "Failed to delete chat."
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // No chat selected
   if (!chat) {
     return (
       <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
@@ -93,25 +189,6 @@ export default function Conversation({ onBack }) {
       </div>
     );
   }
-  const sendMessage = async (e) => {
-    e.preventDefault();
-    if (!msg.trim()) return;
-    try {
-      setLoading(true);
-      const res = await api.post(`/message/${chat._id}/message`, {
-        content: msg,
-      });
-      setMessages((prev) => [
-        ...prev, res.data?.data
-      ])
-    } catch (error) {
-      console.error(error);
-      notify.error(error?.response?.data?.message || "Something went wrong while sending a message.");
-    } finally {
-      setMsg("")
-      setLoading(false);
-    }
-  };
 
   return (
     <div className="flex h-full flex-col rounded-2xl bg-slate-900">
@@ -148,34 +225,29 @@ export default function Conversation({ onBack }) {
         </div>
 
         <div className="flex items-center gap-4 text-gray-300">
-          <button className="hover:text-cyan-400 transition">
-            <FiEdit2 size={20} />
-          </button>
-
-          <button className="hover:text-red-500 transition">
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="hover:text-red-500 transition">
             <FiTrash2 size={20} />
-          </button>
-
-          <button className="hover:text-cyan-400 transition">
-            <FiMoreVertical size={20} />
           </button>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-6 py-5">
-        {loading ? (
+        {loadingMessages ? (
           <div className="relative flex h-full items-center justify-center">
             <Loader variant="section" />
           </div>
         ) : (
           <div className="space-y-4">
             {messages.map((message) => {
-              const isMe = message.sender._id === user._id;
+              const isMe = message.sender?._id === user?._id;;
 
               return (
                 <div
                   key={message._id}
-                  className={`flex mb-4 ${isMe ? "justify-end" : "justify-start"}`}
+                  className={`flex mb-4 transition-all duration-300 ${isMe ? "justify-end" : "justify-start"
+                    }`}
                 >
                   <div
                     className={`flex items-end gap-2 max-w-[75%] ${isMe ? "flex-row-reverse" : ""
@@ -190,7 +262,8 @@ export default function Conversation({ onBack }) {
 
                     {/* Bubble */}
                     <div
-                      className={`px-4 py-3 max-w-md wrap-break-words rounded-2xl shadow ${isMe
+                      className={`px-4 py-3 max-w-md wrap-break-words rounded-2xl shadow-md transition-all duration-200 
+                        ${isMe
                           ? "bg-cyan-500 text-white rounded-br-md"
                           : "bg-slate-800 text-slate-100 rounded-bl-md border border-slate-700"
                         }`}
@@ -228,25 +301,35 @@ export default function Conversation({ onBack }) {
 
       {/* Input */}
       <div className="border-t border-slate-800 p-4">
-        <form className="flex items-center gap-3">
+        <form className="flex items-center gap-3" onSubmit={sendMessage}>
           <input
             type="text"
             value={msg}
+            disabled={sending}
             onChange={(e) => setMsg(e.target.value)}
             placeholder="Type a message..."
-            className="flex-1 rounded-full bg-slate-800 px-5 py-3 text-white outline-none placeholder:text-gray-400"
+            className="flex-1 rounded-full bg-slate-800 px-5 py-3 text-white outline-none placeholder:text-gray-400 disabled:opacity-60"
           />
 
           <button
             type="submit"
-            disabled={loading}
-            onClick={sendMessage}
-            className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600"
+            disabled={sending}
+            className="relative flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600"
           >
-            <FiSend size={20} className="text-white" />
+            {sending ? (
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              <FiSend size={20} className="text-white" />
+            )}
           </button>
         </form>
       </div>
+      <DeleteChatModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onDelete={deleteChat}
+        loading={deleting}
+      />
     </div>
   );
 }

@@ -10,7 +10,7 @@ export default function ChatList() {
   const [chats, setChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-const { chatId } = useParams();
+  const { chatId } = useParams();
   useEffect(() => {
     const getChats = async () => {
       try {
@@ -70,9 +70,8 @@ const { chatId } = useParams();
               <button
                 key={chat._id}
                 onClick={() => navigate(`/home/chat/${chat._id}`)}
-                className={`w-full flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${
-                  chatId === chat._id ? "bg-slate-800" : ""
-                }`}
+                className={`w-full flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${chatId === chat._id ? "bg-slate-800" : ""
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   {/* Avatar */}
@@ -91,9 +90,8 @@ const { chatId } = useParams();
 
                     {/* Online Status */}
                     <span
-                      className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 ${
-                        chat.isOnline ? "bg-green-500" : "bg-gray-500"
-                      }`}
+                      className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 ${chat.isOnline ? "bg-green-500" : "bg-gray-500"
+                        }`}
                     />
                   </div>
 
