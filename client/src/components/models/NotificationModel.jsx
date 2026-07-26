@@ -156,7 +156,7 @@ export default function NotificationModal({ open, onClose }) {
             }
             className="rounded-md px-2 py-1 text-xs font-medium text-cyan-400 hover:bg-slate-800 disabled:opacity-50"
           >
-            {markingAll ? "Reading..." : "Mark all"}
+            {markingAll ? <Loader variant="button"/> : "Mark all"}
           </button>
 
           <button
@@ -168,7 +168,7 @@ export default function NotificationModal({ open, onClose }) {
             }
             className="rounded-md px-2 py-1 text-xs font-medium text-red-400 hover:bg-slate-800 disabled:opacity-50"
           >
-            {deletingAll ? "Deleting..." : "Delete all"}
+            {deletingAll ? <Loader variant="button"/> : "Delete all"}
           </button>
         </div>
       </div>
@@ -183,7 +183,7 @@ export default function NotificationModal({ open, onClose }) {
             </div>
           ) : (
           notifications.map((item) => (
-            <button
+            <div
               key={item._id}
               onClick={() => handleNotificationClick(item)}
               className={`group flex w-full gap-4 border-b border-slate-800/50 px-5 py-4 text-left transition-all duration-200 hover:bg-slate-800 ${!item.isRead ? "bg-slate-800/40" : ""
@@ -193,14 +193,14 @@ export default function NotificationModal({ open, onClose }) {
               <div className="relative shrink-0">
                 <img
                   src={
-                    item.chat.isGroupChat
-                      ? item.chat.groupAvatar.url || "/group-avatar.png"
-                      : item.sender.avatar.url
+                    item.chat?.isGroupChat
+                      ? item.chat.groupAvatar?.url || "/group-avatar.png"
+                      : item.sender.avatar?.url
                   }
                   alt={
-                    item.chat.isGroupChat
-                      ? item.chat.groupName
-                      : item.sender.username
+                    item.chat?.isGroupChat
+                      ? item.chat?.groupName
+                      : item.sender?.username
                   }
                   className="h-12 w-12 rounded-full border border-slate-700 object-cover"
                 />
@@ -217,13 +217,13 @@ export default function NotificationModal({ open, onClose }) {
 
                   <div>
                     <h3 className="truncate font-semibold text-white">
-                      {item.chat.isGroupChat
+                      {item.chat?.isGroupChat
                         ? item.chat.groupName
                         : item.sender.username}
                     </h3>
 
                     <p className="mt-1 text-sm text-gray-400">
-                      {item.chat.isGroupChat ? (
+                      {item.chat?.isGroupChat ? (
                         <>
                           <span className="font-medium text-cyan-400">
                             {item.sender.username}
@@ -253,7 +253,7 @@ export default function NotificationModal({ open, onClose }) {
                       className="flex h-7 w-7 items-center justify-center rounded-full opacity-0 transition-all duration-200 hover:bg-red-500/10 group-hover:opacity-100 disabled:opacity-100"
                     >
                       {deletingId === item._id ? (
-                        <Loader size={14} />
+                        <Loader variant="button" />
                       ) : (
                         <FiX
                           size={15}
@@ -271,7 +271,7 @@ export default function NotificationModal({ open, onClose }) {
                   </div>
                 )}
               </div>
-            </button>
+            </div>
           ))
         )}
       </div>
