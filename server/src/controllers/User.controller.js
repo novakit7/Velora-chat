@@ -314,7 +314,6 @@ const getUserProfile = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  console.log("========== REFRESH ==========");
   const incommingToken = req.cookies.refreshToken || req.body.refreshToken;
   console.log("Incoming Token:", incommingToken);
 

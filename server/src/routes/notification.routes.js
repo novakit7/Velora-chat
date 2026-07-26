@@ -3,7 +3,6 @@ import { verifyJWT } from "../middleware/Auth.middleware.js";
 import {
   deleteAllNotifications,
   deleteNotification,
-  getNotificationById,
   getNotifications,
   markAllNotificationsAsRead,
   markNotificationAsRead,
@@ -20,7 +19,6 @@ notificationRouter
 
 notificationRouter
   .route("/:notificationId")
-  .get(getNotificationById)
   .delete(deleteNotification);
 
 notificationRouter.route("/:notificationId/read").patch(markNotificationAsRead);
