@@ -11,6 +11,7 @@ import AddFriend from "../components/sidebar/AddFriend";
 import Conversation from "../components/chat/Conversation";
 import useIsMobile from "../hooks/useIsMobile";
 import AIChat from "../components/chat/AIChat";
+import FriendSection from "../components/chat/FriendSection";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -18,7 +19,8 @@ export default function Home() {
   const isMobile = useIsMobile();
 
   // URL is now the source of truth
-  const isAIHome = location.pathname === "/home/ai";
+  const isFriendPage = location.pathname.startsWith("/home/add-friend");
+  const isFriendRequestsPage = location.pathname.startsWith("/home/friend-requests");
   const isAINew = location.pathname === "/home/ai/new";
   const isAIChat =
     location.pathname.startsWith("/home/ai/") && !isAINew;
@@ -35,30 +37,28 @@ export default function Home() {
       );
     }
 
-    if (location.pathname.startsWith("/home/group")) {
-      return (
-        <GroupList />
-      );
-    }
-
-    if (location.pathname.startsWith("/home/new-chat")) {
-      return (
-        <NewChat />
-      );
-    }
-
-    if (location.pathname.startsWith("/home/add-friend")) {
+    if (
+      location.pathname.startsWith("/home/add-friend") ||
+      location.pathname.startsWith("/home/friend-requests")
+    ) {
       return <AddFriend />;
     }
 
-    // Default
-    return (
-      <ChatList />
-    );
+    if (location.pathname.startsWith("/home/group")) {
+      return <GroupList />;
+    }
+
+    if (location.pathname.startsWith("/home/new-chat")) {
+      return <NewChat />;
+    }
+
+    return <ChatList />;
   };
   const showConversation =
     isAIChat ||
     isAINew ||
+    (!isMobile && isFriendPage) ||
+    isFriendRequestsPage ||
     location.pathname.startsWith("/home/chat/") ||
     location.pathname.startsWith("/home/group/");
 
@@ -68,10 +68,11 @@ export default function Home() {
       ? "Groups"
       : location.pathname.startsWith("/home/new-chat")
         ? "New Chat"
-        : location.pathname.startsWith("/home/add-friend")
-          ? "Add Friend"
-          : "Chats";
-
+        : isFriendRequestsPage
+          ? "Friend Requests"
+          : isFriendPage
+            ? "Add Friend"
+            : "Chats";
   return isMobile ? (
     <div className="h-dvh bg-slate-950 flex flex-col">
       {!showConversation ? (
@@ -85,10 +86,16 @@ export default function Home() {
       ) : isAIPage ? (
         <AIChat
           creating={creatingAIChat}
-          onChatCreated={(newChat) => {
-            navigate(`/home/ai/${newChat._id}`);
-          }}
+          onChatCreated={(newChat) =>
+            navigate(`/home/ai/${newChat._id}`)
+          }
           onBack={() => navigate("/home/ai")}
+        />
+      ) : isFriendRequestsPage ? (
+        <FriendSection
+          onBack={() =>
+            navigate("/home/add-friend", { replace: true })
+          }
         />
       ) : (
         <Conversation
@@ -112,11 +119,13 @@ export default function Home() {
             isAIPage ? (
               <AIChat
                 creating={creatingAIChat}
-                onChatCreated={(newChat) => {
-                  navigate(`/home/ai/${newChat._id}`);
-                }}
+                onChatCreated={(newChat) =>
+                  navigate(`/home/ai/${newChat._id}`)
+                }
                 onBack={() => navigate("/home/ai")}
               />
+            ) : (isFriendPage || isFriendRequestsPage) ? (
+              <FriendSection />
             ) : (
               <Conversation
                 onBack={() => navigate("/home")}

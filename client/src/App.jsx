@@ -104,6 +104,14 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/home/friend-requests"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
 
       <Route path="*" element={<NotFound />} />
     </Routes>

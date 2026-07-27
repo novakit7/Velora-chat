@@ -23,7 +23,6 @@ export default function NotificationModal({ open, onClose }) {
       setLoading(true);
 
       const res = await api.get('/notification');
-      console.log(res.data.data)
       setNotifications(res.data.data);
     } catch (error) {
       console.error(error);
