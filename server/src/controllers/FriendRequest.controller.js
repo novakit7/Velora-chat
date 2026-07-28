@@ -7,40 +7,67 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 
 const sendFriendRequest = asyncHandler(async (req, res) => {
   const { receiverId } = req.params;
+
   if (!mongoose.Types.ObjectId.isValid(receiverId)) {
     throw new ApiError(400, "Invalid user id");
   }
 
   if (receiverId === req.user._id.toString()) {
-    throw new ApiError(400, "You can't send request to yourself");
+    throw new ApiError(400, "You cannot send a friend request to yourself");
   }
 
+  // Check relationship in both directions
   const existingRequest = await FriendRequest.findOne({
-    sender: req.user._id,
-    receiver: receiverId,
+    $or: [
+      {
+        sender: req.user._id,
+        receiver: receiverId,
+      },
+      {
+        sender: receiverId,
+        receiver: req.user._id,
+      },
+    ],
   });
 
   if (existingRequest) {
-    throw new ApiError(400, "Friend request already exists");
-  }
+    if (existingRequest.status === "accepted") {
+      throw new ApiError(400, "You are already friends");
+    }
 
-  const reverseRequest = await FriendRequest.findOne({
-    sender: receiverId,
-    receiver: req.user._id,
-    status: "pending",
-  });
+    if (
+      existingRequest.status === "pending" &&
+      existingRequest.sender.equals(req.user._id)
+    ) {
+      throw new ApiError(400, "Friend request already sent");
+    }
 
-  if (reverseRequest) {
-    throw new ApiError(400, "This user has already sent you a friend request");
+    if (
+      existingRequest.status === "pending" &&
+      existingRequest.receiver.equals(req.user._id)
+    ) {
+      throw new ApiError(
+        400,
+        "This user has already sent you a friend request",
+      );
+    }
+
+    // Handles old rejected records if they exist
+    if (existingRequest.status === "rejected") {
+      await existingRequest.deleteOne();
+    }
   }
 
   const request = await FriendRequest.create({
     sender: req.user._id,
     receiver: receiverId,
+    status: "pending",
   });
+
   sendToUser(receiverId, "friend_request", {
+    requestId: request._id,
     senderId: req.user._id,
-    message: "New Friend Request",
+    message: "New friend request",
   });
 
   return res
@@ -48,28 +75,67 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, request, "Friend request sent"));
 });
 
+//GET INCOMING REQUESTS
+const getReceivedRequests = asyncHandler(async (req, res) => {
+  const requests = await FriendRequest.find({
+    receiver: req.user._id,
+    status: "pending",
+  })
+    .populate("sender", "username fullName avatar email")
+    .sort({ createdAt: -1 });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      requests,
+      "Incoming friend requests fetched successfully",
+    ),
+  );
+});
+
+
+const getSentRequests = asyncHandler(async (req, res) => {
+  const requests = await FriendRequest.find({
+    sender: req.user._id,
+    status: "pending",
+  })
+    .populate("receiver", "username fullName avatar email")
+    .sort({ createdAt: -1 });
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      requests,
+      "Sent friend requests fetched successfully",
+    ),
+  );
+});
+
 const acceptFriendRequest = asyncHandler(async (req, res) => {
   const { requestId } = req.params;
 
-  const request = await FriendRequest.findById(requestId);
+  if (!mongoose.Types.ObjectId.isValid(requestId)) {
+    throw new ApiError(400, "Invalid request id");
+  }
+
+  const request = await FriendRequest.findOne({
+    _id: requestId,
+    receiver: req.user._id,
+    status: "pending",
+  });
 
   if (!request) {
-    throw new ApiError(404, "Friend request not found");
-  }
-  if (request.status !== "pending") {
-    throw new ApiError(400, "no pending request with this id");
-  }
-
-  if (!request.receiver.equals(req.user._id)) {
-    throw new ApiError(403, "Unauthorized");
-  }
-
-  if (request.status !== "pending") {
-    throw new ApiError(400, "Request already handled");
+    throw new ApiError(404, "Pending friend request not found");
   }
 
   request.status = "accepted";
   await request.save();
+
+  sendToUser(request.sender.toString(), "friend_request_accepted", {
+    requestId: request._id,
+    userId: req.user._id,
+    message: "Your friend request was accepted",
+  });
 
   return res
     .status(200)
@@ -79,133 +145,64 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
 const rejectFriendRequest = asyncHandler(async (req, res) => {
   const { requestId } = req.params;
 
-  const request = await FriendRequest.findById(requestId);
+  if (!mongoose.Types.ObjectId.isValid(requestId)) {
+    throw new ApiError(400, "Invalid request id");
+  }
+
+  const request = await FriendRequest.findOne({
+    _id: requestId,
+    receiver: req.user._id,
+    status: "pending",
+  });
 
   if (!request) {
-    throw new ApiError(404, "Friend request not found");
-  }
-  if (request.status !== "pending") {
-    throw new ApiError(400, "no pending request with this id");
+    throw new ApiError(404, "Pending friend request not found");
   }
 
-  if (!request.receiver.equals(req.user._id)) {
-    throw new ApiError(403, "Unauthorized");
-  }
+  await request.deleteOne();
 
-  request.status = "rejected";
-  await request.save();
-
-  return res
-    .status(200)
-    .json(new ApiResponse(200, request, "Friend request rejected"));
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { requestId },
+      "Friend request rejected",
+    ),
+  );
 });
 
 const cancelFriendRequest = asyncHandler(async (req, res) => {
   const { requestId } = req.params;
 
-  const request = await FriendRequest.findById(requestId);
+  if (!mongoose.Types.ObjectId.isValid(requestId)) {
+    throw new ApiError(400, "Invalid request id");
+  }
+
+  const request = await FriendRequest.findOne({
+    _id: requestId,
+    sender: req.user._id,
+    status: "pending",
+  });
 
   if (!request) {
-    throw new ApiError(404, "Request not found");
-  }
-
-  if (!request.sender.equals(req.user._id)) {
-    throw new ApiError(403, "Unauthorized");
-  }
-
-  if (request.status !== "pending") {
-    throw new ApiError(400, "Cannot cancel");
+    throw new ApiError(404, "Pending friend request not found");
   }
 
   await request.deleteOne();
 
-  return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "Friend request cancelled"));
-});
-
-const getReceivedRequests = asyncHandler(async (req, res) => {
-  const requests = await FriendRequest.find({
-    receiver: req.user._id,
-    status: "pending",
-  }).populate("sender", "username fullname avatar");
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(
-        200,
-        requests,
-        "received requests are featched sucessfully",
-      ),
-    );
-});
-
-const getSentRequests = asyncHandler(async (req, res) => {
-  const requests = await FriendRequest.find({
-    sender: req.user._id,
-    status: "pending",
-  }).populate("receiver", "username fullname avatar");
-
-  return res
-    .status(200)
-    .json(
-      new ApiResponse(200, requests, "sent requests are fetched sucessfully"),
-    );
-});
-
-const getFriends = asyncHandler(async (req, res) => {
-
-  const requests = await FriendRequest.find({
-    $or: [{ sender: req.user._id }, { receiver: req.user._id }],
-    status: "accepted",
-  })
-    .populate("sender", "fullName avatar username email")
-    .populate("receiver", "fullName avatar username email");
-
-  const friendsList = requests.map((requests) => {
-    if (requests.sender._id.toString() === req.user._id.toString()) {
-      return requests.receiver;
-    }
-
-    return requests.sender;
-  });
-  return res
-    .status(200)
-    .json(new ApiResponse(200, friendsList, "friends are fetched sucessfully"));
-});
-
-const removeFriend = asyncHandler(async (req, res) => {
-  const { friendId } = req.params;
-
-  const friendship = await FriendRequest.findOneAndDelete({
-    status: "accepted",
-    $or: [
-      {
-        sender: req.user._id,
-        receiver: friendId,
-      },
-      {
-        sender: friendId,
-        receiver: req.user._id,
-      },
-    ],
-  });
-
-  if (!friendship) {
-    throw new ApiError(404, "Friend not found");
-  }
-
-  return res.status(200).json(new ApiResponse(200, friendship, "Friend removed"));
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { requestId },
+      "Friend request cancelled",
+    ),
+  );
 });
 
 export {
   sendFriendRequest,
-  removeFriend,
-  getFriends,
-  getSentRequests,
   getReceivedRequests,
-  cancelFriendRequest,
-  rejectFriendRequest,
+  getSentRequests,
   acceptFriendRequest,
+  rejectFriendRequest,
+  cancelFriendRequest,
 };

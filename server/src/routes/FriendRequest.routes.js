@@ -1,32 +1,47 @@
 import { Router } from "express";
 import { verifyJWT } from "../middleware/Auth.middleware.js";
+
 import {
+  sendFriendRequest,
   acceptFriendRequest,
+  rejectFriendRequest,
   cancelFriendRequest,
-  getFriends,
   getReceivedRequests,
   getSentRequests,
-  rejectFriendRequest,
-  removeFriend,
-  sendFriendRequest,
 } from "../controllers/FriendRequest.controller.js";
 
 const FriendRequestRouter = Router();
+
 FriendRequestRouter.use(verifyJWT);
-FriendRequestRouter.route("/send/:receiverId").post(sendFriendRequest);
 
-FriendRequestRouter.route("/accept/:requestId").patch(acceptFriendRequest);
+FriendRequestRouter.post(
+  "/send/:receiverId",
+  sendFriendRequest
+);
 
-FriendRequestRouter.route("/reject/:requestId").patch(rejectFriendRequest);
+FriendRequestRouter.get(
+  "/received",
+  getReceivedRequests
+);
 
-FriendRequestRouter.route("/cancel/:requestId").delete(cancelFriendRequest);
+FriendRequestRouter.get(
+  "/sent",
+  getSentRequests
+);
 
-FriendRequestRouter.route("/received").get(getReceivedRequests);
+FriendRequestRouter.patch(
+  "/accept/:requestId",
+  acceptFriendRequest
+);
 
-FriendRequestRouter.route("/friends").get(getFriends);
+FriendRequestRouter.delete(
+  "/reject/:requestId",
+  rejectFriendRequest
+);
 
-FriendRequestRouter.route("/sent").get(getSentRequests);
-
-FriendRequestRouter.route("/remove/:friendId").delete(removeFriend);
+FriendRequestRouter.delete(
+  "/cancel/:requestId",
+  cancelFriendRequest
+);
 
 export default FriendRequestRouter;

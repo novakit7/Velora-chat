@@ -1,3 +1,4 @@
+import "dotenv/config";
 import dotenv from "dotenv";
 import connectDB from "./db/mongoDB.db.js";
 import { connectRedis } from "./db/redis.db.js";
