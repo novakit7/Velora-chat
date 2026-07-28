@@ -75,7 +75,6 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, request, "Friend request sent"));
 });
 
-//GET INCOMING REQUESTS
 const getReceivedRequests = asyncHandler(async (req, res) => {
   const requests = await FriendRequest.find({
     receiver: req.user._id,
@@ -198,6 +197,28 @@ const cancelFriendRequest = asyncHandler(async (req, res) => {
   );
 });
 
+const getFriends = asyncHandler(async (req, res) => {
+
+  const requests = await FriendRequest.find({
+    $or: [{ sender: req.user._id }, { receiver: req.user._id }],
+    status: "accepted",
+  })
+    .populate("sender", "fullName avatar username email")
+    .populate("receiver", "fullName avatar username email");
+
+  const friendsList = requests.map((requests) => {
+    if (requests.sender._id.toString() === req.user._id.toString()) {
+      return requests.receiver;
+    }
+
+    return requests.sender;
+  });
+  return res
+    .status(200)
+    .json(new ApiResponse(200, friendsList, "friends are fetched sucessfully"));
+});
+
+
 export {
   sendFriendRequest,
   getReceivedRequests,
@@ -205,4 +226,5 @@ export {
   acceptFriendRequest,
   rejectFriendRequest,
   cancelFriendRequest,
+  getFriends
 };
