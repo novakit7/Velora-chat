@@ -1,9 +1,6 @@
 import { User } from "../models/User.model.js";
-import { FriendRequest } from "../models/FriendRequest.model.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { ApiError } from "../utils/ApiError.js";
-
 import mongoose from "mongoose";
 
 const searchUsers = asyncHandler(async (req, res) => {
@@ -15,6 +12,7 @@ const searchUsers = asyncHandler(async (req, res) => {
     _id: { $ne: currentUserId },
   };
 
+  // Search by username or full name
   if (query.trim()) {
     matchStage.$or = [
       {
@@ -37,10 +35,11 @@ const searchUsers = asyncHandler(async (req, res) => {
       $match: matchStage,
     },
 
-    // Find any friend request between current user and this user
+    // Find any existing interaction between both users
     {
       $lookup: {
         from: "friendrequests",
+
         let: {
           otherUserId: "$_id",
         },
@@ -53,16 +52,24 @@ const searchUsers = asyncHandler(async (req, res) => {
                   // Current user -> Other user
                   {
                     $and: [
-                      { $eq: ["$sender", currentUserId] },
-                      { $eq: ["$receiver", "$$otherUserId"] },
+                      {
+                        $eq: ["$sender", currentUserId],
+                      },
+                      {
+                        $eq: ["$receiver", "$$otherUserId"],
+                      },
                     ],
                   },
 
                   // Other user -> Current user
                   {
                     $and: [
-                      { $eq: ["$sender", "$$otherUserId"] },
-                      { $eq: ["$receiver", currentUserId] },
+                      {
+                        $eq: ["$sender", "$$otherUserId"],
+                      },
+                      {
+                        $eq: ["$receiver", currentUserId],
+                      },
                     ],
                   },
                 ],
@@ -70,81 +77,38 @@ const searchUsers = asyncHandler(async (req, res) => {
             },
           },
 
-          {
-            $sort: {
-              createdAt: -1,
-            },
-          },
-
+          // We only need to know if one exists
           {
             $limit: 1,
           },
         ],
 
-        as: "friendRequest",
+        as: "friendInteraction",
       },
     },
 
-    // Convert lookup array into single object
+    // Keep ONLY users with no interaction
     {
-      $addFields: {
-        friendRequest: {
-          $arrayElemAt: ["$friendRequest", 0],
+      $match: {
+        friendInteraction: {
+          $size: 0,
         },
       },
     },
 
-    // Create frontend-friendly friendship object
-    {
-      $addFields: {
-        friendship: {
-          $cond: [
-            // No request exists
-            {
-              $eq: [
-                { $type: "$friendRequest" },
-                "missing",
-              ],
-            },
-
-            {
-              status: "none",
-              direction: null,
-              requestId: null,
-            },
-
-            // Request exists
-            {
-              status: "$friendRequest.status",
-
-              direction: {
-                $cond: [
-                  {
-                    $eq: [
-                      "$friendRequest.sender",
-                      currentUserId,
-                    ],
-                  },
-                  "sent",
-                  "received",
-                ],
-              },
-
-              requestId: "$friendRequest._id",
-            },
-          ],
-        },
-      },
-    },
-
+    // Return only what AddFriend.jsx needs
     {
       $project: {
         username: 1,
         fullName: 1,
         avatar: 1,
         email: 1,
-        friendship: 1,
       },
+    },
+
+    // Optional limit
+    {
+      $limit: 30,
     },
   ]);
 
