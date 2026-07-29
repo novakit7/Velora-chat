@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  FiSearch,
-  FiMessageCircle,
-} from "react-icons/fi";
+import { FiMessageCircle, FiSearch, FiTrash2 } from "react-icons/fi";
 import { notify } from "../../utils/toast";
 import Loader from "../common/Loader";
 import api from "../../api/axois";
@@ -12,6 +9,8 @@ export default function NewChat() {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState([]);
   const navigate = useNavigate();
+  const [chatLoadingId, setChatLoadingId] = useState(null);
+  const [removeLoadingId, setRemoveLoadingId] = useState(null);
 
   useEffect(() => {
     const getFriends = async () => {
@@ -32,20 +31,45 @@ export default function NewChat() {
 
   const createChat = async (id) => {
     try {
-      setLoading(true);
+      setChatLoadingId(id);
 
       const res = await api.post(`/chat/create-chat/${id}`);
 
-      notify.success(res.data?.message);
+      notify.success(res.data.message);
 
       navigate(`/home/chat/${res.data.data._id}`);
     } catch (error) {
       console.error(error);
+
       notify.error(
-        error?.response?.data?.message || "Something went wrong"
+        error?.response?.data?.message ||
+        "Something went wrong"
       );
     } finally {
-      setLoading(false);
+      setChatLoadingId(null);
+    }
+  };
+
+  const removeFriend = async (friendId) => {
+    try {
+      setRemoveLoadingId(friendId);
+
+      await api.delete(`/friend-request/remove/${friendId}`);
+
+      setUsers((prev) =>
+        prev.filter((user) => user._id !== friendId)
+      );
+
+      notify.success("Friend removed successfully");
+    } catch (error) {
+      console.error(error);
+
+      notify.error(
+        error?.response?.data?.message ||
+        "Failed to remove friend"
+      );
+    } finally {
+      setRemoveLoadingId(null);
     }
   };
 
@@ -78,63 +102,89 @@ export default function NewChat() {
         <Loader variant="section" />
       </div>}
       {/* Users */}
-      <div className="flex-1 overflow-y-auto">
-
-        {users.map((user) => (
-          <div
-            key={user._id}
-            className="flex items-center justify-between border-b border-slate-800 px-4 py-4 hover:bg-slate-800 transition"
-          >
-
-            <div className="flex items-center gap-3">
-
-              <div className="relative">
-                {user.avatar?.url ? (
-                  <img
-                    src={user.avatar.url}
-                    alt={user.username}
-                    className="h-12 w-12 rounded-full object-cover border-2 border-slate-700"
-                  />
-                ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-semibold text-white">
-                    {user.username?.charAt(0).toUpperCase()}
-                  </div>
-                )}
-
-                {user.online && (
-                  <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-500" />
-                )}
-              </div>
-
-              <div>
-
-                <h3 className="font-medium text-white">
-                  {user.username}
-                </h3>
-
-                <p className="text-sm text-gray-400">
-                  {user.fullName}
-                </p>
-
-              </div>
-
-            </div>
-
-            <button
-              onClick={() => createChat(user._id)}
-              className="flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-600">
-
-              <FiMessageCircle />
-
-              Chat
-
-            </button>
-
+      <div className="flex-1 overflow-y-auto all-scroll p-4">
+        {users.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center text-slate-400">
+            <FiMessageCircle size={40} className="mb-3 opacity-40" />
+            <p>No friends found.</p>
           </div>
-        ))}
+        ) : (
+          <div className="space-y-4">
+            {users.map((user) => (
+              <div
+                key={user._id}
+                className="rounded-xl border border-slate-800 bg-slate-800 p-4 transition hover:border-cyan-500/40"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    {user.avatar?.url ? (
+                      <img
+                        src={user.avatar.url}
+                        alt={user.username}
+                        className="h-14 w-14 rounded-full object-cover ring-2 ring-slate-700"
+                      />
+                    ) : (
+                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500 text-lg font-semibold text-white">
+                        {user.username?.charAt(0).toUpperCase()}
+                      </div>
+                    )}
 
+                    {user.online && (
+                      <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-slate-900 bg-green-500" />
+                    )}
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-lg font-semibold text-white">
+                      {user.username}
+                    </h3>
+
+                    <p className="truncate text-sm text-slate-400">
+                      {user.fullName}
+                    </p>
+
+                    <p className="truncate text-xs text-slate-500">
+                      {user.email}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => createChat(user._id)}
+                    disabled={chatLoadingId === user._id}
+                    className="flex items-center justify-center gap-2 rounded-lg bg-cyan-500 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-600 disabled:opacity-60"
+                  >
+                    {chatLoadingId === user._id ? (
+                      <Loader variant="button" />
+                    ) : (
+                      <>
+                        <FiMessageCircle />
+                        Chat
+                      </>
+                    )}
+                  </button>
+
+                  <button
+                    onClick={() => removeFriend(user._id)}
+                    disabled={removeLoadingId === user._id}
+                    className="flex items-center justify-center gap-2 rounded-lg border border-red-500/30 py-2.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:opacity-60"
+                  >
+                    {removeLoadingId === user._id ? (
+                      <Loader variant="button" />
+                    ) : (
+                      <>
+                        <FiTrash2 />
+                        Remove
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
     </div>
   );
 }

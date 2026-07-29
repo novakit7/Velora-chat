@@ -11,6 +11,7 @@ export default function AddFriend() {
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -33,6 +34,21 @@ export default function AddFriend() {
 
     return () => clearTimeout(timer);
   }, [query]);
+
+  const sendRequest = async (userId) => {
+    try {
+      setSending(true);
+      console.log(userId)
+      const res = await api.post(`/friend-request/send/${userId}`);
+      notify.success(res.data?.data.message);
+      navigate(0)
+    } catch (error) {
+      console.log(error);
+      notify.error(error?.response?.data?.message || "Something went wrong");
+    } finally {
+      setSending(false);
+    }
+  };
 
 
   return (
@@ -116,9 +132,11 @@ export default function AddFriend() {
                 </div>
               </div>
 
-              <button className="flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-600">
+              <button
+                onClick={() => sendRequest(user._id)}
+                className="flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-600">
                 <FiUserPlus />
-                Add
+                {sending ? <Loader variant="button" /> : "Send"}
               </button>
             </div>
           ))
