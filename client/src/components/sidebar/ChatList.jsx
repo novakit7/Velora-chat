@@ -5,6 +5,7 @@ import Loader from "../common/Loader";
 import { notify } from "../../utils/toast";
 import { formatRelativeDate } from "../../utils/date";
 import { useNavigate, useParams } from "react-router-dom";
+import { FiMessageCircle } from "react-icons/fi";
 
 export default function ChatList() {
   const [chats, setChats] = useState([]);
@@ -53,12 +54,26 @@ export default function ChatList() {
             <Loader variant="section" />
           </div>
         ) : chats.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-4">
-            <h3 className="text-lg font-semibold text-white">No chats yet</h3>
+          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-slate-800">
+              <FiMessageCircle className="text-4xl text-cyan-400" />
+            </div>
 
-            <p className="text-gray-400 text-center">
-              Start a conversation with a friend or create a group.
+            <h3 className="mt-6 text-2xl font-semibold text-white">
+              No Chats Yet
+            </h3>
+
+            <p className="mt-2 max-w-sm text-sm leading-6 text-slate-400">
+              You haven't started any conversations yet. Chat with your friends and stay connected.
             </p>
+
+            <button
+              onClick={() => navigate("/home/new-chat")}
+              className="mt-6 flex items-center gap-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 px-6 py-3 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/30"
+            >
+              <FiMessageCircle />
+              Start New Chat
+            </button>
           </div>
         ) : (
           chats.map((chat) => {

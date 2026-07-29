@@ -31,13 +31,21 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Don't intercept refresh request itself
-    if (originalRequest?.url?.includes("/refresh-token")) {
+    const status = error.response.status;
+    const url = originalRequest?.url || "";
+
+    // Don't intercept auth endpoints
+    if (
+      url.includes("/user/login") ||
+      url.includes("/user/register") ||
+      url.includes("/user/refresh-token") ||
+      url.includes("/user/logout")
+    ) {
       return Promise.reject(error);
     }
 
-    // Only refresh on 401
-    if (error.response.status !== 401) {
+    // Refresh only on 401
+    if (status !== 401) {
       return Promise.reject(error);
     }
 
@@ -46,7 +54,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Wait if refresh is already running
+    // Queue requests while refresh is in progress
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
@@ -58,15 +66,16 @@ api.interceptors.response.use(
 
     try {
       await api.post("/user/refresh-token");
+
       processQueue();
 
       return api(originalRequest);
     } catch (refreshError) {
-      console.error("Refresh failed.");
+      console.error("Refresh token failed:", refreshError);
 
       processQueue(refreshError);
 
-      // Notify React that the session has expired
+      // Let the app know the session expired
       window.dispatchEvent(new CustomEvent("session-expired"));
 
       return Promise.reject(refreshError);

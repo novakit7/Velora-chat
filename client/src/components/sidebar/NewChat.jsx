@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FiMessageCircle, FiSearch, FiTrash2 } from "react-icons/fi";
+import { FiMessageCircle, FiPlusSquare, FiSearch, FiTrash2 } from "react-icons/fi";
 import { notify } from "../../utils/toast";
 import Loader from "../common/Loader";
 import api from "../../api/axois";
@@ -11,6 +11,7 @@ export default function NewChat() {
   const navigate = useNavigate();
   const [chatLoadingId, setChatLoadingId] = useState(null);
   const [removeLoadingId, setRemoveLoadingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   useEffect(() => {
     const getFriends = async () => {
@@ -54,7 +55,7 @@ export default function NewChat() {
     try {
       setRemoveLoadingId(friendId);
 
-      await api.delete(`/friend-request/remove/${friendId}`);
+      await api.delete(`/friend-request/delete/${friendId}`);
 
       setUsers((prev) =>
         prev.filter((user) => user._id !== friendId)
@@ -104,9 +105,28 @@ export default function NewChat() {
       {/* Users */}
       <div className="flex-1 overflow-y-auto all-scroll p-4">
         {users.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-slate-400">
-            <FiMessageCircle size={40} className="mb-3 opacity-40" />
-            <p>No friends found.</p>
+          <div className="flex h-full flex-col items-center justify-center text-center">
+            <div className="rounded-full bg-slate-800 p-5">
+              <FiMessageCircle
+                size={42}
+                className="text-slate-500"
+              />
+            </div>
+
+            <h3 className="mt-5 text-lg font-semibold text-white">
+              No Friends Yet
+            </h3>
+
+            <p className="mt-2 max-w-xs text-sm text-slate-400">
+              Once you add friends, they'll appear here so you can start chatting instantly.
+            </p>
+            <button
+              onClick={() => navigate("/home/add-friend")}
+              className="mt-6 flex items-center gap-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 px-6 py-3 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/30"
+            >
+              <FiPlusSquare />
+              Add Friend
+            </button>
           </div>
         ) : (
           <div className="space-y-4">
@@ -166,7 +186,7 @@ export default function NewChat() {
                   </button>
 
                   <button
-                    onClick={() => removeFriend(user._id)}
+                    onClick={() => setConfirmDelete(user)}
                     disabled={removeLoadingId === user._id}
                     className="flex items-center justify-center gap-2 rounded-lg border border-red-500/30 py-2.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:opacity-60"
                   >
@@ -185,6 +205,54 @@ export default function NewChat() {
           </div>
         )}
       </div>
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-[90%] max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-6 shadow-2xl animate-[fadeIn_.2s_ease]">
+
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-500/15">
+              <FiTrash2 className="text-3xl text-red-400" />
+            </div>
+
+            <h2 className="mt-5 text-center text-xl font-semibold text-white">
+              Remove Friend?
+            </h2>
+
+            <p className="mt-3 text-center text-sm text-slate-400">
+              Are you sure you want to remove{" "}
+              <span className="font-semibold text-white">
+                {confirmDelete.username}
+              </span>
+              ?
+              <br />
+              You'll need to send a friend request again to chat in the future.
+            </p>
+
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => setConfirmDelete(null)}
+                className="flex-1 rounded-xl border border-slate-700 py-3 font-medium text-slate-300 transition hover:bg-slate-800"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={async () => {
+                  await removeFriend(confirmDelete._id);
+                  setConfirmDelete(null);
+                }}
+                disabled={removeLoadingId === confirmDelete._id}
+                className="flex flex-1 items-center justify-center rounded-xl bg-red-500 py-3 font-medium text-white transition hover:bg-red-600 disabled:opacity-60"
+              >
+                {removeLoadingId === confirmDelete._id ? (
+                  <Loader variant="button" />
+                ) : (
+                  "Remove"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

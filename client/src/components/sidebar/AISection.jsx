@@ -164,17 +164,51 @@ export default function AISection({ onCreateChat }) {
 
               <button
                 onClick={() => openEditModal(chat)}
-                className="rounded-lg p-2 text-gray-400 transition hover:bg-slate-700 hover:text-white"
+                className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-cyan-500/10 hover:text-cyan-400 active:scale-95"
+                title="Rename chat"
               >
-                <FiEdit size={18} />
+                <FiEdit size={17} />
               </button>
             </div>
           </div>
         ))}
 
         {filteredChats.length === 0 && (
-          <div className="flex h-full items-center justify-center text-gray-400">
-            No chats found
+          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-800 ring-1 ring-slate-700">
+              <Brain size={46} className="text-cyan-400" />
+            </div>
+
+            <h2 className="mt-6 text-2xl font-semibold text-white">
+              {query ? "No Matching Chats" : "No AI Chats Yet"}
+            </h2>
+
+            <p className="mt-3 max-w-sm text-sm leading-6 text-slate-400">
+              {query
+                ? "Try another keyword or clear your search."
+                : "Create your first AI conversation and start asking questions."}
+            </p>
+
+            {!query && (
+              <button
+                onClick={onCreateChat}
+                className="mt-6 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 px-6 py-3 font-medium text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/30"
+              >
+                <FiPlus className="mr-2 inline" />
+                New AI Chat
+              </button>
+            )}
+
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="mt-6 rounded-xl border border-slate-700 px-5 py-2.5 text-slate-300 transition hover:border-cyan-500 hover:text-cyan-400"
+              >
+                Clear Search
+              </button>
+            )}
+
           </div>
         )}
       </div>

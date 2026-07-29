@@ -6,6 +6,7 @@ import {
   FiMoreVertical,
   FiSend,
   FiTrash2,
+  FiMessageCircle
 } from "react-icons/fi";
 import Loader from "../common/Loader";
 import { useContext } from "react";
@@ -105,7 +106,7 @@ export default function Conversation({ onBack }) {
 
     getMessages();
   }, [chat?._id]);
-  
+
   const sendMessage = async (e) => {
     e.preventDefault();
 
@@ -143,27 +144,27 @@ export default function Conversation({ onBack }) {
   };
 
   const deleteChat = async () => {
-  try {
-    setDeleting(true);
+    try {
+      setDeleting(true);
 
-    await api.delete(`/chat/delete/${chat._id}`);
+      await api.delete(`/chat/delete/${chat._id}`);
 
-    notify.success("Chat deleted successfully.");
+      notify.success("Chat deleted successfully.");
 
-    setShowDeleteModal(false);
+      setShowDeleteModal(false);
 
-    // Go back to chat list
-    navigate("/home", { replace: true });
-    navigate(0);
+      // Go back to chat list
+      navigate("/home", { replace: true });
+      navigate(0);
 
-  } catch (error) {
-    notify.error(
-      error?.response?.data?.message || "Failed to delete chat."
-    );
-  } finally {
-    setDeleting(false);
-  }
-};
+    } catch (error) {
+      notify.error(
+        error?.response?.data?.message || "Failed to delete chat."
+      );
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   // No chat selected
   if (!chat) {
@@ -231,62 +232,80 @@ export default function Conversation({ onBack }) {
             <Loader variant="section" />
           </div>
         ) : (
-          <div className="space-y-4">
-            {messages.map((message) => {
-              const isMe = message.sender?._id === user?._id;;
+          messages.length === 0 ? (
+            <div className="flex h-full flex-col items-center justify-center px-6 text-center">
 
-              return (
-                <div
-                  key={message._id}
-                  className={`flex mb-4 transition-all duration-300 ${isMe ? "justify-end" : "justify-start"
-                    }`}
-                >
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-800 ring-1 ring-slate-700">
+                <FiMessageCircle className="text-5xl text-cyan-400" />
+              </div>
+
+              <h2 className="mt-6 text-2xl font-semibold text-white">
+                No Messages Yet
+              </h2>
+
+              <p className="mt-3 max-w-sm text-sm leading-6 text-slate-400">
+                Start the conversation by sending your first message.
+              </p>
+
+              <div className="mt-6 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-300">
+                👋 Say hello and break the ice!
+              </div>
+
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {messages.map((message) => {
+                const isMe = message.sender?._id === user?._id;
+
+                return (
                   <div
-                    className={`flex items-end gap-2 max-w-[75%] ${isMe ? "flex-row-reverse" : ""
+                    key={message._id}
+                    className={`flex mb-4 transition-all duration-300 ${isMe ? "justify-end" : "justify-start"
                       }`}
                   >
-                    {/* Avatar */}
-                    <img
-                      src={message.sender?.avatar?.url}
-                      alt={message.sender?.username}
-                      className="h-10 w-10 rounded-full object-cover border border-slate-700"
-                    />
-
-                    {/* Bubble */}
                     <div
-                      className={`px-4 py-3 max-w-md wrap-break-words rounded-2xl shadow-md transition-all duration-200 
-                        ${isMe
-                          ? "bg-cyan-500 text-white rounded-br-md"
-                          : "bg-slate-800 text-slate-100 rounded-bl-md border border-slate-700"
+                      className={`flex items-end gap-2 max-w-[75%] ${isMe ? "flex-row-reverse" : ""
                         }`}
                     >
-                      {/* Username */}
-                      {!isMe && (
-                        <p className="mb-1 text-xs font-semibold text-cyan-400">
-                          {message.sender?.username}
-                        </p>
-                      )}
+                      <img
+                        src={message.sender?.avatar?.url}
+                        alt={message.sender?.username}
+                        className="h-10 w-10 rounded-full border border-slate-700 object-cover"
+                      />
 
-                      {/* Message */}
-                      <p className="text-sm leading-6">{message.content}</p>
-
-                      {/* Time + Tick */}
                       <div
-                        className={`mt-2 flex items-center justify-end gap-1 text-[11px] ${isMe ? "text-white/80" : "text-slate-400"
+                        className={`max-w-md rounded-2xl px-4 py-3 shadow-md transition-all duration-200 wrap-break-words ${isMe
+                            ? "rounded-br-md bg-cyan-500 text-white"
+                            : "rounded-bl-md border border-slate-700 bg-slate-800 text-slate-100"
                           }`}
                       >
-                        <span>{formatDateTime(message.createdAt)}</span>
-
-                        {isMe && (
-                          <span className="font-bold tracking-tight">✓✓</span>
+                        {!isMe && (
+                          <p className="mb-1 text-xs font-semibold text-cyan-400">
+                            {message.sender?.username}
+                          </p>
                         )}
+
+                        <p className="text-sm leading-6">
+                          {message.content}
+                        </p>
+
+                        <div
+                          className={`mt-2 flex items-center justify-end gap-1 text-[11px] ${isMe ? "text-white/80" : "text-slate-400"
+                            }`}
+                        >
+                          <span>{formatDateTime(message.createdAt)}</span>
+
+                          {isMe && (
+                            <span className="font-bold">✓✓</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )
         )}
         <div ref={messagesEndRef} />
       </div>

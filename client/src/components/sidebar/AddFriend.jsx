@@ -11,7 +11,7 @@ export default function AddFriend() {
   const [users, setUsers] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sending, setSending] = useState(false);
+  const [sendingId, setSendingId] = useState(null);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
@@ -37,16 +37,17 @@ export default function AddFriend() {
 
   const sendRequest = async (userId) => {
     try {
-      setSending(true);
-      console.log(userId)
+      setSendingId(userId);
       const res = await api.post(`/friend-request/send/${userId}`);
-      notify.success(res.data?.data.message);
-      navigate(0)
+      notify.success(res.data?.message);
+      setUsers((prev) => prev.filter((user) => user._id !== userId));
     } catch (error) {
       console.log(error);
-      notify.error(error?.response?.data?.message || "Something went wrong");
+      notify.error(
+        error?.response?.data?.message || "Something went wrong"
+      );
     } finally {
-      setSending(false);
+      setSendingId(null);
     }
   };
 
@@ -95,8 +96,30 @@ export default function AddFriend() {
             <Loader variant="section" />
           </div>
         ) : users.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-gray-400">
-            No users found
+          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+
+            <div className="rounded-full bg-slate-800 p-6 shadow-lg">
+              <FiUsers className="text-5xl text-slate-500" />
+            </div>
+
+            <h2 className="mt-6 text-xl font-semibold text-white">
+              No Users Found
+            </h2>
+
+            <p className="mt-2 max-w-sm text-sm leading-6 text-slate-400">
+              {query
+                ? `We couldn't find anyone matching "${query}".`
+                : "Start typing a username to search for new friends."}
+            </p>
+
+            {query && (
+              <button
+                onClick={() => setQuery("")}
+                className="mt-5 rounded-xl border border-slate-700 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:border-cyan-500 hover:text-cyan-400"
+              >
+                Clear Search
+              </button>
+            )}
           </div>
         ) : (
           users.map((user) => (
@@ -134,9 +157,17 @@ export default function AddFriend() {
 
               <button
                 onClick={() => sendRequest(user._id)}
-                className="flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-600">
-                <FiUserPlus />
-                {sending ? <Loader variant="button" /> : "Send"}
+                disabled={sendingId === user._id}
+                className="flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {sendingId === user._id ? (
+                  <Loader variant="button" />
+                ) : (
+                  <>
+                    <FiUserPlus />
+                    Send
+                  </>
+                )}
               </button>
             </div>
           ))
