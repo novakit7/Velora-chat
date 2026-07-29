@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FiSearch, FiUserPlus, FiCheck } from "react-icons/fi";
+import { FiSearch, FiUserPlus, FiCheck, FiX } from "react-icons/fi";
 import api from "../../api/axois";
 import { notify } from "../../utils/toast";
 import Loader from "../common/Loader";
@@ -75,6 +75,14 @@ export default function AddFriend() {
             placeholder="Search users..."
             className="ml-2 flex-1 bg-transparent text-white outline-none placeholder:text-gray-400"
           />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+            >
+              <FiX size={17} />
+            </button>
+          )}
         </div>
 
         {/* Mobile Only */}
@@ -125,46 +133,51 @@ export default function AddFriend() {
           users.map((user) => (
             <div
               key={user._id}
-              className="flex items-center justify-between border-b border-slate-800 px-4 py-4 transition hover:bg-slate-800"
+              className="group flex items-center justify-between rounded-xl border border-transparent bg-slate-800 px-4 py-3.5 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800/80"
             >
-              <div className="flex items-center gap-3">
-                {user.avatar ? (
-                  <img
-                    src={user.avatar.url}
-                    alt={user.username}
-                    className="h-12 w-12 rounded-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 text-lg font-semibold text-white">
-                    {user.username?.charAt(0).toUpperCase()}
-                  </div>
-                )}
+              <div className="flex min-w-0 items-center gap-3">
+                {/* Avatar */}
+                <div className="shrink-0">
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar.url}
+                      alt={user.username}
+                      className="h-12 w-12 rounded-full border border-slate-700 object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 text-sm font-semibold text-white">
+                      {user.username?.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
 
-                <div>
-                  <h3 className="font-medium text-white">
+                {/* User Details */}
+                <div className="min-w-0 flex-1">
+                  <h3 className="truncate text-sm font-semibold text-white">
                     {user.username}
                   </h3>
 
-                  <p className="text-sm text-gray-400">
+                  <p className="truncate text-xs text-slate-400">
                     {user.fullName}
                   </p>
 
-                  <p className="text-xs text-gray-500">
+                  <p className="truncate text-xs text-slate-500">
                     {user.email}
                   </p>
                 </div>
               </div>
 
+              {/* Send Button */}
               <button
                 onClick={() => sendRequest(user._id)}
                 disabled={sendingId === user._id}
-                className="flex items-center justify-center gap-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-70"
+                className="ml-4 flex shrink-0 items-center justify-center gap-2 rounded-xl border border-cyan-500 bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:border-cyan-400 hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {sendingId === user._id ? (
                   <Loader variant="button" />
                 ) : (
                   <>
-                    <FiUserPlus />
+                    <FiUserPlus className="text-base" />
                     Send
                   </>
                 )}

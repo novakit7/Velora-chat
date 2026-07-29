@@ -58,11 +58,13 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setOpenNotification((prev) => !prev)}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 transition hover:bg-slate-700"
+              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-800 transition-all duration-200 hover:border-slate-600 hover:bg-slate-700"
             >
-              <FiBell className="text-gray-300" size={18} />
-            </button>
+              <FiBell className="text-slate-300" size={18} />
 
+              {/* Optional unread indicator */}
+              <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500" />
+            </button>
             <NotificationModal
               open={openNotification}
               onClose={() => setOpenNotification(false)}

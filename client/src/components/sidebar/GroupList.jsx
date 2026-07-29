@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FiSearch, FiX, FiUser, FiCheck } from "react-icons/fi";
+import { FiSearch, FiX, FiUser, FiCheck, FiPlus } from "react-icons/fi";
 import api from "../../api/axois";
 import Loader from "../common/Loader";
 import { notify } from "../../utils/toast";
@@ -13,7 +13,8 @@ export default function GroupList() {
   const [newGroupName, setNewGroupName] = useState("");
   const [selectedFriends, setSelectedFriends] = useState([]);
   const navigate = useNavigate();
-const { chatId } = useParams();
+  const { chatId } = useParams();
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const getGroups = async () => {
@@ -35,6 +36,10 @@ const { chatId } = useParams();
 
     getGroups();
   }, []);
+
+  const filteredGroups = groups.filter((group) =>
+    group.groupName.toLowerCase().includes(query.toLowerCase()),
+  );
 
   const handleCreateGroup = () => {
     if (!newGroupName.trim()) return notify.error("Group name cannot be empty");
@@ -78,17 +83,37 @@ const { chatId } = useParams();
   return (
     <div className="h-full bg-slate-900 rounded-2xl flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-slate-900 p-4 border-b border-slate-800">
-        <h2 className="text-xl font-semibold text-white">Groups</h2>
+      <div className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900 p-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-white">Groups</h2>
 
-        <div className="mt-4 flex items-center rounded-xl bg-slate-800 px-3 py-2">
-          <FiSearch className="text-gray-400" />
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
+            title="Create Group"
+          >
+            <FiPlus size={18} />
+          </button>
+        </div>
+
+        <div className="mt-4 flex items-center rounded-xl border border-slate-700 bg-slate-800 px-3 py-3 transition-all duration-200 focus-within:border-cyan-500">
+          <FiSearch className="text-slate-400" />
 
           <input
-            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search groups..."
-            className="ml-2 flex-1 bg-transparent outline-none text-white placeholder:text-gray-400"
+            className="ml-3 flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
           />
+
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+            >
+              <FiX size={17} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -97,7 +122,7 @@ const { chatId } = useParams();
           <div className="relative flex h-full items-center justify-center">
             <Loader variant="section" />
           </div>
-        ) : groups.length === 0 ? (
+        ) : filteredGroups.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-4">
             <h3 className="text-lg font-semibold text-white">No groups yet</h3>
 
@@ -114,15 +139,7 @@ const { chatId } = useParams();
           </div>
         ) : (
           <>
-            <div className="px-4 py-3">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="w-full rounded-lg bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600"
-              >
-                Create New Group
-              </button>
-            </div>
-            {groups.map((group) => {
+            {filteredGroups.map((group) => {
               const avatar = group.groupAvatar?.url;
               const message = group.latestMessage?.content || "No messages yet";
 
@@ -130,38 +147,38 @@ const { chatId } = useParams();
                 <button
                   key={group._id}
                   onClick={() => navigate(`/home/group/${group._id}`)}
-                  className={`w-full flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${
-                    chatId === group._id ? "bg-slate-800" : ""
-                  }`}
+                  className={`group flex w-full items-center justify-between rounded-xl border px-4 py-4 transition-all duration-200
+  ${chatId === group._id
+                      ? "border-cyan-500 bg-slate-800 shadow-md"
+                      : "border-transparent hover:border-slate-700 hover:bg-slate-800/60"
+                    }`}
                 >
-                  <div className="flex items-center gap-3">
-                    {/* Avatar */}
-                    <div className="relative">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="relative shrink-0">
                       {avatar ? (
                         <img
                           src={avatar}
                           alt={group.groupName}
-                          className="h-12 w-12 rounded-full object-cover border-2 border-slate-700"
+                          className="h-11 w-11 rounded-full border border-slate-700 object-cover"
                         />
                       ) : (
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-semibold text-white">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-full bg-cyan-500 text-sm font-semibold text-white">
                           {group.groupName?.charAt(0).toUpperCase()}
                         </div>
                       )}
 
-                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-[10px] text-white">
+                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-slate-900 bg-cyan-500 text-[10px] font-medium text-white">
                         {group.participantsCount}
                       </span>
                     </div>
 
-                    {/* Details */}
-                    <div className="text-left">
-                      <h3 className="font-medium text-white">
+                    <div className="min-w-0 flex-1 text-left">
+                      <h3 className="truncate text-sm font-semibold text-white">
                         {group.groupName}
                       </h3>
 
-                      <p className="max-w-44 truncate text-sm text-gray-400">
-                        <span className="font-medium">
+                      <p className="truncate text-xs text-slate-400">
+                        <span className="font-medium text-slate-300">
                           {group.latestMessage?.sender?.fullName}:
                         </span>{" "}
                         {message}
@@ -169,7 +186,7 @@ const { chatId } = useParams();
                     </div>
                   </div>
 
-                  <span className="text-xs text-gray-400">
+                  <span className="ml-3 shrink-0 text-[11px] text-slate-500">
                     {formatRelativeDate(group.latestMessage?.createdAt)}
                   </span>
                 </button>
@@ -195,16 +212,12 @@ const { chatId } = useParams();
             </div>
 
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">
-                  Group Name
-                </label>
+              <div className="mt-4 flex items-center rounded-xl border border-slate-700 bg-slate-800 px-3 py-3 transition-all focus-within:border-cyan-500">
+                <FiSearch className="text-slate-400" />
                 <input
                   type="text"
-                  value={newGroupName}
-                  onChange={(e) => setNewGroupName(e.target.value)}
-                  className="w-full rounded-lg bg-slate-700 border border-slate-600 px-4 py-2 text-white outline-none focus:ring-2 focus:ring-cyan-500"
-                  placeholder="Enter group name"
+                  placeholder="Search groups..."
+                  className="ml-3 flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
                 />
               </div>
 

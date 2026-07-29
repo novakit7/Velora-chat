@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiPlus, FiX } from "react-icons/fi";
 import api from "../../api/axois";
 import Loader from "../common/Loader";
 import { notify } from "../../utils/toast";
@@ -12,6 +12,9 @@ export default function ChatList() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { chatId } = useParams();
+  const [query, setQuery] = useState("");
+
+
   useEffect(() => {
     const getChats = async () => {
       try {
@@ -30,20 +33,47 @@ export default function ChatList() {
     getChats();
   }, []);
 
+  const filteredChats = chats.filter((chat) => {
+    const username = chat.otherMember?.username || "";
+    return username.toLowerCase().includes(query.toLowerCase());
+  });
+
   return (
     <div className="h-full bg-slate-900 rounded-2xl flex flex-col">
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-slate-900 p-4 border-b border-slate-800">
-        <h2 className="text-xl font-semibold text-white">Chats</h2>
+      <div className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900 p-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-white">
+            Chats
+          </h2>
 
-        <div className="mt-4 flex items-center bg-slate-800 rounded-xl px-3 py-2">
-          <FiSearch className="text-gray-400" />
+          <button
+            onClick={() => navigate("/home/new-chat")}
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
+            title="New Chat"
+          >
+            <FiPlus size={18} />
+          </button>
+        </div>
+
+        <div className="mt-4 flex items-center rounded-xl border border-slate-700 bg-slate-800 px-3 py-3 transition-all duration-200 focus-within:border-cyan-500">
+          <FiSearch className="text-slate-400" />
 
           <input
             type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             placeholder="Search chats..."
-            className="ml-2 flex-1 bg-transparent outline-none text-white placeholder:text-gray-400"
+            className="ml-3 flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
           />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="ml-2 rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+            >
+              <FiX size={18} />
+            </button>
+          )}
         </div>
       </div>
 
@@ -76,7 +106,7 @@ export default function ChatList() {
             </button>
           </div>
         ) : (
-          chats.map((chat) => {
+          filteredChats.map((chat) => {
             const avatar = chat.otherMember?.avatar?.url;
             const username = chat.otherMember?.username;
             const message = chat.latestMessage?.content || "No messages yet";
@@ -85,43 +115,47 @@ export default function ChatList() {
               <button
                 key={chat._id}
                 onClick={() => navigate(`/home/chat/${chat._id}`)}
-                className={`w-full flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${chatId === chat._id ? "bg-slate-800" : ""
+                className={`group w-full flex items-center justify-between rounded-xl px-4 py-4 transition-all duration-200 border
+    ${chatId === chat._id
+                    ? "bg-slate-800 border-cyan-500 shadow-md"
+                    : "border-transparent hover:bg-slate-800/60 hover:border-slate-700"
                   }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 min-w-0">
                   {/* Avatar */}
-                  <div className="relative">
+                  <div className="relative shrink-0">
                     {avatar ? (
                       <img
                         src={avatar}
                         alt={username}
-                        className="h-12 w-12 rounded-full object-cover border-2 border-slate-700"
+                        className="h-11 w-11 rounded-full object-cover border border-slate-700"
                       />
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 font-semibold text-white">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-cyan-500 text-sm font-semibold text-white">
                         {username?.charAt(0).toUpperCase()}
                       </div>
                     )}
 
-                    {/* Online Status */}
                     <span
-                      className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 ${chat.isOnline ? "bg-green-500" : "bg-gray-500"
+                      className={`absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-slate-900 ${chat.isOnline ? "bg-emerald-500" : "bg-slate-500"
                         }`}
                     />
                   </div>
 
                   {/* Details */}
-                  <div className="text-left">
-                    <h3 className="font-medium text-white">{username}</h3>
+                  <div className="min-w-0 flex-1 text-left">
+                    <h3 className="truncate text-sm font-semibold text-white">
+                      {username}
+                    </h3>
 
-                    <p className="max-w-44 truncate text-sm text-gray-400">
+                    <p className="truncate text-xs text-slate-400">
                       {message}
                     </p>
                   </div>
                 </div>
 
                 {/* Time */}
-                <span className="text-xs text-gray-400">
+                <span className="ml-3 shrink-0 text-[11px] text-slate-500">
                   {formatRelativeDate(chat.latestMessage?.createdAt)}
                 </span>
               </button>

@@ -90,7 +90,7 @@ export default function AISection({ onCreateChat }) {
   }
 
   return (
-    <div className="h-full rounded-2xl bg-slate-900 flex flex-col">
+    <div className="flex h-full flex-col rounded-2xl bg-slate-900">
       {/* Header */}
       <div className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900 p-4">
         <div className="flex items-center justify-between">
@@ -100,29 +100,30 @@ export default function AISection({ onCreateChat }) {
 
           <button
             onClick={onCreateChat}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-cyan-500 text-white transition hover:bg-cyan-600"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
+            title="New AI Chat"
           >
-            <FiPlus />
+            <FiPlus size={18} />
           </button>
         </div>
 
-        <div className="mt-4 flex items-center rounded-xl bg-slate-800 px-3 py-2">
-          <FiSearch className="text-gray-400" />
+        <div className="mt-4 flex items-center rounded-xl border border-slate-700 bg-slate-800 px-3 py-3 transition-all duration-200 focus-within:border-cyan-500">
+          <FiSearch className="text-slate-400" />
 
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search AI chats..."
-            className="ml-2 flex-1 bg-transparent text-white outline-none placeholder:text-gray-400"
+            className="ml-3 flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
           />
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="ml-2 rounded-full p-1 text-gray-400 transition hover:bg-slate-700 hover:text-white"
-              aria-label="Clear search"
+              className="rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+              title="Clear search"
             >
-              <FiX size={18} />
+              <FiX size={17} />
             </button>
           )}
         </div>
@@ -130,53 +131,56 @@ export default function AISection({ onCreateChat }) {
 
       {/* Chat List */}
       <div className="flex-1 overflow-y-auto">
-        {filteredChats.map((chat) => (
+        <div className="space-y-1 p-1">
+  {filteredChats.map((chat) => (
           <div
             key={chat._id}
-            className={`flex items-center justify-between px-4 py-3 transition hover:bg-slate-800 ${chatId === chat._id ? "bg-slate-800" : ""
+            className={`group flex items-center justify-between rounded-xl border px-4 py-4 transition-all duration-200
+        ${chatId === chat._id
+                ? "border-cyan-500 bg-slate-800 shadow-md"
+                : "border-transparent hover:border-slate-700 hover:bg-slate-800/60"
               }`}
           >
-            {/* Clickable chat area */}
             <button
               onClick={() => navigate(`/home/ai/${chat._id}`)}
-              className="flex flex-1 items-center gap-3 text-left cursor-pointer"
+              className="flex flex-1 items-center gap-3 text-left min-w-0 cursor-pointer"
             >
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 text-white">
-                <Brain size={24} />
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-cyan-500 text-white">
+                <Brain size={22} />
               </div>
 
-              <div>
-                <h3 className="font-medium text-white">
+              <div className="min-w-0 flex-1">
+                <h3 className="truncate text-sm font-semibold text-white">
                   {chat.title}
                 </h3>
 
-                <p className="max-w-44 truncate text-sm text-gray-400">
+                <p className="truncate text-xs text-slate-400">
                   {chat.latestConversation?.prompt || "No messages yet"}
                 </p>
               </div>
             </button>
 
-            {/* Right side */}
-            <div className="ml-4 flex items-center gap-3">
-              <span className="text-xs text-gray-400 whitespace-nowrap">
+            {/* Right Side */}
+            <div className="ml-4 flex shrink-0 items-center gap-3">
+              <span className="text-[11px] text-slate-500 whitespace-nowrap">
                 {formatRelativeDate(chat.lastActivity)}
               </span>
 
               <button
                 onClick={() => openEditModal(chat)}
-                className="rounded-lg p-2 text-slate-400 transition-all duration-200 hover:bg-cyan-500/10 hover:text-cyan-400 active:scale-95"
+                className="flex h-10 w-10 items-center justify-center rounded-xl border border-transparent text-slate-400 transition-all duration-200 hover:border-slate-700 hover:bg-slate-700 hover:text-cyan-400 active:scale-95"
                 title="Rename chat"
               >
-                <FiEdit size={17} />
+                <FiEdit size={18} />
               </button>
             </div>
           </div>
         ))}
+</div>
 
         {filteredChats.length === 0 && (
           <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-800 ring-1 ring-slate-700">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full border border-slate-700 bg-slate-800">
               <Brain size={46} className="text-cyan-400" />
             </div>
 
@@ -193,7 +197,7 @@ export default function AISection({ onCreateChat }) {
             {!query && (
               <button
                 onClick={onCreateChat}
-                className="mt-6 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 px-6 py-3 font-medium text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/30"
+                className="mt-6 rounded-xl border border-cyan-500 bg-cyan-500 px-6 py-3 font-medium text-white transition-all duration-200 hover:bg-cyan-600 hover:border-cyan-400"
               >
                 <FiPlus className="mr-2 inline" />
                 New AI Chat
@@ -203,12 +207,11 @@ export default function AISection({ onCreateChat }) {
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="mt-6 rounded-xl border border-slate-700 px-5 py-2.5 text-slate-300 transition hover:border-cyan-500 hover:text-cyan-400"
+                className="mt-6 rounded-xl border border-slate-700 px-5 py-3 text-slate-300 transition-all duration-200 hover:border-cyan-500 hover:bg-slate-800 hover:text-cyan-400"
               >
                 Clear Search
               </button>
             )}
-
           </div>
         )}
       </div>

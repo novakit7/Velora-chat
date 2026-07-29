@@ -142,8 +142,8 @@ export default function MobileNavbar() {
               className="relative h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center"
             >
               <FiBell size={20} className="text-gray-300" />
-
-              <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500" />
+              {/* Optional unread indicator */}
+              <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500" />
             </button>
 
             <NotificationModal

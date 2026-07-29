@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { FiMessageCircle, FiPlusSquare, FiSearch, FiTrash2 } from "react-icons/fi";
+import {
+  FiMessageCircle,
+  FiPlusSquare,
+  FiSearch,
+  FiTrash2,
+  FiX,
+} from "react-icons/fi";
 import { notify } from "../../utils/toast";
 import Loader from "../common/Loader";
 import api from "../../api/axois";
@@ -12,6 +18,7 @@ export default function NewChat() {
   const [chatLoadingId, setChatLoadingId] = useState(null);
   const [removeLoadingId, setRemoveLoadingId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const getFriends = async () => {
@@ -74,6 +81,16 @@ export default function NewChat() {
     }
   };
 
+  const filteredUsers = users.filter((user) => {
+    const search = query.toLowerCase();
+
+    return (
+      user.username?.toLowerCase().includes(search) ||
+      user.fullName?.toLowerCase().includes(search) ||
+      user.email?.toLowerCase().includes(search)
+    );
+  });
+
   return (
     <div className="h-full rounded-2xl bg-slate-900 flex flex-col">
 
@@ -88,14 +105,25 @@ export default function NewChat() {
           Search users and start a conversation.
         </p>
 
-        <div className="mt-4 flex items-center rounded-xl bg-slate-800 px-3 py-2">
-          <FiSearch className="text-gray-400" />
+        <div className="mt-4 flex items-center rounded-xl border border-slate-700 bg-slate-800 px-3 py-3 transition-all duration-200 focus-within:border-cyan-500">
+          <FiSearch className="text-slate-400" />
 
           <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
             type="text"
-            placeholder="Search username..."
-            className="ml-2 flex-1 bg-transparent text-white outline-none placeholder:text-gray-400"
+            placeholder="Search friends..."
+            className="ml-3 flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
           />
+
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+            >
+              <FiX size={17} />
+            </button>
+          )}
         </div>
 
       </div>
@@ -103,8 +131,8 @@ export default function NewChat() {
         <Loader variant="section" />
       </div>}
       {/* Users */}
-      <div className="flex-1 overflow-y-auto all-scroll p-4">
-        {users.length === 0 ? (
+      <div className="flex-1 overflow-y-auto all-scroll p-4 ">
+        {filteredUsers.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <div className="rounded-full bg-slate-800 p-5">
               <FiMessageCircle
@@ -129,37 +157,39 @@ export default function NewChat() {
             </button>
           </div>
         ) : (
-          <div className="space-y-4">
-            {users.map((user) => (
+          <div className="space-y-2.5">
+            {filteredUsers.map((user) => (
               <div
                 key={user._id}
-                className="rounded-xl border border-slate-800 bg-slate-800 p-4 transition hover:border-cyan-500/40"
+                className="group rounded-xl border border-transparent bg-slate-800 px-4 py-3.5 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800/80"
               >
-                <div className="flex items-center gap-4">
-                  <div className="relative">
+                <div className="flex items-center gap-3">
+                  {/* Avatar */}
+                  <div className="relative shrink-0">
                     {user.avatar?.url ? (
                       <img
                         src={user.avatar.url}
                         alt={user.username}
-                        className="h-14 w-14 rounded-full object-cover ring-2 ring-slate-700"
+                        className="h-12 w-12 rounded-full object-cover border border-slate-700"
                       />
                     ) : (
-                      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-cyan-500 text-lg font-semibold text-white">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 text-sm font-semibold text-white">
                         {user.username?.charAt(0).toUpperCase()}
                       </div>
                     )}
 
                     {user.online && (
-                      <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-slate-900 bg-green-500" />
+                      <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-slate-900 bg-emerald-500" />
                     )}
                   </div>
 
+                  {/* User Details */}
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-lg font-semibold text-white">
+                    <h3 className="truncate text-sm font-semibold text-white">
                       {user.username}
                     </h3>
 
-                    <p className="truncate text-sm text-slate-400">
+                    <p className="truncate text-xs text-slate-400">
                       {user.fullName}
                     </p>
 
@@ -169,17 +199,18 @@ export default function NewChat() {
                   </div>
                 </div>
 
-                <div className="mt-5 grid grid-cols-2 gap-3">
+                {/* Actions */}
+                <div className="mt-4 grid grid-cols-2 gap-3">
                   <button
                     onClick={() => createChat(user._id)}
                     disabled={chatLoadingId === user._id}
-                    className="flex items-center justify-center gap-2 rounded-lg bg-cyan-500 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-600 disabled:opacity-60"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-cyan-500 bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-cyan-600 hover:border-cyan-400 disabled:opacity-60"
                   >
                     {chatLoadingId === user._id ? (
                       <Loader variant="button" />
                     ) : (
                       <>
-                        <FiMessageCircle />
+                        <FiMessageCircle className="text-base" />
                         Chat
                       </>
                     )}
@@ -188,13 +219,13 @@ export default function NewChat() {
                   <button
                     onClick={() => setConfirmDelete(user)}
                     disabled={removeLoadingId === user._id}
-                    className="flex items-center justify-center gap-2 rounded-lg border border-red-500/30 py-2.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:opacity-60"
+                    className="flex items-center justify-center gap-2 rounded-xl border border-red-500/30 px-4 py-2.5 text-sm font-medium text-red-400 transition-all duration-200 hover:border-red-500/60 hover:bg-red-500/10 disabled:opacity-60"
                   >
                     {removeLoadingId === user._id ? (
                       <Loader variant="button" />
                     ) : (
                       <>
-                        <FiTrash2 />
+                        <FiTrash2 className="text-base" />
                         Remove
                       </>
                     )}
