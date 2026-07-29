@@ -86,7 +86,7 @@ export default function UserModal({ open, onClose, onLogout }) {
             onClose();
             // navigate("/home/profile/edit");
           }}
-          className="flex w-full items-center justify-between rounded-xl border border-transparent px-4 py-3 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800"
+          className="flex w-full items-center cursor-pointer justify-between rounded-xl border border-transparent px-4 py-3 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10">
@@ -113,7 +113,7 @@ export default function UserModal({ open, onClose, onLogout }) {
             onClose();
             // navigate("/home/change-password");
           }}
-          className="flex w-full items-center justify-between rounded-xl border border-transparent px-4 py-3 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800"
+          className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-transparent px-4 py-3 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800"
         >
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/10">
@@ -144,7 +144,7 @@ export default function UserModal({ open, onClose, onLogout }) {
             onClose();
             onLogout();
           }}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 py-3 font-medium text-red-400 transition-all duration-200 hover:border-red-500/40 hover:bg-red-500/20"
+          className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border border-red-500/20 bg-red-500/10 py-3 font-medium text-red-400 transition-all duration-200 hover:border-red-500/40 hover:bg-red-500/20"
         >
           <FiLogOut />
           Logout

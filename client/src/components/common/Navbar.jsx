@@ -58,7 +58,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setOpenNotification((prev) => !prev)}
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-slate-700 bg-slate-800 transition-all duration-200 hover:border-slate-600 hover:bg-slate-700"
+              className="relative flex h-11 w-11 items-center cursor-pointer justify-center rounded-full border border-slate-700 bg-slate-800 transition-all duration-200 hover:border-slate-600 hover:bg-slate-700"
             >
               <FiBell className="text-slate-300" size={18} />
 
@@ -72,7 +72,7 @@ export default function Navbar() {
 
             <button
               onClick={() => setOpenUser((prev) => !prev)}
-              className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-cyan-500 bg-cyan-500"
+              className="flex h-10 w-10 items-center justify-center cursor-pointer overflow-hidden rounded-full border-2 border-cyan-500 bg-cyan-500"
             >
               {user?.avatar?.url ? (
                 <img

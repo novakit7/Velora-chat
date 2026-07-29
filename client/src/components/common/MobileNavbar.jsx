@@ -139,7 +139,7 @@ export default function MobileNavbar() {
 
             <button
               onClick={() => setOpenNotification(true)}
-              className="relative h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center"
+              className="relative cursor-pointer h-10 w-10 rounded-full bg-slate-800 flex items-center justify-center"
             >
               <FiBell size={20} className="text-gray-300" />
               {/* Optional unread indicator */}
@@ -153,7 +153,7 @@ export default function MobileNavbar() {
 
             <button
               onClick={() => setOpenUser(true)}
-              className="w-10 h-10 rounded-full border-2 border-cyan-500 overflow-hidden"
+              className="w-10 h-10 rounded-full cursor-pointer border-2 border-cyan-500 overflow-hidden"
             >
               {user?.avatar?.url ? (
                 <img
@@ -184,26 +184,37 @@ export default function MobileNavbar() {
       </header>
 
       {/* ---------- Bottom Navigation ---------- */}
-
-      <nav className="fixed bottom-3 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-md rounded-2xl border border-slate-800 bg-slate-900/95 backdrop-blur-lg shadow-2xl">
-
-        <div className="flex items-center justify-around py-3">
-
+      <nav className="fixed bottom-3 left-1/2 z-50 w-[95%] max-w-md -translate-x-1/2 rounded-2xl border border-slate-800 bg-slate-900/95 shadow-2xl backdrop-blur-lg">
+        <div className="flex items-center justify-around py-2">
           {menuItems.map((item) => (
             <button
               key={item.name}
-               onClick={() => handleNavigation(item.name)}
-              className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 ${activeTab === item.name
-                  ? "bg-cyan-500 text-white scale-105 shadow-md"
-                  : "text-gray-400 hover:text-cyan-400"
+              onClick={() => handleNavigation(item.name)}
+              className={`group flex min-w-14.5 flex-col items-center justify-center rounded-xl px-2 py-2 transition-all duration-200 ${activeTab === item.name
+                  ? "text-cyan-400"
+                  : "text-slate-400 hover:text-cyan-400"
                 }`}
             >
-              {item.icon}
+              <div
+                className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${activeTab === item.name
+                    ? "bg-cyan-500 text-white shadow-md"
+                    : "group-hover:bg-slate-800"
+                  }`}
+              >
+                {item.icon}
+              </div>
+
+              <span
+                className={`mt-1 text-[10px] font-medium leading-none ${activeTab === item.name
+                    ? "text-cyan-400"
+                    : "text-slate-400"
+                  }`}
+              >
+                {item.name}
+              </span>
             </button>
           ))}
-
         </div>
-
       </nav>
       <LogoutModal
         open={openLogout}

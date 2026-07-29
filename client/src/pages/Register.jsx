@@ -304,7 +304,7 @@ export default function Register() {
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-text-muted transition-colors hover:text-primary"
+                    className="absolute cursor-pointer inset-y-0 right-0 flex w-12 items-center justify-center text-text-muted transition-colors hover:text-primary"
                     aria-label={
                       showPassword ? "Hide password" : "Show password"
                     }
@@ -406,7 +406,7 @@ export default function Register() {
                     type="button"
                     onClick={handleRegisterUser}
                     disabled={loading}
-                    className="mt-6 w-45 rounded-xl bg-secondary py-1.5 font-semibold text-white transition hover:bg-secondary-hover disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-6 w-45 rounded-xl cursor-pointer bg-secondary py-1.5 font-semibold text-white transition hover:bg-secondary-hover disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {loading ?  <Loader variant="button"/> : "Send OTP"}
                   </button>
@@ -432,7 +432,7 @@ export default function Register() {
                       type="button"
                       onClick={handleRegisterUser}
                       disabled={loading || timer > 0}
-                      className="rounded-xl border border-border px-4 py-2 text-sm font-medium text-text transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-xl cursor-pointer border border-border px-4 py-2 text-sm font-medium text-text transition hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {timer > 0 ? `${timer}s` : "Resend"}
                     </button>
@@ -485,7 +485,7 @@ export default function Register() {
               type="button"
               onClick={handleVerifyUser}
               disabled={!otpSent || loading}
-              className={`mt-1 flex w-full items-center justify-center rounded-xl py-3.5 font-semibold transition-all duration-200
+              className={`mt-1 flex w-full cursor-pointer items-center justify-center rounded-xl py-3.5 font-semibold transition-all duration-200
     ${
       !otpSent || loading
         ? "cursor-not-allowed bg-primary/60 text-white opacity-70"
@@ -511,7 +511,7 @@ export default function Register() {
               Already have an account?{" "}
               <Link
                 to="/"
-                className="font-semibold text-primary transition-colors hover:text-primary-hover"
+                className="font-semibold text-primary cursor-pointer transition-colors hover:text-primary-hover"
               >
                 Sign In
               </Link>

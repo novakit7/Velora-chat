@@ -30,7 +30,7 @@ export default function LogoutModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="rounded-lg bg-slate-700 px-4 py-2 text-white hover:bg-slate-600 disabled:opacity-50"
+            className="rounded-lg bg-slate-700 px-4 py-2 cursor-pointer text-white hover:bg-slate-600 disabled:opacity-50"
           >
             Cancel
           </button>
@@ -38,7 +38,7 @@ export default function LogoutModal({
           <button
             onClick={onConfirm}
             disabled={loading}
-            className="flex min-w-22.5 items-center justify-center rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-50"
+            className="flex min-w-22.5 items-center cursor-pointer justify-center rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 disabled:opacity-50"
           >
             {loading ? <Loader variant="button" /> : "Logout"}
           </button>

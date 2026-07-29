@@ -89,7 +89,7 @@ export default function GroupList() {
 
           <button
             onClick={() => setShowCreateModal(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
+            className="flex h-10 w-10 items-center cursor-pointer justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
             title="Create Group"
           >
             <FiPlus size={18} />
@@ -109,7 +109,7 @@ export default function GroupList() {
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+              className="rounded-full p-1 cursor-pointer text-slate-400 transition hover:bg-slate-700 hover:text-white"
             >
               <FiX size={17} />
             </button>
@@ -132,7 +132,7 @@ export default function GroupList() {
 
             <button
               onClick={() => setShowCreateModal(true)}
-              className="rounded-lg bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600"
+              className="rounded-lg cursor-pointer bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600"
             >
               Create Group
             </button>
@@ -147,7 +147,7 @@ export default function GroupList() {
                 <button
                   key={group._id}
                   onClick={() => navigate(`/home/group/${group._id}`)}
-                  className={`group flex w-full items-center justify-between rounded-xl border px-4 py-4 transition-all duration-200
+                  className={`group flex cursor-pointer w-full items-center justify-between rounded-xl border px-4 py-4 transition-all duration-200
   ${chatId === group._id
                       ? "border-cyan-500 bg-slate-800 shadow-md"
                       : "border-transparent hover:border-slate-700 hover:bg-slate-800/60"
@@ -205,7 +205,7 @@ export default function GroupList() {
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 hover:text-white"
+                className="text-gray-400 cursor-pointer hover:text-white"
               >
                 <FiX size={24} />
               </button>
@@ -249,7 +249,7 @@ export default function GroupList() {
               <button
                 onClick={handleCreateGroup}
                 disabled={!newGroupName.trim() || selectedFriends.length === 0}
-                className="w-full rounded-lg bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full rounded-lg cursor-pointer bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Create Group
               </button>

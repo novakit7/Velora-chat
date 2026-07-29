@@ -21,12 +21,27 @@ export default function Conversation({ onBack }) {
   const [loadingChat, setLoadingChat] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(true);
   const [sending, setSending] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const { user } = useContext(AuthContext);
 
   const [messages, setMessages] = useState([]);
   const [msg, setMsg] = useState("");
   const [chat, setChat] = useState(null);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const { chatId } = useParams();
 
@@ -217,12 +232,38 @@ export default function Conversation({ onBack }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-gray-300">
+        <div className="relative" ref={menuRef}>
           <button
-            onClick={() => setShowDeleteModal(true)}
-            className="hover:text-red-500 transition">
-            <FiTrash2 size={20} />
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl transition-all duration-200 hover:bg-slate-800"
+          >
+            <FiMoreVertical
+              size={20}
+              className="text-slate-400"
+            />
           </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 top-12 z-20 w-44 overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  setShowDeleteModal(true);
+                }}
+                className="flex w-full items-center cursor-pointer gap-3 px-4 py-3 text-red-400 transition hover:bg-slate-800"
+              >
+                <FiTrash2 size={18} />
+                Delete Chat
+              </button>
+            </div>
+          )}
+
+          <DeleteChatModal
+            isOpen={showDeleteModal}
+            onClose={() => setShowDeleteModal(false)}
+            onDelete={deleteChat}
+            loading={deleting}
+          />
         </div>
       </div>
 
@@ -260,21 +301,21 @@ export default function Conversation({ onBack }) {
                 return (
                   <div
                     key={message._id}
-                    className={`flex mb-4 transition-all duration-300 ${isMe ? "justify-end" : "justify-start"
+                    className={`mb-4 flex ${isMe ? "justify-end" : "justify-start"
                       }`}
                   >
                     <div
-                      className={`flex items-end gap-2 max-w-[75%] ${isMe ? "flex-row-reverse" : ""
+                      className={`flex max-w-[75%] min-w-0 items-end gap-2 ${isMe ? "flex-row-reverse" : ""
                         }`}
                     >
                       <img
                         src={message.sender?.avatar?.url}
                         alt={message.sender?.username}
-                        className="h-10 w-10 rounded-full border border-slate-700 object-cover"
+                        className="h-10 w-10 shrink-0 rounded-full border border-slate-700 object-cover"
                       />
 
                       <div
-                        className={`max-w-md rounded-2xl px-4 py-3 shadow-md transition-all duration-200 wrap-break-words ${isMe
+                        className={`min-w-0 max-w-full rounded-2xl px-4 py-3 shadow-md ${isMe
                             ? "rounded-br-md bg-cyan-500 text-white"
                             : "rounded-bl-md border border-slate-700 bg-slate-800 text-slate-100"
                           }`}
@@ -285,7 +326,7 @@ export default function Conversation({ onBack }) {
                           </p>
                         )}
 
-                        <p className="text-sm leading-6">
+                        <p className="whitespace-pre-wrap break-all text-sm leading-6">
                           {message.content}
                         </p>
 
@@ -295,9 +336,7 @@ export default function Conversation({ onBack }) {
                         >
                           <span>{formatDateTime(message.createdAt)}</span>
 
-                          {isMe && (
-                            <span className="font-bold">✓✓</span>
-                          )}
+                          {isMe && <span className="font-bold">✓✓</span>}
                         </div>
                       </div>
                     </div>
@@ -325,7 +364,7 @@ export default function Conversation({ onBack }) {
           <button
             type="submit"
             disabled={sending}
-            className="relative flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600"
+            className="relative cursor-pointer flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600"
           >
             {sending ? (
               <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />

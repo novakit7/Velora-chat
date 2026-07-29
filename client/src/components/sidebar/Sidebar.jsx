@@ -24,15 +24,15 @@ export default function Sidebar() {
   const location = useLocation();
 
   const activeTab =
-  location.pathname.startsWith("/home/ai")
-    ? "AI"
-    : location.pathname.startsWith("/home/group")
-    ? "Groups"
-    : location.pathname.startsWith("/home/new-chat")
-    ? "New Chat"
-    : location.pathname.startsWith("/home/add-friend")
-    ? "Add Friend"
-    : "Chats";
+    location.pathname.startsWith("/home/ai")
+      ? "AI"
+      : location.pathname.startsWith("/home/group")
+        ? "Groups"
+        : location.pathname.startsWith("/home/new-chat")
+          ? "New Chat"
+          : location.pathname.startsWith("/home/add-friend")
+            ? "Add Friend"
+            : "Chats";
 
   const menuItems = [
     {
@@ -73,55 +73,58 @@ export default function Sidebar() {
   };
 
   const handleNavigation = (tab) => {
-  switch (tab) {
-    case "Chats":
-      navigate("/home");
-      break;
+    switch (tab) {
+      case "Chats":
+        navigate("/home");
+        break;
 
-    case "Groups":
-      navigate("/home/group");
-      break;
+      case "Groups":
+        navigate("/home/group");
+        break;
 
-    case "New Chat":
-      navigate("/home/new-chat");
-      break;
+      case "New Chat":
+        navigate("/home/new-chat");
+        break;
 
-    case "AI":
-      navigate("/home/ai");
-      break;
+      case "AI":
+        navigate("/home/ai");
+        break;
 
-    case "Add Friend":
-      navigate("/home/add-friend");
-      break;
+      case "Add Friend":
+        navigate("/home/add-friend");
+        break;
 
-    default:
-      navigate("/home");
-  }
-};
+      default:
+        navigate("/home");
+    }
+  };
 
   return (
     <>
-      <aside className="w-19.5 lg:w-20 bg-bg border border-border rounded-2xl flex flex-col py-4 shrink-0">
+      <aside className="w-22 bg-bg border border-border rounded-2xl flex flex-col py-4 shrink-0">
         <nav className="flex-1 flex flex-col items-center gap-3">
           {menuItems.map((item) => (
             <button
               key={item.name}
               title={item.name}
               onClick={() => handleNavigation(item.name)}
-              className={`group relative w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer
-
-                ${
-                  activeTab === item.name
-                    ? item.primary
-                      ? "bg-linear-to-br from-cyan-500 to-blue-600 text-white shadow-lg scale-105"
-                      : "bg-cyan-500 text-white shadow-lg scale-105"
-                    : item.primary
-                      ? "bg-linear-to-br from-cyan-500/80 to-blue-600/80 text-white hover:scale-105"
-                      : "text-gray-400 hover:bg-slate-800 hover:text-cyan-400 hover:scale-105"
+              className={`group flex w-16 flex-col items-center justify-center gap-1 rounded-xl py-2 transition-all duration-200 cursor-pointer
+      ${activeTab === item.name
+                  ? "bg-cyan-500 text-white shadow-lg scale-105"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-cyan-400 hover:scale-105"
                 }
-              `}
+    `}
             >
               {item.icon}
+
+              <span
+                className={`text-[10px] font-medium leading-none ${activeTab === item.name
+                    ? "text-white"
+                    : "text-slate-400 group-hover:text-cyan-400"
+                  }`}
+              >
+                {item.name}
+              </span>
             </button>
           ))}
         </nav>
@@ -130,7 +133,7 @@ export default function Sidebar() {
           <button
             onClick={() => setShowLogoutModal(true)}
             title="Logout"
-            className="w-14 h-14 rounded-xl flex items-center justify-center text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:scale-105 transition-all duration-200"
+            className="w-14 h-14 rounded-xl flex items-center cursor-pointer justify-center text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:scale-105 transition-all duration-200"
           >
             <FiLogOut size={22} />
           </button>
@@ -155,14 +158,14 @@ export default function Sidebar() {
             <div className="mt-6 flex justify-end gap-3">
               <button
                 onClick={() => setShowLogoutModal(false)}
-                className="rounded-lg bg-slate-700 px-4 py-2 text-white hover:bg-slate-600 transition"
+                className="rounded-lg cursor-pointer bg-slate-700 px-4 py-2 text-white hover:bg-slate-600 transition"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleLogout}
-                className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600 transition"
+                className="rounded-lg cursor-pointer bg-red-500 px-4 py-2 text-white hover:bg-red-600 transition"
               >
                 {loading ? <Loader variant="button" /> : "Logout"}
               </button>

@@ -198,7 +198,7 @@ export default function FriendSection() {
                         <button
                           onClick={() => acceptRequest(request._id)}
                           disabled={actionLoading === request._id}
-                          className="flex items-center justify-center gap-2 rounded-lg bg-cyan-500 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="flex items-center cursor-pointer justify-center gap-2 rounded-lg bg-cyan-500 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {actionLoading === request._id ? (
                             <Loader variant="button" />
@@ -213,7 +213,7 @@ export default function FriendSection() {
                         <button
                           onClick={() => rejectRequest(request._id)}
                           disabled={actionLoading === request._id}
-                          className="flex items-center justify-center gap-2 rounded-lg border border-red-500/30 py-2.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="flex items-center cursor-pointer justify-center gap-2 rounded-lg border border-red-500/30 py-2.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <FiX />
                           Reject
@@ -284,7 +284,7 @@ export default function FriendSection() {
                       <button
                         onClick={() => cancelRequest(request._id)}
                         disabled={actionLoading === request._id}
-                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-red-500/30 py-2.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg border border-red-500/30 py-2.5 text-sm font-medium text-red-400 transition hover:bg-red-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {actionLoading === request._id ? (
                           <Loader variant="button" />

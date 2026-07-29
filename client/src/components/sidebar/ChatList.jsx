@@ -49,7 +49,7 @@ export default function ChatList() {
 
           <button
             onClick={() => navigate("/home/new-chat")}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
             title="New Chat"
           >
             <FiPlus size={18} />
@@ -69,7 +69,7 @@ export default function ChatList() {
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="ml-2 rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+              className="ml-2 rounded-full p-1 cursor-pointer text-slate-400 transition hover:bg-slate-700 hover:text-white"
             >
               <FiX size={18} />
             </button>
@@ -99,7 +99,7 @@ export default function ChatList() {
 
             <button
               onClick={() => navigate("/home/new-chat")}
-              className="mt-6 flex items-center gap-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 px-6 py-3 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/30"
+              className="mt-6 flex items-center cursor-pointer gap-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 px-6 py-3 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/30"
             >
               <FiMessageCircle />
               Start New Chat
@@ -115,7 +115,7 @@ export default function ChatList() {
               <button
                 key={chat._id}
                 onClick={() => navigate(`/home/chat/${chat._id}`)}
-                className={`group w-full flex items-center justify-between rounded-xl px-4 py-4 transition-all duration-200 border
+                className={`group w-full flex cursor-pointer items-center justify-between rounded-xl px-4 py-4 transition-all duration-200 border
     ${chatId === chat._id
                     ? "bg-slate-800 border-cyan-500 shadow-md"
                     : "border-transparent hover:bg-slate-800/60 hover:border-slate-700"

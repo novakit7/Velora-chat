@@ -28,7 +28,7 @@ export default function NotFound() {
         {/* Button */}
         <Link
           to="/"
-          className="mt-8 inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-6 py-3 font-medium text-white transition hover:bg-cyan-600"
+          className="mt-8 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-cyan-500 px-6 py-3 font-medium text-white transition hover:bg-cyan-600"
         >
           <FiHome size={18} />
           Back to Home

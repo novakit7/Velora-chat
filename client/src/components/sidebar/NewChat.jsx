@@ -119,7 +119,7 @@ export default function NewChat() {
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+              className="rounded-full p-1 cursor-pointer text-slate-400 transition hover:bg-slate-700 hover:text-white"
             >
               <FiX size={17} />
             </button>
@@ -204,7 +204,7 @@ export default function NewChat() {
                   <button
                     onClick={() => createChat(user._id)}
                     disabled={chatLoadingId === user._id}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-cyan-500 bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-cyan-600 hover:border-cyan-400 disabled:opacity-60"
+                    className="flex items-center justify-center cursor-pointer gap-2 rounded-xl border border-cyan-500 bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:bg-cyan-600 hover:border-cyan-400 disabled:opacity-60"
                   >
                     {chatLoadingId === user._id ? (
                       <Loader variant="button" />
@@ -219,7 +219,7 @@ export default function NewChat() {
                   <button
                     onClick={() => setConfirmDelete(user)}
                     disabled={removeLoadingId === user._id}
-                    className="flex items-center justify-center gap-2 rounded-xl border border-red-500/30 px-4 py-2.5 text-sm font-medium text-red-400 transition-all duration-200 hover:border-red-500/60 hover:bg-red-500/10 disabled:opacity-60"
+                    className="flex items-center cursor-pointer justify-center gap-2 rounded-xl border border-red-500/30 px-4 py-2.5 text-sm font-medium text-red-400 transition-all duration-200 hover:border-red-500/60 hover:bg-red-500/10 disabled:opacity-60"
                   >
                     {removeLoadingId === user._id ? (
                       <Loader variant="button" />
@@ -261,7 +261,7 @@ export default function NewChat() {
             <div className="mt-6 flex gap-3">
               <button
                 onClick={() => setConfirmDelete(null)}
-                className="flex-1 rounded-xl border border-slate-700 py-3 font-medium text-slate-300 transition hover:bg-slate-800"
+                className="flex-1 rounded-xl border cursor-pointer border-slate-700 py-3 font-medium text-slate-300 transition hover:bg-slate-800"
               >
                 Cancel
               </button>
@@ -272,7 +272,7 @@ export default function NewChat() {
                   setConfirmDelete(null);
                 }}
                 disabled={removeLoadingId === confirmDelete._id}
-                className="flex flex-1 items-center justify-center rounded-xl bg-red-500 py-3 font-medium text-white transition hover:bg-red-600 disabled:opacity-60"
+                className="flex flex-1 items-center cursor-pointer justify-center rounded-xl bg-red-500 py-3 font-medium text-white transition hover:bg-red-600 disabled:opacity-60"
               >
                 {removeLoadingId === confirmDelete._id ? (
                   <Loader variant="button" />

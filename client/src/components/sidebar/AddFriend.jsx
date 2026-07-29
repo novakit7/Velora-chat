@@ -78,7 +78,7 @@ export default function AddFriend() {
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+              className="rounded-full p-1 cursor-pointer text-slate-400 transition hover:bg-slate-700 hover:text-white"
             >
               <FiX size={17} />
             </button>
@@ -89,7 +89,7 @@ export default function AddFriend() {
         {isMobile && (
           <button
             onClick={() => navigate("/home/friend-requests")}
-            className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-3 font-medium text-white transition hover:bg-cyan-600"
+            className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-3 font-medium text-white transition hover:bg-cyan-600"
           >
             <FiUsers size={20} />
             Manage Requests
@@ -123,7 +123,7 @@ export default function AddFriend() {
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="mt-5 rounded-xl border border-slate-700 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:border-cyan-500 hover:text-cyan-400"
+                className="mt-5 cursor-pointer rounded-xl border border-slate-700 px-5 py-2.5 text-sm font-medium text-slate-300 transition hover:border-cyan-500 hover:text-cyan-400"
               >
                 Clear Search
               </button>
@@ -171,7 +171,7 @@ export default function AddFriend() {
               <button
                 onClick={() => sendRequest(user._id)}
                 disabled={sendingId === user._id}
-                className="ml-4 flex shrink-0 items-center justify-center gap-2 rounded-xl border border-cyan-500 bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:border-cyan-400 hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-70"
+                className="ml-4 flex cursor-pointer shrink-0 items-center justify-center gap-2 rounded-xl border border-cyan-500 bg-cyan-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 hover:border-cyan-400 hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {sendingId === user._id ? (
                   <Loader variant="button" />

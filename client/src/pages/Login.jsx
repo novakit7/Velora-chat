@@ -258,7 +258,7 @@ export default function Login() {
                       <button
                         type="button"
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-text-muted hover:text-primary"
+                        className="absolute cursor-pointer inset-y-0 right-0 flex w-12 items-center justify-center text-text-muted hover:text-primary"
                       >
                         {showPassword ? (
                           <FiEyeOff size={20} />
@@ -283,7 +283,7 @@ export default function Login() {
                         setForgotPassword(true);
                         setOtpSent(false);
                       }}
-                      className="text-sm text-primary hover:text-primary-hover"
+                      className="text-sm cursor-pointer text-primary hover:text-primary-hover"
                     >
                       Forgot Password?
                     </button>
@@ -302,7 +302,7 @@ export default function Login() {
                     type="button"
                     disabled={loading}
                     onClick={() => setForgotPassword(false)}
-                    className="mt-4 text-sm text-primary hover:text-primary-hover"
+                    className="mt-4 text-sm cursor-pointer text-primary hover:text-primary-hover"
                   >
                     ← Back to Login
                   </button>
@@ -335,7 +335,7 @@ export default function Login() {
                           otp: "",
                         }));
                       }}
-                      className={`w-full rounded-lg border bg-input-focus px-4 py-2 text-text outline-none transition
+                      className={`w-full rounded-lg border cursor-pointer bg-input-focus px-4 py-2 text-text outline-none transition
           ${
             errors.otp
               ? "border-red-500 focus:border-red-500"
@@ -380,7 +380,7 @@ export default function Login() {
                         type="button"
                         disabled={loading}
                         onClick={() => setShowPassword((prev) => !prev)}
-                        className="absolute inset-y-0 right-0 flex w-12 items-center justify-center text-text-muted hover:text-primary"
+                        className="absolute cursor-pointer inset-y-0 right-0 flex w-12 items-center justify-center text-text-muted hover:text-primary"
                       >
                         {showPassword ? (
                           <FiEyeOff size={20} />
@@ -405,7 +405,7 @@ export default function Login() {
                       className={`${
                         timer > 0
                           ? "text-gray-400 cursor-not-allowed"
-                          : "text-primary hover:underline"
+                          : "text-primary cursor-pointer hover:underline"
                       }`}
                     >
                       {timer > 0 ? `Resend OTP (${timer}s)` : "Resend OTP"}
@@ -420,7 +420,7 @@ export default function Login() {
                         setStep(1);
                         setTimer(60);
                       }}
-                      className="text-primary hover:underline"
+                      className="text-primary cursor-pointer hover:underline"
                     >
                       Change Email
                     </button>
@@ -438,7 +438,7 @@ export default function Login() {
                       setNewPassword("");
                       setEmail("");
                     }}
-                    className="text-left text-sm text-primary hover:text-primary-hover"
+                    className="text-left text-smcursor-pointer text-primary hover:text-primary-hover"
                   >
                     ← Back to Login
                   </button>
@@ -456,7 +456,7 @@ export default function Login() {
                     ? handleForgetPassword
                     : handleVerifyOtp
               }
-              className="w-full rounded-lg bg-primary py-2 font-semibold text-white transition hover:bg-primary-hover active:bg-primary-active "
+              className="w-full rounded-lg bg-primary py-2 font-semibold cursor-pointer text-white transition hover:bg-primary-hover active:bg-primary-active "
             >
               {loading ? (
                 <Loader variant="button" />
@@ -474,7 +474,7 @@ export default function Login() {
                 Don't have an account?{" "}
                 <Link
                   to="/register"
-                  className="font-semibold text-primary hover:text-primary-hover"
+                  className="font-semibold cursor-pointer text-primary hover:text-primary-hover"
                 >
                   Create Account
                 </Link>

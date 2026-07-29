@@ -153,7 +153,7 @@ export default function NotificationModal({ open, onClose }) {
               deletingAll ||
               notifications.length === 0
             }
-            className="rounded-md px-2 py-1 text-xs font-medium text-cyan-400 hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-md px-2 cursor-pointer py-1 text-xs font-medium text-cyan-400 hover:bg-slate-800 disabled:opacity-50"
           >
             {markingAll ? <Loader variant="button"/> : "Mark all"}
           </button>
@@ -165,7 +165,7 @@ export default function NotificationModal({ open, onClose }) {
               markingAll ||
               notifications.length === 0
             }
-            className="rounded-md px-2 py-1 text-xs font-medium text-red-400 hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-md cursor-pointer px-2 py-1 text-xs font-medium text-red-400 hover:bg-slate-800 disabled:opacity-50"
           >
             {deletingAll ? <Loader variant="button"/> : "Delete all"}
           </button>
@@ -249,7 +249,7 @@ export default function NotificationModal({ open, onClose }) {
                         handleDeleteNotification(e, item._id)
                       }
                       disabled={deletingId === item._id}
-                      className="flex h-7 w-7 items-center justify-center rounded-full opacity-0 transition-all duration-200 hover:bg-red-500/10 group-hover:opacity-100 disabled:opacity-100"
+                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-full opacity-0 transition-all duration-200 hover:bg-red-500/10 group-hover:opacity-100 disabled:opacity-100"
                     >
                       {deletingId === item._id ? (
                         <Loader variant="button" />

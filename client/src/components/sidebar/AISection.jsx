@@ -100,7 +100,7 @@ export default function AISection({ onCreateChat }) {
 
           <button
             onClick={onCreateChat}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
             title="New AI Chat"
           >
             <FiPlus size={18} />
@@ -120,7 +120,7 @@ export default function AISection({ onCreateChat }) {
           {query && (
             <button
               onClick={() => setQuery("")}
-              className="rounded-full p-1 text-slate-400 transition hover:bg-slate-700 hover:text-white"
+              className="rounded-full p-1 cursor-pointer text-slate-400 transition hover:bg-slate-700 hover:text-white"
               title="Clear search"
             >
               <FiX size={17} />
@@ -168,7 +168,7 @@ export default function AISection({ onCreateChat }) {
 
               <button
                 onClick={() => openEditModal(chat)}
-                className="flex h-10 w-10 items-center justify-center rounded-xl border border-transparent text-slate-400 transition-all duration-200 hover:border-slate-700 hover:bg-slate-700 hover:text-cyan-400 active:scale-95"
+                className="flex h-10 w-10 items-center cursor-pointer justify-center rounded-xl border border-transparent text-slate-400 transition-all duration-200 hover:border-slate-700 hover:bg-slate-700 hover:text-cyan-400 active:scale-95"
                 title="Rename chat"
               >
                 <FiEdit size={18} />
@@ -197,7 +197,7 @@ export default function AISection({ onCreateChat }) {
             {!query && (
               <button
                 onClick={onCreateChat}
-                className="mt-6 rounded-xl border border-cyan-500 bg-cyan-500 px-6 py-3 font-medium text-white transition-all duration-200 hover:bg-cyan-600 hover:border-cyan-400"
+                className="mt-6 rounded-xl border cursor-pointer border-cyan-500 bg-cyan-500 px-6 py-3 font-medium text-white transition-all duration-200 hover:bg-cyan-600 hover:border-cyan-400"
               >
                 <FiPlus className="mr-2 inline" />
                 New AI Chat
@@ -207,7 +207,7 @@ export default function AISection({ onCreateChat }) {
             {query && (
               <button
                 onClick={() => setQuery("")}
-                className="mt-6 rounded-xl border border-slate-700 px-5 py-3 text-slate-300 transition-all duration-200 hover:border-cyan-500 hover:bg-slate-800 hover:text-cyan-400"
+                className="mt-6 rounded-xl border cursor-pointer border-slate-700 px-5 py-3 text-slate-300 transition-all duration-200 hover:border-cyan-500 hover:bg-slate-800 hover:text-cyan-400"
               >
                 Clear Search
               </button>

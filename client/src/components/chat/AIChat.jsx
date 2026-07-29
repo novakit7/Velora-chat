@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 import { notify } from "../../utils/toast";
 import {
   FiArrowLeft,
-  FiEdit2,
   FiMoreVertical,
   FiSend,
   FiTrash2,
@@ -36,6 +35,21 @@ export default function AIChat({
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const navigate = useNavigate();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const scrollToBottom = (behavior = "smooth") => {
     messagesEndRef.current?.scrollIntoView({
@@ -203,7 +217,7 @@ export default function AIChat({
 
             <button
               onClick={onBack}
-              className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-700 text-white transition hover:bg-gray-600"
+              className="flex h-10 w-10 items-center cursor-pointer justify-center rounded-full bg-gray-700 text-white transition hover:bg-gray-600"
             >
               <FiArrowLeft size={20} />
             </button>
@@ -253,7 +267,7 @@ export default function AIChat({
             <button
               disabled={creatingChat}
               onClick={createChat}
-              className="w-full rounded-xl bg-cyan-500 py-3 font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-50"
+              className="w-full rounded-xl cursor-pointer bg-cyan-500 py-3 font-semibold text-white transition hover:bg-cyan-600 disabled:opacity-50"
             >
               {creatingChat ? <Loader variant="button" /> : "Start Conversation"}
             </button>
@@ -286,16 +300,32 @@ export default function AIChat({
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-gray-300 px-3">
+        <div className="relative" ref={menuRef}>
           <button
-            onClick={() => setShowDeleteModal(true)}
-            className="group rounded-xl p-2 transition hover:bg-red-500/10"
+            onClick={() => setMenuOpen((prev) => !prev)}
+            className="flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 hover:bg-slate-800"
           >
-            <FiTrash2
+            <FiMoreVertical
               size={20}
-              className="text-gray-400 transition group-hover:text-red-500"
+              className="text-slate-400"
             />
           </button>
+
+          {menuOpen && (
+            <div className="absolute right-0 top-12 z-20 w-44 overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-2xl">
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  setShowDeleteModal(true);
+                }}
+                className="flex w-full items-center gap-3 px-4 py-3 text-red-400 transition hover:bg-slate-800"
+              >
+                <FiTrash2 size={18} />
+                Delete Chat
+              </button>
+            </div>
+          )}
+
           <DeleteChatModal
             isOpen={showDeleteModal}
             onClose={() => setShowDeleteModal(false)}
@@ -376,10 +406,10 @@ export default function AIChat({
             className="flex h-12 w-12 items-center justify-center rounded-full bg-cyan-500 transition hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {sendingMessage ? (
-                          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                        ) : (
-                          <FiSend size={20} className="text-white" />
-                        )}
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            ) : (
+              <FiSend size={20} className="text-white" />
+            )}
           </button>
         </form>
       </div>

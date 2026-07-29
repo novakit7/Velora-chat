@@ -56,7 +56,7 @@ export default function DeleteChatModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="rounded-lg p-2 text-gray-400 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg p-2 cursor-pointer text-gray-400 transition hover:bg-slate-800 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             <FiX size={20} />
           </button>
@@ -80,7 +80,7 @@ export default function DeleteChatModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="rounded-lg border border-slate-700 px-5 py-2 text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border cursor-pointer border-slate-700 px-5 py-2 text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cancel
           </button>
@@ -88,7 +88,7 @@ export default function DeleteChatModal({
           <button
             onClick={onDelete}
             disabled={loading}
-            className="min-w-27.5 rounded-lg bg-red-600 px-5 py-2 font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-w-27.5 rounded-lg cursor-pointer bg-red-600 px-5 py-2 font-medium text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? <Loader variant="button"/> : "Delete"}
           </button>
