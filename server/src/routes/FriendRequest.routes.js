@@ -9,6 +9,7 @@ import {
   getReceivedRequests,
   getSentRequests,
   getFriends,
+  removeFriend,
 } from "../controllers/FriendRequest.controller.js";
 
 const FriendRequestRouter = Router();
@@ -44,6 +45,11 @@ FriendRequestRouter.delete(
   "/cancel/:requestId",
   cancelFriendRequest
 );
+
+FriendRequestRouter.delete(
+  "/delete/:friendId",
+  removeFriend
+)
 
 FriendRequestRouter.route("/friends").get(getFriends);
 

@@ -4,6 +4,8 @@ import { asyncHandler } from "../utils/AsyncHandler.js";
 import { sendToUser } from "../services/socket.services.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import { Chat } from "../models/Chat.model.js";
+import { Message } from "../models/Message.model.js";
 
 const sendFriendRequest = asyncHandler(async (req, res) => {
   const { receiverId } = req.params;
@@ -218,6 +220,59 @@ const getFriends = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, friendsList, "friends are fetched sucessfully"));
 });
 
+const removeFriend = asyncHandler(async (req, res) => {
+  const { friendId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(friendId)) {
+    throw new ApiError(400, "Invalid friend id");
+  }
+
+  // Remove friendship
+  const friendship = await FriendRequest.findOneAndDelete({
+    status: "accepted",
+    $or: [
+      {
+        sender: req.user._id,
+        receiver: friendId,
+      },
+      {
+        sender: friendId,
+        receiver: req.user._id,
+      },
+    ],
+  });
+
+  if (!friendship) {
+    throw new ApiError(404, "Friend not found");
+  }
+
+  // Find one-to-one chat
+  const chat = await Chat.findOne({
+    isGroupChat: false,
+    participants: {
+      $all: [req.user._id, friendId],
+    },
+  });
+
+  if (chat) {
+    // Delete all messages
+    await Message.deleteMany({
+      chat: chat._id,
+    });
+
+    // Delete chat
+    await chat.deleteOne();
+  }
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {},
+      "Friend removed successfully"
+    )
+  );
+});
+
 
 export {
   sendFriendRequest,
@@ -226,5 +281,6 @@ export {
   acceptFriendRequest,
   rejectFriendRequest,
   cancelFriendRequest,
-  getFriends
+  getFriends,
+  removeFriend
 };
