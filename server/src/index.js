@@ -1,27 +1,15 @@
 import "dotenv/config";
-import dotenv from "dotenv";
+import http from "http";
+
 import connectDB from "./db/mongoDB.db.js";
 import { connectRedis } from "./db/redis.db.js";
 import app from "./app.js";
-import { Server } from "socket.io";
 import { initializeSocket } from "./sockets/index.js";
-import http from "http";
-
-dotenv.config({
-  path: "./.env",
-});
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
-  cors: {
-    origin: process.env.CORS_ORIGIN,
-    methods: ["GET", "POST", "PATCH", "DELETE"],
-    credentials: true,
-  },
-});
-
-initializeSocket(io);
+// Initialize Socket.IO
+initializeSocket(server);
 
 const startServer = async () => {
   try {
@@ -29,9 +17,11 @@ const startServer = async () => {
     await connectRedis();
 
     const PORT = process.env.PORT || 3000;
+
     server.listen(PORT, () => {
-      console.log(`socket is connected!!\n Server is running`);
-      console.log(`\nhttp://localhost:${PORT}\n`);
+      console.log("Server is running\n");
+      console.log(` http://localhost:${PORT}\n`);
+      console.log(" Socket.IO initialized\n");
     });
   } catch (error) {
     console.error("Server startup failed:", error);

@@ -1,20 +1,22 @@
+import { Server } from "socket.io";
 import { socketHandler } from "./socketHandler.js";
+
 let io;
 
-const initializeSocket = (socketIo) => {
-    io = socketIo;
+export const initializeSocket = (server) => {
+    io = new Server(server, {
+        cors: {
+            origin: process.env.CORS_ORIGIN,
+            credentials: true,
+            methods: ["GET", "POST", "PATCH", "DELETE"],
+        },
+    });
 
     io.on("connection", (socket) => {
-        console.log("Connected:", socket.id);
+        console.log(` Connected: ${socket.id}`);
 
         socketHandler(socket, io);
-
-        socket.on("disconnect", () => {
-            console.log("Disconnected:", socket.id);
-        });
     });
 };
 
-const getIO = () => io;
-
-export {initializeSocket, getIO}
+export const getIO = () => io;

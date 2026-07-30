@@ -1,20 +1,17 @@
 import onlineUsers from "./onlineUsers.js";
 
 const socketHandler = (socket, io) => {
-  socket.on("join", (userId) => {
-    onlineUsers.set(userId, socket.id);
-
-    console.log(onlineUsers);
-  });
 
   socket.on("disconnect", () => {
-    for (const [userId, socketId] of onlineUsers.entries()) {
-      if (socketId === socket.id) {
-        onlineUsers.delete(userId);
-        break;
-      }
+
+    if (socket.userId) {
+      onlineUsers.delete(socket.userId);
+
+      console.log(`${socket.userId} disconnected`);
+
+      io.emit("onlineUsers", [...onlineUsers.keys()]);
     }
   });
 };
 
-export {socketHandler};
+export { socketHandler };
