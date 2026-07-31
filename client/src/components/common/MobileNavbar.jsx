@@ -15,6 +15,7 @@ import { Brain } from "lucide-react";
 import api from "../../api/axois";
 import { notify } from "../../utils/toast";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useNotifications } from "../../context/NotificationContext";
 
 
 export default function MobileNavbar() {
@@ -25,6 +26,7 @@ export default function MobileNavbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { setUser, user } = useContext(AuthContext);
+  const { unreadCount } = useNotifications();
 
   const activeTab =
     location.pathname.startsWith("/home/ai")
@@ -143,7 +145,11 @@ export default function MobileNavbar() {
             >
               <FiBell size={20} className="text-gray-300" />
               {/* Optional unread indicator */}
-              <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </button>
 
             <NotificationModal
@@ -191,14 +197,14 @@ export default function MobileNavbar() {
               key={item.name}
               onClick={() => handleNavigation(item.name)}
               className={`group flex min-w-14.5 flex-col items-center justify-center rounded-xl px-2 py-2 transition-all duration-200 ${activeTab === item.name
-                  ? "text-cyan-400"
-                  : "text-slate-400 hover:text-cyan-400"
+                ? "text-cyan-400"
+                : "text-slate-400 hover:text-cyan-400"
                 }`}
             >
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-xl transition-all duration-200 ${activeTab === item.name
-                    ? "bg-cyan-500 text-white shadow-md"
-                    : "group-hover:bg-slate-800"
+                  ? "bg-cyan-500 text-white shadow-md"
+                  : "group-hover:bg-slate-800"
                   }`}
               >
                 {item.icon}
@@ -206,8 +212,8 @@ export default function MobileNavbar() {
 
               <span
                 className={`mt-1 text-[10px] font-medium leading-none ${activeTab === item.name
-                    ? "text-cyan-400"
-                    : "text-slate-400"
+                  ? "text-cyan-400"
+                  : "text-slate-400"
                   }`}
               >
                 {item.name}

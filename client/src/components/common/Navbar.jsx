@@ -7,6 +7,7 @@ import LogoutModal from "../models/LogoutModel";
 import AuthContext from "../../context/AuthContext";
 import api from "../../api/axois";
 import { notify } from "../../utils/toast";
+import { useNotifications } from "../../context/NotificationContext";
 
 export default function Navbar() {
   const [openNotification, setOpenNotification] = useState(false);
@@ -14,8 +15,10 @@ export default function Navbar() {
   const [openLogout, setOpenLogout] = useState(false);
   const [loading, setLoading] = useState(false);
 
+
   const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
+  const { unreadCount } = useNotifications();
 
   const handleLogout = async () => {
     try {
@@ -62,8 +65,11 @@ export default function Navbar() {
             >
               <FiBell className="text-slate-300" size={18} />
 
-              {/* Optional unread indicator */}
-              <span className="absolute right-2 top-2 h-2.5 w-2.5 rounded-full bg-red-500" />
+              {unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
             </button>
             <NotificationModal
               open={openNotification}

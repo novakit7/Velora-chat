@@ -5,120 +5,90 @@ import {
 } from "react-icons/fi";
 import { formatRelativeDate } from "../../utils/date";
 import { useNavigate } from "react-router-dom";
-import api from "../../api/axois";
 import Loader from "../common/Loader";
+import { useNotifications } from "../../context/NotificationContext";
 
 export default function NotificationModal({ open, onClose }) {
   const modalRef = useRef(null);
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState(null);
   const [deletingAll, setDeletingAll] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
 
-  // fetch notifications
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true);
+  const {
+    notifications,
+    loading,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    deleteNotification,
+    deleteAllNotifications,
+  } = useNotifications();
 
-      const res = await api.get('/notification');
-      setNotifications(res.data.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
-  // navigate to chat
+  // Navigate to chat
   const handleNotificationClick = async (notification) => {
     try {
       if (!notification.isRead) {
-        await api.patch(`/notification/${notification._id}/read`);
+        await markNotificationAsRead(notification._id);
       }
 
-      setNotifications(prev =>
-        prev.map(item =>
-          item._id === notification._id
-            ? { ...item, isRead: true }
-            : item
-        )
-      );
-    } catch (err) {
-      console.error(err);
-    }
+      onClose();
 
-    onClose();
-    navigate(`/home/chat/${notification.chat._id}`);
+      if (notification.chat?._id) {
+        navigate(`/home/chat/${notification.chat._id}`);
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  //handle delete notification
+  // Delete notification
   const handleDeleteNotification = async (e, notificationId) => {
     e.stopPropagation();
 
     try {
       setDeletingId(notificationId);
 
-      await api.delete(`/notification/${notificationId}`);
-
-      setNotifications(prev =>
-        prev.filter(item => item._id !== notificationId)
-      );
-    } catch (err) {
-      console.error(err);
+      await deleteNotification(notificationId);
+    } catch (error) {
+      console.error(error);
     } finally {
       setDeletingId(null);
     }
   };
 
-  //delete all 
+  // Delete all notifications
   const handleDeleteAllNotifications = async () => {
     try {
       setDeletingAll(true);
 
-      await api.delete("/notification");
-
-      setNotifications([]);
-    } catch (err) {
-      console.error(err);
+      await deleteAllNotifications();
+    } catch (error) {
+      console.error(error);
     } finally {
       setDeletingAll(false);
     }
   };
-  // marl all as read
+
+  // Mark all as read
   const handleMarkAllRead = async () => {
     try {
       setMarkingAll(true);
 
-      await api.patch("/notification/read-all");
-
-      setNotifications(prev =>
-        prev.map(item => ({
-          ...item,
-          isRead: true,
-        }))
-      );
-    } catch (err) {
-      console.error(err);
+      await markAllNotificationsAsRead();
+    } catch (error) {
+      console.error(error);
     } finally {
       setMarkingAll(false);
     }
   };
 
-
-
-  // effect -- model.
+  // Close modal on outside click
   useEffect(() => {
-    function handleClickOutside(e) {
+    const handleClickOutside = (e) => {
       if (modalRef.current && !modalRef.current.contains(e.target)) {
         onClose();
       }
-    }
+    };
 
     if (open) {
       document.addEventListener("mousedown", handleClickOutside);
@@ -130,7 +100,6 @@ export default function NotificationModal({ open, onClose }) {
   }, [open, onClose]);
 
   if (!open) return null;
-
   return (
     <div
       ref={modalRef}
@@ -155,7 +124,7 @@ export default function NotificationModal({ open, onClose }) {
             }
             className="rounded-md px-2 cursor-pointer py-1 text-xs font-medium text-cyan-400 hover:bg-slate-800 disabled:opacity-50"
           >
-            {markingAll ? <Loader variant="button"/> : "Mark all"}
+            {markingAll ? <Loader variant="button" /> : "Mark all"}
           </button>
 
           <button
@@ -167,7 +136,7 @@ export default function NotificationModal({ open, onClose }) {
             }
             className="rounded-md cursor-pointer px-2 py-1 text-xs font-medium text-red-400 hover:bg-slate-800 disabled:opacity-50"
           >
-            {deletingAll ? <Loader variant="button"/> : "Delete all"}
+            {deletingAll ? <Loader variant="button" /> : "Delete all"}
           </button>
         </div>
       </div>
@@ -222,19 +191,29 @@ export default function NotificationModal({ open, onClose }) {
                     </h3>
 
                     <p className="mt-1 text-sm text-gray-400">
-                      {item.chat?.isGroupChat ? (
+                      {item.type === "friend_request" && (
                         <>
                           <span className="font-medium text-cyan-400">
                             {item.sender.username}
                           </span>{" "}
-                          sent a message in{" "}
-                          <span className="text-white">
-                            {item.chat.groupName}
-                          </span>
+                          sent you a friend request.
                         </>
-                      ) : (
-                        item.text
                       )}
+
+                      {item.type === "message" &&
+                        (item.chat?.isGroupChat ? (
+                          <>
+                            <span className="font-medium text-cyan-400">
+                              {item.sender.username}
+                            </span>{" "}
+                            sent a message in{" "}
+                            <span className="text-white">
+                              {item.chat.groupName}
+                            </span>
+                          </>
+                        ) : (
+                          item.text
+                        ))}
                     </p>
                   </div>
 
