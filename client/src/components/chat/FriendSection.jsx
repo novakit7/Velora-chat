@@ -12,35 +12,72 @@ import api from "../../api/axois";
 import { notify } from "../../utils/toast";
 import { formatRelativeDate } from "../../utils/date";
 import Loader from "../common/Loader";
+import { registerFriendListeners, removeFriendListeners } from "../../socket/Listeners/friend.listener";
 
 export default function FriendSection() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+
   const [loading, setLoading] = useState(false);
   const [incomingRequests, setIncomingRequests] = useState([]);
   const [sentRequests, setSentRequests] = useState([]);
   const [actionLoading, setActionLoading] = useState(null);
 
+  // Fetch initial requests
   const handleRequests = async () => {
     try {
       setLoading(true);
+
       const received = await api.get("/friend-request/received");
       const sent = await api.get("/friend-request/sent");
-      setSentRequests(sent.data.data);
-      console.log(received.data.data)
+
       setIncomingRequests(received.data.data);
+      setSentRequests(sent.data.data);
     } catch (error) {
       console.log(error);
-      notify.error(error?.response?.data?.message || "Something went wrong");
+      notify.error(
+        error?.response?.data?.message || "Something went wrong"
+      );
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     handleRequests();
   }, []);
 
+  // Socket listener callback
+  const handleNewFriendRequest = (request) => {
+    setIncomingRequests((prev) => {
+      const exists = prev.some(
+        (item) => item._id === request._id
+      );
+
+      if (exists) return prev;
+
+      return [request, ...prev];
+    });
+
+    notify.success(
+      `${request.sender.username} sent you a friend request`
+    );
+  };
+
+  // Register socket listeners
+  useEffect(() => {
+    registerFriendListeners({
+      onFriendRequest: handleNewFriendRequest,
+    });
+
+    return () => {
+      removeFriendListeners({
+        onFriendRequest: handleNewFriendRequest,
+      });
+    };
+  }, []);
+
+  // Accept request
   const acceptRequest = async (requestId) => {
     try {
       setActionLoading(requestId);
@@ -63,6 +100,8 @@ export default function FriendSection() {
       setActionLoading(null);
     }
   };
+
+  // Reject request
   const rejectRequest = async (requestId) => {
     try {
       setActionLoading(requestId);
@@ -86,6 +125,7 @@ export default function FriendSection() {
     }
   };
 
+  // Cancel request
   const cancelRequest = async (requestId) => {
     try {
       setActionLoading(requestId);

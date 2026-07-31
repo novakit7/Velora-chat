@@ -1,17 +1,36 @@
-import onlineUsers from "./onlineUsers.js";
+import {
+  addUserSocket,
+  removeUserSocket,
+  getOnlineUsers,
+} from "./onlineUsers.js";
 
-const socketHandler = (socket, io) => {
+import { SOCKET_EVENTS } from "../constants.js";
+import { getIO } from "./index.js";
 
-  socket.on("disconnect", () => {
+export const socketHandler = (socket) => {
+  const io = getIO();
 
-    if (socket.userId) {
-      onlineUsers.delete(socket.userId);
+  const userId = socket.user._id.toString();
 
-      console.log(`${socket.userId} disconnected`);
+  addUserSocket(userId, socket.id);
 
-      io.emit("onlineUsers", [...onlineUsers.keys()]);
-    }
+  console.log(`S ${socket.user.username} connected`);
+
+  io.emit(
+    SOCKET_EVENTS.ONLINE_USERS,
+    getOnlineUsers()
+  );
+
+  socket.on("disconnect", (reason) => {
+    removeUserSocket(userId, socket.id);
+
+    io.emit(
+      SOCKET_EVENTS.ONLINE_USERS,
+      getOnlineUsers()
+    );
+
+    console.log(
+      ` ${socket.user.username} disconnected (${reason})`
+    );
   });
 };
-
-export { socketHandler };

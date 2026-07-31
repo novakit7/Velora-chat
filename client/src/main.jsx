@@ -5,6 +5,8 @@ import { BrowserRouter } from "react-router-dom";
 import "./index.css";
 import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext";
+import { SocketProvider } from "./socket/SocketProvider"
+import { NotificationProvider } from "./context/NotificationContext";
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
@@ -22,7 +24,11 @@ createRoot(document.getElementById("root")).render(
     />
     <BrowserRouter>
       <AuthProvider>
-        <App />
+        <NotificationProvider>
+          <SocketProvider>
+            <App />
+          </SocketProvider>
+        </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
   </>,

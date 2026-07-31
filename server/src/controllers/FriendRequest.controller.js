@@ -1,11 +1,12 @@
 import mongoose from "mongoose";
 import { FriendRequest } from "../models/FriendRequest.model.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
-import { sendToUser } from "../services/socket.services.js";
+import { emitToUser } from "../sockets/socket.services.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Chat } from "../models/Chat.model.js";
 import { Message } from "../models/Message.model.js";
+import { SOCKET_EVENTS } from "../constants.js";
 
 const sendFriendRequest = asyncHandler(async (req, res) => {
   const { receiverId } = req.params;
@@ -66,11 +67,14 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
     status: "pending",
   });
 
-  sendToUser(receiverId, "friend_request", {
-    requestId: request._id,
-    senderId: req.user._id,
-    message: "New friend request",
-  });
+  const populatedRequest = await FriendRequest.findById(request._id)
+    .populate("sender", "_id username fullName email avatar");
+
+  emitToUser(
+    receiverId,
+    SOCKET_EVENTS.FRIEND_RECEIVED,
+    populatedRequest
+  );
 
   return res
     .status(201)
@@ -131,12 +135,6 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
 
   request.status = "accepted";
   await request.save();
-
-  sendToUser(request.sender.toString(), "friend_request_accepted", {
-    requestId: request._id,
-    userId: req.user._id,
-    message: "Your friend request was accepted",
-  });
 
   return res
     .status(200)

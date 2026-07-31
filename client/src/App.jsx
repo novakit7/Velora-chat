@@ -1,39 +1,13 @@
 import React, { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
-
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
-
 import ProtectedRoute from "./routes/ProtectedRoutes";
 import PublicRoute from "./routes/PublicRoutes";
-import { socket } from "./Hooks/useSocket";
 
 export default function App() {
-
-useEffect(() => {
-  socket.connect();
-
-  socket.on("connect", () => {
-    console.log("Connected:", socket.id);
-  });
-
-  socket.on("connect_error", (err) => {
-    console.error("Connect Error:", err.message);
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.log("Disconnected:", reason);
-  });
-
-  return () => {
-    socket.off("connect");
-    socket.off("connect_error");
-    socket.off("disconnect");
-    socket.disconnect();
-  };
-}, []);
 
   return (
     <Routes>

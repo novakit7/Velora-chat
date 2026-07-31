@@ -1,5 +1,6 @@
 import { Server } from "socket.io";
 import { socketHandler } from "./socketHandler.js";
+import { socketAuth } from "./middlewares/socketAuth.middleware.js";
 
 let io;
 
@@ -12,10 +13,15 @@ export const initializeSocket = (server) => {
         },
     });
 
-    io.on("connection", (socket) => {
-        console.log(` Connected: ${socket.id}`);
+    // Authenticate every socket before allowing connection
+    io.use(socketAuth);
 
-        socketHandler(socket, io);
+    io.on("connection", (socket) => {
+        console.log(
+            `${socket.user.username} connected (${socket.id})`
+        );
+
+        socketHandler(socket);
     });
 };
 
