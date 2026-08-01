@@ -1,24 +1,28 @@
 import { Notification } from "../models/Notification.model.js";
 
-const sendNotification = async ({
+export const createNotification = async ({
   sender,
   receiver,
-  chat = null,
-  message = null,
   type,
   text = "",
+  friendRequest = null,
+  chat = null,
+  message = null,
 }) => {
-  // Save notification
   const notification = await Notification.create({
     sender,
     receiver,
-    chat,
-    message,
     type,
     text,
+    friendRequest,
+    chat,
+    message,
   });
 
-  return notification;
+  return await Notification.findById(notification._id)
+    .populate("sender", "_id username fullName email avatar")
+    .populate("receiver", "_id username fullName email avatar")
+    .populate("friendRequest")
+    .populate("chat")
+    .populate("message");
 };
-
-export {sendNotification}

@@ -11,16 +11,13 @@ import { NotificationProvider } from "./context/NotificationContext";
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
   <>
-    <Toaster
-      position="top-center"
-      reverseOrder={true}
-      toastOptions={{
-        duration: 3000,
-        style: {
-          background: "#333",
-          color: "#fff",
-        },
-      }}
+    <Toaster position="top-center" reverseOrder={true} toastOptions={{
+      duration: 3000,
+      style: {
+        background: "#333",
+        color: "#fff",
+      },
+    }}
     />
     <BrowserRouter>
       <AuthProvider>

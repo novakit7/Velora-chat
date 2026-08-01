@@ -18,6 +18,8 @@ export const SOCKET_EVENTS = {
   FRIEND_RECEIVED: "friend:request",
   FRIEND_ACCEPTED: "friend:accepted",
   FRIEND_REJECTED: "friend:rejected",
+  FRIEND_REMOVED: "friend:removed",
+  FRIEND_CANCELLED: "friend:cancelled",
 
   // Notifications
   NOTIFICATION_NEW: "notification:new",

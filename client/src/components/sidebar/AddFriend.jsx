@@ -41,6 +41,7 @@ export default function AddFriend() {
       const res = await api.post(`/friend-request/send/${userId}`);
       notify.success(res.data?.message);
       setUsers((prev) => prev.filter((user) => user._id !== userId));
+      navigate(0);
     } catch (error) {
       console.log(error);
       notify.error(

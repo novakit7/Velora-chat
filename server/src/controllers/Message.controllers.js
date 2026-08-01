@@ -5,7 +5,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { uploadOnCloudinary } from "../utils/Cloudinary.js";
-import { sendNotification } from "../services/notification.services.js";
+import { createNotification } from "../services/notification.services.js";
 
 const sendMessage = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
@@ -44,7 +44,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     (participant) => participant.toString() !== req.user._id.toString(),
   );
 
-  const notification = await sendNotification({
+  const notification = await createNotification({
     sender: req.user._id,
     receiver,
     chat: chat._id,

@@ -2,7 +2,7 @@ import { getIO } from "./index.js";
 import { getUserSockets } from "./onlineUsers.js";
 
 export const emitToUser = (userId, event, data) => {
-  const sockets = getUserSockets(userId);
+  const sockets = getUserSockets(userId.toString());
 
   if (!sockets || sockets.size === 0) return;
 

@@ -20,11 +20,17 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       enum: [
         "message",
+
+        "friend_request",
+        "friend_request_accepted",
+        "friend_request_rejected",
+        "friend_removed",
         "group_created",
         "group_updated",
         "added_to_group",
         "removed_from_group",
         "left_group",
+
         "ai_response",
       ],
       required: true,
@@ -36,6 +42,10 @@ const notificationSchema = new mongoose.Schema(
     message: {
       type: Schema.Types.ObjectId,
       ref: "Message",
+    },
+    friendRequest: {
+      type: Schema.Types.ObjectId,
+      ref: "FriendRequest",
     },
     isRead: {
       type: Boolean,

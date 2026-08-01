@@ -4,6 +4,7 @@ import {
     useEffect,
     useMemo,
     useState,
+    useCallback,
 } from "react";
 import api from "../api/axois";
 import { useAuth } from "../hooks/useAuth";
@@ -17,7 +18,7 @@ export const NotificationProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
 
     // Fetch notifications
-    const fetchNotifications = async () => {
+    const fetchNotifications = useCallback(async () => {
         if (!user) return;
 
         try {
@@ -26,13 +27,15 @@ export const NotificationProvider = ({ children }) => {
             const res = await api.get("/notification");
 
             setNotifications(res.data.data);
+        } catch (error) {
+            console.error(error);
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
 
     // Socket helper
-    const addNotification = (notification) => {
+    const addNotification = useCallback((notification) => {
         setNotifications((prev) => {
             const exists = prev.some(
                 (item) => item._id === notification._id
@@ -42,67 +45,89 @@ export const NotificationProvider = ({ children }) => {
 
             return [notification, ...prev];
         });
-    };
+    }, []);
 
-    const removeNotification = (notificationId) => {
+    const removeNotification = useCallback((notificationId) => {
         setNotifications((prev) =>
             prev.filter((item) => item._id !== notificationId)
         );
-    };
+    }, []);
 
     // Read
-    const markNotificationAsRead = async (notificationId) => {
-        await api.patch(`/notification/${notificationId}/read`);
+    const markNotificationAsRead = useCallback(async (notificationId) => {
+        try {
+            await api.patch(`/notification/${notificationId}/read`);
 
-        setNotifications((prev) =>
-            prev.map((item) =>
-                item._id === notificationId
-                    ? { ...item, isRead: true }
-                    : item
-            )
-        );
-    };
+            setNotifications((prev) =>
+                prev.map((item) =>
+                    item._id === notificationId
+                        ? { ...item, isRead: true }
+                        : item
+                )
+            );
+        } catch (error) {
+            console.error(error);
+        }
+    }, []);
 
-    const markAllNotificationsAsRead = async () => {
-        await api.patch("/notification/read-all");
+    const markAllNotificationsAsRead = useCallback(async () => {
+        try {
+            await api.patch("/notification/read-all");
 
-        setNotifications((prev) =>
-            prev.map((item) => ({
-                ...item,
-                isRead: true,
-            }))
-        );
-    };
+            setNotifications((prev) =>
+                prev.map((item) => ({
+                    ...item,
+                    isRead: true,
+                }))
+            );
+        } catch (error) {
+            console.error(error);
+        }
+    }, []);
 
     // Delete
-    const deleteNotification = async (notificationId) => {
-        await api.delete(`/notification/${notificationId}`);
+    const deleteNotification = useCallback(
+        async (notificationId) => {
+            try {
+                await api.delete(`/notification/${notificationId}`);
 
-        removeNotification(notificationId);
-    };
+                removeNotification(notificationId);
+            } catch (error) {
+                console.error(error);
+            }
+        },
+        [removeNotification]
+    );
 
-    const deleteAllNotifications = async () => {
-        await api.delete("/notification");
+    const deleteAllNotifications = useCallback(async () => {
+        try {
+            await api.delete("/notification");
 
-        setNotifications([]);
-    };
+            setNotifications([]);
+        } catch (error) {
+            console.error(error);
+        }
+    }, []);
 
-    // Auth lifecycle
+    // Fetch notifications when user logs in
     useEffect(() => {
         if (user) {
             fetchNotifications();
         } else {
             setNotifications([]);
         }
-    }, [user]);
+    }, [user, fetchNotifications]);
 
     const unreadCount = useMemo(() => {
-        return notifications.filter((item) => !item.isRead).length;
+        return notifications.filter(
+            (item) => !item.isRead
+        ).length;
     }, [notifications]);
 
     const value = useMemo(
         () => ({
             loading,
+
             notifications,
             unreadCount,
 
@@ -117,7 +142,22 @@ export const NotificationProvider = ({ children }) => {
             deleteNotification,
             deleteAllNotifications,
         }),
-        [loading, notifications, unreadCount]
+        [
+            loading,
+            notifications,
+            unreadCount,
+
+            fetchNotifications,
+
+            addNotification,
+            removeNotification,
+
+            markNotificationAsRead,
+            markAllNotificationsAsRead,
+
+            deleteNotification,
+            deleteAllNotifications,
+        ]
     );
 
     return (

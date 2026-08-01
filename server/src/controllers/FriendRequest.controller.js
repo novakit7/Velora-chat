@@ -7,6 +7,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Chat } from "../models/Chat.model.js";
 import { Message } from "../models/Message.model.js";
 import { SOCKET_EVENTS } from "../constants.js";
+import { createNotification } from "../services/notification.services.js";
 
 const sendFriendRequest = asyncHandler(async (req, res) => {
   const { receiverId } = req.params;
@@ -67,8 +68,22 @@ const sendFriendRequest = asyncHandler(async (req, res) => {
     status: "pending",
   });
 
+  const notification = await createNotification({
+    sender: req.user._id,
+    receiver: receiverId,
+    type: "friend_request",
+    text: `${req.user.username} sent you a friend request.`,
+    friendRequest: request._id,
+  });
   const populatedRequest = await FriendRequest.findById(request._id)
-    .populate("sender", "_id username fullName email avatar");
+    .populate("sender", "_id username fullName avatar email")
+    .populate("receiver", "_id username fullName avatar email");
+
+  emitToUser(
+    receiverId,
+    SOCKET_EVENTS.NOTIFICATION_NEW,
+    notification
+  );
 
   emitToUser(
     receiverId,
@@ -97,7 +112,6 @@ const getReceivedRequests = asyncHandler(async (req, res) => {
     ),
   );
 });
-
 
 const getSentRequests = asyncHandler(async (req, res) => {
   const requests = await FriendRequest.find({
@@ -136,6 +150,28 @@ const acceptFriendRequest = asyncHandler(async (req, res) => {
   request.status = "accepted";
   await request.save();
 
+  const notification = await createNotification({
+    sender: req.user._id,
+    receiver: request.sender,
+    type: "friend_request_accepted",
+    text: `${req.user.username} accepted your friend request.`,
+    friendRequest: request._id,
+  });
+
+  emitToUser(
+    request.sender,
+    SOCKET_EVENTS.NOTIFICATION_NEW,
+    notification
+  );
+  emitToUser(
+    request.sender,
+    SOCKET_EVENTS.FRIEND_ACCEPTED,
+    {
+      requestId: request._id,
+      friend: req.user,
+    }
+  );
+
   return res
     .status(200)
     .json(new ApiResponse(200, request, "Friend request accepted"));
@@ -158,14 +194,20 @@ const rejectFriendRequest = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Pending friend request not found");
   }
 
+  const senderId = request.sender.toString();
+
   await request.deleteOne();
+  console.log("Reject Request Id:", requestId);
+  emitToUser(senderId, SOCKET_EVENTS.FRIEND_REJECTED, {
+    requestId,
+  });
 
   return res.status(200).json(
     new ApiResponse(
       200,
       { requestId },
-      "Friend request rejected",
-    ),
+      "Friend request rejected successfully"
+    )
   );
 });
 
@@ -186,14 +228,20 @@ const cancelFriendRequest = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Pending friend request not found");
   }
 
+  const receiverId = request.receiver.toString();
+
   await request.deleteOne();
+
+  emitToUser(receiverId, SOCKET_EVENTS.FRIEND_CANCELLED, {
+    requestId,
+  });
 
   return res.status(200).json(
     new ApiResponse(
       200,
       { requestId },
-      "Friend request cancelled",
-    ),
+      "Friend request cancelled successfully"
+    )
   );
 });
 
@@ -262,6 +310,26 @@ const removeFriend = asyncHandler(async (req, res) => {
     await chat.deleteOne();
   }
 
+  const notification = await createNotification({
+    sender: req.user._id,
+    receiver: friendId,
+    type: "friend_removed",
+    text: `${req.user.username} removed you from their friends.`,
+  });
+
+  emitToUser(
+    friendId,
+    SOCKET_EVENTS.NOTIFICATION_NEW,
+    notification
+  );
+
+  emitToUser(
+    friendId,
+    SOCKET_EVENTS.FRIEND_REMOVED,
+    {
+      friendId: req.user._id,
+    }
+  );
   return res.status(200).json(
     new ApiResponse(
       200,

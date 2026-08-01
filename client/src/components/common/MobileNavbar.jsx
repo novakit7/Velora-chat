@@ -71,8 +71,6 @@ export default function MobileNavbar() {
 
       await api.post("/user/logout");
 
-      localStorage.removeItem("accessToken");
-
       setUser(null);
 
       navigate("/", { replace: true });
