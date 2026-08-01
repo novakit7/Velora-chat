@@ -238,59 +238,57 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     );
 });
 
-const updateAccountDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
-  if (!fullName || !email) {
-    throw new ApiError(400, "All fields are required");
+const updateProfile = asyncHandler(async (req, res) => {
+  const { fullName } = req.body;
+  const avatarLocalPath = req.file?.path;
+
+  if (!fullName?.trim() && !avatarLocalPath) {
+    throw new ApiError(
+      400,
+      "Please provide a full name or profile picture."
+    );
   }
-  const user = await User.findByIdAndUpdate(
-    req.user?._id,
-    {
-      $set: {
-        fullName: fullName,
-        email: email,
-      },
-    },
-    { returnDocument: "after" },
-  ).select("-password");
+
+  const user = await User.findById(req.user?._id);
+
   if (!user) {
     throw new ApiError(404, "User not found");
   }
-  res
-    .status(200)
-    .json(new ApiResponse(200, user, "Accout details Updated Successfully.."));
-});  //if email change  ask for otp.... fix it in next version
 
-const updateUserAvatar = asyncHandler(async (req, res) => {
-  const avatarLocalPath = req.file?.path;
-  if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is Missing..");
+  // Update full name if provided
+  if (fullName?.trim()) {
+    user.fullName = fullName.trim();
   }
-  const deleteOldAvatar = await deleteFromCloudinary(req.user.avatar.publicId);
-  if (!deleteOldAvatar) {
-    throw new ApiError(500, "unable to delete old avatar");
+
+  // Update avatar if provided
+  if (avatarLocalPath) {
+    if (user.avatar?.publicId) {
+      await deleteFromCloudinary(user.avatar.publicId);
+    }
+
+    const uploadedAvatar = await uploadOnCloudinary(avatarLocalPath);
+
+    if (!uploadedAvatar?.url) {
+      throw new ApiError(500, "Failed to upload avatar");
+    }
+
+    user.avatar = {
+      url: uploadedAvatar.url,
+      publicId: uploadedAvatar.public_id,
+    };
   }
-  const avatar = await uploadOnCloudinary(avatarLocalPath);
-  if (!avatar.url) {
-    throw new ApiError(500, "Failed to upload Avatar");
-  }
-  const user = await User.findByIdAndUpdate(
-    req.user?._id,
-    {
-      $set: {
-        avatar: {
-          url: avatar.url,
-          publicId: avatar.secure_url,
-        },
-      },
-    },
-    {
-      returnDocument: "after",
-    },
-  ).select("-password");
-  res
-    .status(200)
-    .json(new ApiResponse(200, user, "avatar is Updated sucessfully"));
+
+  await user.save({ validateBeforeSave: false });
+
+  const updatedUser = await User.findById(user._id).select("-password");
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      updatedUser,
+      "Profile updated successfully."
+    )
+  );
 });
 
 const getUserProfile = asyncHandler(async (req, res) => {
@@ -446,8 +444,7 @@ export {
   logOutUser,
   changePassword,
   getCurrentUser,
-  updateAccountDetails,
-  updateUserAvatar,
+  updateProfile,
   refreshAccessToken,
   getUserProfile,
   verifyOTP,

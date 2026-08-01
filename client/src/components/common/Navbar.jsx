@@ -8,10 +8,15 @@ import AuthContext from "../../context/AuthContext";
 import api from "../../api/axois";
 import { notify } from "../../utils/toast";
 import { useNotifications } from "../../context/NotificationContext";
+import EditProfileModal from "../models/editProfileModel";
+import ChangePasswordModal from "../models/ChangePasswordModel";
+import { updateProfile, changePassword } from "../../services/userService";
 
 export default function Navbar() {
   const [openNotification, setOpenNotification] = useState(false);
   const [openUser, setOpenUser] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [openLogout, setOpenLogout] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -19,6 +24,46 @@ export default function Navbar() {
   const { user, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const { unreadCount } = useNotifications();
+
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  const handleProfileUpdate = async (formData) => {
+    try {
+      setProfileLoading(true);
+
+      const res = await updateProfile(formData);
+      setUser(res.data);
+      notify.success(res.message);
+
+      setEditOpen(false);
+    } catch (error) {
+      notify.error(
+        error?.response?.data?.message || "Failed to update profile"
+      );
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+
+  const handlePasswordChange = async (payload) => {
+    try {
+      setPasswordLoading(true);
+
+      const res = await changePassword(payload);
+
+      notify.success(res.message);
+
+      setPasswordOpen(false);
+    } catch (error) {
+      notify.error(
+        error?.response?.data?.message || "Failed to change password"
+      );
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -97,6 +142,14 @@ export default function Navbar() {
               open={openUser}
               onClose={() => setOpenUser(false)}
               onLogout={() => setOpenLogout(true)}
+              onEdit={() => {
+                setOpenUser(false);
+                setEditOpen(true);
+              }}
+              onPassword={() => {
+                setOpenUser(false);
+                setPasswordOpen(true);
+              }}
             />
           </div>
         </header>
@@ -106,6 +159,20 @@ export default function Navbar() {
         onClose={() => setOpenLogout(false)}
         onConfirm={handleLogout}
         loading={loading}
+      />
+      <EditProfileModal
+        open={editOpen}
+        user={user}
+        loading={profileLoading}
+        onClose={() => setEditOpen(false)}
+        onSave={handleProfileUpdate}
+      />
+
+      <ChangePasswordModal
+        open={passwordOpen}
+        loading={passwordLoading}
+        onClose={() => setPasswordOpen(false)}
+        onSave={handlePasswordChange}
       />
     </>
   );

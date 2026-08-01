@@ -61,7 +61,7 @@ export default function App() {
       />
 
       <Route
-        path="/home/new-chat"
+        path="/home/friends"
         element={
           <ProtectedRoute>
             <Home />

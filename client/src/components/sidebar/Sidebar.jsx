@@ -14,6 +14,7 @@ import {
   FiUserPlus,
   FiLogOut,
 } from "react-icons/fi";
+import { FaUserFriends } from "react-icons/fa";
 import { Brain } from "lucide-react";
 
 export default function Sidebar() {
@@ -28,8 +29,8 @@ export default function Sidebar() {
       ? "AI"
       : location.pathname.startsWith("/home/group")
         ? "Groups"
-        : location.pathname.startsWith("/home/new-chat")
-          ? "New Chat"
+        : location.pathname.startsWith("/home/friends")
+          ? "Friends"
           : location.pathname.startsWith("/home/add-friend")
             ? "Add Friend"
             : "Chats";
@@ -44,8 +45,8 @@ export default function Sidebar() {
       icon: <FiUsers size={22} />,
     },
     {
-      name: "New Chat",
-      icon: <FiPlusCircle size={22} />,
+      name: "Friends",
+      icon: <FaUserFriends size={22} />,
     },
     {
       name: "AI",
@@ -82,8 +83,8 @@ export default function Sidebar() {
         navigate("/home/group");
         break;
 
-      case "New Chat":
-        navigate("/home/new-chat");
+      case "Friends":
+        navigate("/home/friends");
         break;
 
       case "AI":

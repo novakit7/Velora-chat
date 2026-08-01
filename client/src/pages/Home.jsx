@@ -48,7 +48,7 @@ export default function Home() {
       return <GroupList />;
     }
 
-    if (location.pathname.startsWith("/home/new-chat")) {
+    if (location.pathname.startsWith("/home/friends")) {
       return <NewChat />;
     }
 
@@ -66,8 +66,8 @@ export default function Home() {
     ? "AI"
     : location.pathname.startsWith("/home/group")
       ? "Groups"
-      : location.pathname.startsWith("/home/new-chat")
-        ? "New Chat"
+      : location.pathname.startsWith("/home/friends")
+        ? "Friends"
         : isFriendRequestsPage
           ? "Friend Requests"
           : isFriendPage

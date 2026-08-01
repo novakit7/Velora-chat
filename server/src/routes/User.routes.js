@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { upload } from "../middleware/Multer.middleware.js";
+import { verifyJWT } from "../middleware/Auth.middleware.js";
+
 import {
   changePassword,
   forgotPassword,
@@ -10,32 +12,52 @@ import {
   registerUser,
   resetPassword,
   signInUser,
-  updateAccountDetails,
-  updateUserAvatar,
+  updateProfile,
   verifyOTP,
 } from "../controllers/User.controller.js";
-import { verifyJWT } from "../middleware/Auth.middleware.js";
+
 const UserRouter = Router();
 
-UserRouter.route("/login").post(signInUser);
+UserRouter.post("/login", signInUser);
+UserRouter.post(
+  "/register",
+  upload.single("avatar"),
+  registerUser
+);
 
-UserRouter.route("/logout").post(verifyJWT, logOutUser);
+UserRouter.post("/verify", verifyOTP);
 
-UserRouter.route("/register").post(upload.single("avatar"), registerUser);
+UserRouter
+  .route("/forgot-password")
+  .post(forgotPassword)
+  .patch(resetPassword);
 
-UserRouter.route("/verify").post(verifyOTP);
+UserRouter.post("/refresh-token", refreshAccessToken);
 
-UserRouter.route("/forgot-password").post(forgotPassword).patch(resetPassword);
+// Protected Routes
+UserRouter.post("/logout", verifyJWT, logOutUser);
 
-UserRouter.route("/change-password").post(verifyJWT, changePassword);
-UserRouter.route("/")
-  .get(verifyJWT, getCurrentUser)
-  .patch(verifyJWT, updateAccountDetails)
+UserRouter.post(
+  "/change-password",
+  verifyJWT,
+  changePassword
+);
 
-UserRouter.route("/:username").get(verifyJWT, getUserProfile);
+UserRouter
+  .route("/")
+  .get(verifyJWT, getCurrentUser);
 
-UserRouter.route("/change-avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
+UserRouter.patch(
+  "/update-profile",
+  verifyJWT,
+  upload.single("avatar"),
+  updateProfile
+);
 
-UserRouter.route("/refresh-token").post(refreshAccessToken);
+UserRouter.get(
+  "/:username",
+  verifyJWT,
+  getUserProfile
+);
 
 export default UserRouter;

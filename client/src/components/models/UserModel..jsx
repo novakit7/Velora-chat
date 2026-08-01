@@ -7,7 +7,14 @@ import {
 } from "react-icons/fi";
 import AuthContext from "../../context/AuthContext";
 
-export default function UserModal({ open, onClose, onLogout }) {
+export default function UserModal({
+  open,
+  onClose,
+  onLogout,
+  onEdit,
+  onPassword,
+}) {
+
   const { user } = useContext(AuthContext);
   const modalRef = useRef(null);
 
@@ -82,10 +89,7 @@ export default function UserModal({ open, onClose, onLogout }) {
 
         {/* Edit Profile */}
         <button
-          onClick={() => {
-            onClose();
-            // navigate("/home/profile/edit");
-          }}
+          onClick={onEdit}
           className="flex w-full items-center cursor-pointer justify-between rounded-xl border border-transparent px-4 py-3 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800"
         >
           <div className="flex items-center gap-3">
@@ -109,10 +113,7 @@ export default function UserModal({ open, onClose, onLogout }) {
 
         {/* Change Password */}
         <button
-          onClick={() => {
-            onClose();
-            // navigate("/home/change-password");
-          }}
+          onClick={onPassword}
           className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-transparent px-4 py-3 transition-all duration-200 hover:border-slate-700 hover:bg-slate-800"
         >
           <div className="flex items-center gap-3">

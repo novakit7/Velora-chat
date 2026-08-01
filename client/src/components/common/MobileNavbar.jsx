@@ -16,25 +16,33 @@ import api from "../../api/axois";
 import { notify } from "../../utils/toast";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useNotifications } from "../../context/NotificationContext";
+import { FaUserFriends } from "react-icons/fa";
+import EditProfileModal from "../models/editProfileModel";
+import ChangePasswordModal from "../models/ChangePasswordModel";
+import { updateProfile, changePassword } from "../../services/userService";
 
 
 export default function MobileNavbar() {
   const [openNotification, setOpenNotification] = useState(false);
   const [openUser, setOpenUser] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [passwordOpen, setPasswordOpen] = useState(false);
   const [openLogout, setOpenLogout] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { setUser, user } = useContext(AuthContext);
   const { unreadCount } = useNotifications();
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [passwordLoading, setPasswordLoading] = useState(false);
 
   const activeTab =
     location.pathname.startsWith("/home/ai")
       ? "AI"
       : location.pathname.startsWith("/home/group")
         ? "Groups"
-        : location.pathname.startsWith("/home/new-chat")
-          ? "New Chat"
+        : location.pathname.startsWith("/home/friends")
+          ? "Friends"
           : location.pathname.startsWith("/home/add-friend")
             ? "Add Friend"
             : "Chats";
@@ -48,8 +56,8 @@ export default function MobileNavbar() {
         navigate("/home/group");
         break;
 
-      case "New Chat":
-        navigate("/home/new-chat");
+      case "Friends":
+        navigate("/home/friends");
         break;
 
       case "AI":
@@ -62,6 +70,44 @@ export default function MobileNavbar() {
 
       default:
         navigate("/home");
+    }
+  };
+
+  const handleProfileUpdate = async (formData) => {
+    try {
+      setProfileLoading(true);
+
+      const res = await updateProfile(formData);
+
+      setUser(res.data);
+      notify.success(res.message);
+
+      setEditOpen(false);
+    } catch (error) {
+      notify.error(
+        error?.response?.data?.message || "Failed to update profile"
+      );
+    } finally {
+      setProfileLoading(false);
+    }
+  };
+
+
+  const handlePasswordChange = async (payload) => {
+    try {
+      setPasswordLoading(true);
+
+      const res = await changePassword(payload);
+
+      notify.success(res.message);
+
+      setPasswordOpen(false);
+    } catch (error) {
+      notify.error(
+        error?.response?.data?.message || "Failed to change password"
+      );
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -96,8 +142,8 @@ export default function MobileNavbar() {
       icon: <FiUsers size={22} />,
     },
     {
-      name: "New Chat",
-      icon: <FiPlusCircle size={24} />,
+      name: "Friends",
+      icon: <FaUserFriends size={24} />,
     },
     {
       name: "AI",
@@ -175,17 +221,35 @@ export default function MobileNavbar() {
             <UserModal
               open={openUser}
               onClose={() => setOpenUser(false)}
-              onLogout={() => {
+              onLogout={() => setOpenLogout(true)}
+              onEdit={() => {
                 setOpenUser(false);
-                setOpenLogout(true);
+                setEditOpen(true);
+              }}
+              onPassword={() => {
+                setOpenUser(false);
+                setPasswordOpen(true);
               }}
             />
-
           </div>
 
         </div>
 
       </header>
+      <EditProfileModal
+        open={editOpen}
+        user={user}
+        loading={profileLoading}
+        onClose={() => setEditOpen(false)}
+        onSave={handleProfileUpdate}
+      />
+
+      <ChangePasswordModal
+        open={passwordOpen}
+        loading={passwordLoading}
+        onClose={() => setPasswordOpen(false)}
+        onSave={handlePasswordChange}
+      />
 
       {/* ---------- Bottom Navigation ---------- */}
       <nav className="fixed bottom-3 left-1/2 z-50 w-[95%] max-w-md -translate-x-1/2 rounded-2xl border border-slate-800 bg-slate-900/95 shadow-2xl backdrop-blur-lg">
