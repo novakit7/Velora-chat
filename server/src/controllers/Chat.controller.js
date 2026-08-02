@@ -7,6 +7,8 @@ import { Chat } from "../models/Chat.model.js";
 import { User } from "../models/User.model.js";
 import { Message } from "../models/Message.model.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/Cloudinary.js";
+import { SOCKET_EVENTS } from "../constants.js";
+import { emitToUser } from "../sockets/socket.services.js";
 
 const createPrivateChat = asyncHandler(async (req, res) => {
   const { userId } = req.params;
@@ -58,13 +60,16 @@ const createPrivateChat = asyncHandler(async (req, res) => {
   });
 
   // Create new chat
+  let newChat = false;
   if (!chat) {
     chat = await Chat.create({
       participants: [req.user._id, userId],
       createdBy: req.user._id,
       lastActivity: new Date(),
     });
+    newChat = true;
   }
+
 
   // Aggregate response
   const [chatResponse] = await Chat.aggregate([
@@ -191,6 +196,9 @@ const createPrivateChat = asyncHandler(async (req, res) => {
       },
     },
   ]);
+  if (newChat) {
+    emitToUser(userId, SOCKET_EVENTS.CHAT_CREATED, chat);
+  }
 
   return res
     .status(chat.createdAt.getTime() === chat.updatedAt.getTime() ? 201 : 200)
@@ -435,6 +443,14 @@ const createGroupChat = asyncHandler(async (req, res) => {
       },
     },
   ]);
+
+  // Notify all invited users
+  uniqueParticipants.forEach((participantId) => {
+    emitToUser(participantId, SOCKET_EVENTS.GROUP_CREATED, {
+      ...groupResponse,
+      isAdmin: false,
+    });
+  });
 
   return res
     .status(201)
@@ -1170,6 +1186,7 @@ const renameGroup = asyncHandler(async (req, res) => {
       },
     },
   ]);
+  emitToRoom(chatId, SOCKET_EVENTS.GROUP_RENAMED, updatedGroup);
 
   return res
     .status(200)
@@ -1308,7 +1325,7 @@ const renameGroupDescription = asyncHandler(async (req, res) => {
       },
     },
   ]);
-
+  emitToRoom(chatId, SOCKET_EVENTS.GROUP_UPDATE_DISCRIPTION, updatedGroup);
   return res
     .status(200)
     .json(new ApiResponse(200, updatedGroup, "Group desctiption is updated successfully."));

@@ -48,7 +48,7 @@ export default function ChatList() {
           </h2>
 
           <button
-            onClick={() => navigate("/home/new-chat")}
+            onClick={() => navigate("/home/friends")}
             className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl bg-cyan-500 text-white transition-all duration-200 hover:bg-cyan-600"
             title="New Chat"
           >
@@ -98,7 +98,7 @@ export default function ChatList() {
             </p>
 
             <button
-              onClick={() => navigate("/home/new-chat")}
+              onClick={() => navigate("/home/friends")}
               className="mt-6 flex items-center cursor-pointer gap-2 rounded-xl bg-linear-to-r from-cyan-500 to-blue-500 px-6 py-3 font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-cyan-500/30"
             >
               <FiMessageCircle />

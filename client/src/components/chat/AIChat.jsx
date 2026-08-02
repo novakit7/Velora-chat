@@ -37,6 +37,7 @@ export default function AIChat({
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const messagesRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -143,6 +144,11 @@ export default function AIChat({
       setCreatingChat(false);
     }
   };
+  useEffect(() => {
+    if (!sendingMessage) {
+      messagesRef.current?.focus();
+    }
+  }, [sendingMessage]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -393,6 +399,7 @@ export default function AIChat({
         >
           <input
             type="text"
+            ref={messagesRef}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             placeholder="Type a message..."

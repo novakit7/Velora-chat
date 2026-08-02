@@ -6,7 +6,7 @@ import {
   FiMoreVertical,
   FiSend,
   FiTrash2,
-  FiMessageCircle
+  FiMessageCircle,
 } from "react-icons/fi";
 import Loader from "../common/Loader";
 import { useContext } from "react";
@@ -16,12 +16,16 @@ import api from "../../api/axois";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import DeleteChatModal from "../models/DeleteModel";
+import GroupInfoModal from "../models/GroupInfoModel";
+import UserInfoModal from "../models/UserInfoModal";
 
 export default function Conversation({ onBack }) {
   const [loadingChat, setLoadingChat] = useState(true);
   const [loadingMessages, setLoadingMessages] = useState(true);
   const [sending, setSending] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
+  const [showUserModal, setShowUserModal] = useState(false);
 
   const { user } = useContext(AuthContext);
 
@@ -29,6 +33,7 @@ export default function Conversation({ onBack }) {
   const [msg, setMsg] = useState("");
   const [chat, setChat] = useState(null);
   const menuRef = useRef(null);
+  const messagesRef = useRef(null);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -39,8 +44,7 @@ export default function Conversation({ onBack }) {
 
     document.addEventListener("mousedown", handleClickOutside);
 
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const { chatId } = useParams();
@@ -69,7 +73,6 @@ export default function Conversation({ onBack }) {
     });
   }, [messages]);
 
-
   useEffect(() => {
     if (!chatId) return;
 
@@ -83,10 +86,7 @@ export default function Conversation({ onBack }) {
       } catch (err) {
         console.error(err);
 
-        notify.error(
-          err?.response?.data?.message ||
-          "Failed to load chat."
-        );
+        notify.error(err?.response?.data?.message || "Failed to load chat.");
       } finally {
         setLoadingChat(false);
       }
@@ -102,18 +102,13 @@ export default function Conversation({ onBack }) {
       try {
         setLoadingMessages(true);
 
-        const res = await api.get(
-          `/chat/message/${chat._id}?page=1&limit=20`
-        );
+        const res = await api.get(`/chat/message/${chat._id}?page=1&limit=20`);
 
         setMessages(res.data.data.messages || []);
       } catch (err) {
         console.error(err);
 
-        notify.error(
-          err?.response?.data?.message ||
-          "Couldn't load messages."
-        );
+        notify.error(err?.response?.data?.message || "Couldn't load messages.");
       } finally {
         setLoadingMessages(false);
       }
@@ -121,6 +116,12 @@ export default function Conversation({ onBack }) {
 
     getMessages();
   }, [chat?._id]);
+
+  useEffect(() => {
+    if (!sending) {
+      messagesRef.current?.focus();
+    }
+  }, [sending]);
 
   const sendMessage = async (e) => {
     e.preventDefault();
@@ -135,12 +136,9 @@ export default function Conversation({ onBack }) {
     try {
       setSending(true);
 
-      const res = await api.post(
-        `/message/${chat._id}/message`,
-        {
-          content: text,
-        }
-      );
+      const res = await api.post(`/message/${chat._id}/message`, {
+        content: text,
+      });
 
       setMessages((prev) => [...prev, res.data.data]);
     } catch (error) {
@@ -151,7 +149,7 @@ export default function Conversation({ onBack }) {
 
       notify.error(
         error?.response?.data?.message ||
-        "Something went wrong while sending the message."
+          "Something went wrong while sending the message.",
       );
     } finally {
       setSending(false);
@@ -171,17 +169,15 @@ export default function Conversation({ onBack }) {
       // Go back to chat list
       navigate("/home", { replace: true });
       navigate(0);
-
     } catch (error) {
-      notify.error(
-        error?.response?.data?.message || "Failed to delete chat."
-      );
+      notify.error(error?.response?.data?.message || "Failed to delete chat.");
     } finally {
       setDeleting(false);
     }
   };
 
   // No chat selected
+
   if (!chat) {
     return (
       <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
@@ -202,7 +198,16 @@ export default function Conversation({ onBack }) {
     <div className="flex h-full flex-col rounded-2xl bg-slate-900">
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-        <div className="flex items-center gap-3">
+        <div
+          onClick={() => {
+            if (chat.isGroupChat) {
+              setShowGroupModal(true);
+            } else {
+              setShowUserModal(true);
+            }
+          }}
+          className={`flex items-center gap-3 ${chat ? "cursor-pointer" : ""}`}
+        >
           <button className="md:hidden text-white" onClick={onBack}>
             <FiArrowLeft size={22} />
           </button>
@@ -237,10 +242,7 @@ export default function Conversation({ onBack }) {
             onClick={() => setMenuOpen((prev) => !prev)}
             className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl transition-all duration-200 hover:bg-slate-800"
           >
-            <FiMoreVertical
-              size={20}
-              className="text-slate-400"
-            />
+            <FiMoreVertical size={20} className="text-slate-400" />
           </button>
 
           {menuOpen && (
@@ -264,6 +266,17 @@ export default function Conversation({ onBack }) {
             onDelete={deleteChat}
             loading={deleting}
           />
+          <GroupInfoModal
+            isOpen={showGroupModal}
+            onClose={() => setShowGroupModal(false)}
+            chat={chat}
+            setChat={setChat}
+          />
+          <UserInfoModal
+            isOpen={showUserModal}
+            onClose={() => setShowUserModal(false)}
+            user={chat.otherMember}
+          />
         </div>
       </div>
 
@@ -272,79 +285,79 @@ export default function Conversation({ onBack }) {
           <div className="relative flex h-full items-center justify-center">
             <Loader variant="section" />
           </div>
-        ) : (
-          messages.length === 0 ? (
-            <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-800 ring-1 ring-slate-700">
-                <FiMessageCircle className="text-5xl text-cyan-400" />
-              </div>
-
-              <h2 className="mt-6 text-2xl font-semibold text-white">
-                No Messages Yet
-              </h2>
-
-              <p className="mt-3 max-w-sm text-sm leading-6 text-slate-400">
-                Start the conversation by sending your first message.
-              </p>
-
-              <div className="mt-6 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-300">
-                👋 Say hello and break the ice!
-              </div>
-
+        ) : messages.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center px-6 text-center">
+            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-slate-800 ring-1 ring-slate-700">
+              <FiMessageCircle className="text-5xl text-cyan-400" />
             </div>
-          ) : (
-            <div className="space-y-4">
-              {messages.map((message) => {
-                const isMe = message.sender?._id === user?._id;
 
-                return (
+            <h2 className="mt-6 text-2xl font-semibold text-white">
+              No Messages Yet
+            </h2>
+
+            <p className="mt-3 max-w-sm text-sm leading-6 text-slate-400">
+              Start the conversation by sending your first message.
+            </p>
+
+            <div className="mt-6 rounded-xl border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm text-cyan-300">
+              👋 Say hello and break the ice!
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {messages.map((message) => {
+              const isMe = message.sender?._id === user?._id;
+
+              return (
+                <div
+                  key={message._id}
+                  className={`mb-4 flex ${
+                    isMe ? "justify-end" : "justify-start"
+                  }`}
+                >
                   <div
-                    key={message._id}
-                    className={`mb-4 flex ${isMe ? "justify-end" : "justify-start"
-                      }`}
+                    className={`flex max-w-[75%] min-w-0 items-end gap-2 ${
+                      isMe ? "flex-row-reverse" : ""
+                    }`}
                   >
+                    <img
+                      src={message.sender?.avatar?.url}
+                      alt={message.sender?.username}
+                      className="h-10 w-10 shrink-0 rounded-full border border-slate-700 object-cover"
+                    />
+
                     <div
-                      className={`flex max-w-[75%] min-w-0 items-end gap-2 ${isMe ? "flex-row-reverse" : ""
-                        }`}
+                      className={`min-w-0 max-w-full rounded-2xl px-4 py-3 shadow-md ${
+                        isMe
+                          ? "rounded-br-md bg-cyan-500 text-white"
+                          : "rounded-bl-md border border-slate-700 bg-slate-800 text-slate-100"
+                      }`}
                     >
-                      <img
-                        src={message.sender?.avatar?.url}
-                        alt={message.sender?.username}
-                        className="h-10 w-10 shrink-0 rounded-full border border-slate-700 object-cover"
-                      />
+                      {!isMe && (
+                        <p className="mb-1 text-xs font-semibold text-cyan-400">
+                          {message.sender?.username}
+                        </p>
+                      )}
+
+                      <p className="whitespace-pre-wrap break-all text-sm leading-6">
+                        {message.content}
+                      </p>
 
                       <div
-                        className={`min-w-0 max-w-full rounded-2xl px-4 py-3 shadow-md ${isMe
-                            ? "rounded-br-md bg-cyan-500 text-white"
-                            : "rounded-bl-md border border-slate-700 bg-slate-800 text-slate-100"
-                          }`}
+                        className={`mt-2 flex items-center justify-end gap-1 text-[11px] ${
+                          isMe ? "text-white/80" : "text-slate-400"
+                        }`}
                       >
-                        {!isMe && (
-                          <p className="mb-1 text-xs font-semibold text-cyan-400">
-                            {message.sender?.username}
-                          </p>
-                        )}
+                        <span>{formatDateTime(message.createdAt)}</span>
 
-                        <p className="whitespace-pre-wrap break-all text-sm leading-6">
-                          {message.content}
-                        </p>
-
-                        <div
-                          className={`mt-2 flex items-center justify-end gap-1 text-[11px] ${isMe ? "text-white/80" : "text-slate-400"
-                            }`}
-                        >
-                          <span>{formatDateTime(message.createdAt)}</span>
-
-                          {isMe && <span className="font-bold">✓✓</span>}
-                        </div>
+                        {isMe && <span className="font-bold">✓✓</span>}
                       </div>
                     </div>
                   </div>
-                );
-              })}
-            </div>
-          )
+                </div>
+              );
+            })}
+          </div>
         )}
         <div ref={messagesEndRef} />
       </div>
@@ -354,6 +367,7 @@ export default function Conversation({ onBack }) {
         <form className="flex items-center gap-3" onSubmit={sendMessage}>
           <input
             type="text"
+            ref={messagesRef}
             value={msg}
             disabled={sending}
             onChange={(e) => setMsg(e.target.value)}
@@ -374,12 +388,6 @@ export default function Conversation({ onBack }) {
           </button>
         </form>
       </div>
-      <DeleteChatModal
-        isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
-        onDelete={deleteChat}
-        loading={deleting}
-      />
     </div>
   );
 }

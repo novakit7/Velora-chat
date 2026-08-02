@@ -5,6 +5,13 @@ export const SOCKET_EVENTS = {
   JOIN: "join",
   ONLINE_USERS: "onlineUsers",
 
+  CHAT_CREATED: "chat:created",
+  GROUP_CREATED: "group:created",
+  GROUP_RENAMED: "group:renamed",
+  GROUP_UPDATE_DISCRIPTION: "group:update-dis",
+  
+
+
   // Messages
   MESSAGE_NEW: "message:new",
   MESSAGE_EDITED: "message:edited",

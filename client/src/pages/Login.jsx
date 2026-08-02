@@ -190,15 +190,30 @@ export default function Login() {
               : "Welcome to your special page. Sign in to continue your journey."}
           </p>
 
-          <form className="mt-8 space-y-5">
+          <form
+            className="mt-8 space-y-5"
+            onSubmit={
+              !forgotPassword
+                ? handleLogin
+                : !otpSent
+                  ? (e) => {
+                    e.preventDefault();
+                    handleForgetPassword();
+                  }
+                  : (e) => {
+                    e.preventDefault();
+                    handleVerifyOtp();
+                  }
+            }
+          >
             {/* Email */}
             <div>
               <label className="mb-2 block text-sm font-medium text-text-secondary">
-                {forgotPassword ?  "Email": "Email/Username"}
+                {forgotPassword ? "Email" : "Email/Username"}
               </label>
 
               <input
-                type="email"
+                type="text"
                 value={email}
                 disabled={otpSent || loading}
                 onChange={(e) => {
@@ -211,11 +226,10 @@ export default function Login() {
                 }}
                 placeholder="alex@gmail.com"
                 className={`w-full rounded-md border bg-input-focus px-4 py-2 text-text placeholder:text-text-muted outline-none transition-colors duration-200
-      ${
-        errors.email
-          ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-          : "border-border focus:border-primary focus:ring-primary/20"
-      }`}
+      ${errors.email
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                    : "border-border focus:border-primary focus:ring-primary/20"
+                  }`}
               />
 
               {errors.email && (
@@ -248,11 +262,10 @@ export default function Login() {
                           }));
                         }}
                         className={`w-full rounded-md border bg-input-focus px-4 py-2 pr-12 text-text placeholder:text-text-muted outline-none transition-colors duration-200
-            ${
-              errors.password
-                ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
-                : "border-border focus:border-primary focus:ring-primary/20"
-            }`}
+                        ${errors.password
+                            ? "border-red-500 focus:border-red-500 focus:ring-red-500/20"
+                            : "border-border focus:border-primary focus:ring-primary/20"
+                          }`}
                       />
 
                       <button
@@ -336,11 +349,10 @@ export default function Login() {
                         }));
                       }}
                       className={`w-full rounded-lg border cursor-pointer bg-input-focus px-4 py-2 text-text outline-none transition
-          ${
-            errors.otp
-              ? "border-red-500 focus:border-red-500"
-              : "border-border focus:border-primary"
-          }`}
+          ${errors.otp
+                          ? "border-red-500 focus:border-red-500"
+                          : "border-border focus:border-primary"
+                        }`}
                     />
 
                     {errors.otp && (
@@ -356,7 +368,7 @@ export default function Login() {
 
                     <div className="relative">
                       <input
-                      disabled={loading}
+                        disabled={loading}
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         value={newPassword}
@@ -369,11 +381,10 @@ export default function Login() {
                           }));
                         }}
                         className={`w-full rounded-md border bg-input-focus px-4 py-2 pr-12 text-text outline-none transition
-            ${
-              errors.newPassword
-                ? "border-red-500 focus:border-red-500"
-                : "border-border focus:border-primary"
-            }`}
+            ${errors.newPassword
+                            ? "border-red-500 focus:border-red-500"
+                            : "border-border focus:border-primary"
+                          }`}
                       />
 
                       <button
@@ -402,11 +413,10 @@ export default function Login() {
                       type="button"
                       disabled={timer > 0 || loading}
                       onClick={handleForgetPassword}
-                      className={`${
-                        timer > 0
+                      className={`${timer > 0
                           ? "text-gray-400 cursor-not-allowed"
                           : "text-primary cursor-pointer hover:underline"
-                      }`}
+                        }`}
                     >
                       {timer > 0 ? `Resend OTP (${timer}s)` : "Resend OTP"}
                     </button>
@@ -447,15 +457,8 @@ export default function Login() {
             </div>
             {/* Button */}
             <button
-              type="button"
+              type="submit"
               disabled={loading}
-              onClick={
-                !forgotPassword
-                  ? handleLogin
-                  : !otpSent
-                    ? handleForgetPassword
-                    : handleVerifyOtp
-              }
               className="w-full rounded-lg bg-primary py-2 font-semibold cursor-pointer text-white transition hover:bg-primary-hover active:bg-primary-active "
             >
               {loading ? (
