@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 import { FiX } from "react-icons/fi";
+import { useOnlineStatus } from "../../context/OnlineStatusContext";
+import { formatRelativeDate } from "../../utils/date";
 
 export default function UserInfoModal({
     isOpen,
@@ -7,6 +9,7 @@ export default function UserInfoModal({
     user,
 }) {
     const modalRef = useRef(null);
+    const { isUserOnline } = useOnlineStatus();
     useEffect(() => {
         if (!isOpen) return;
 
@@ -68,9 +71,12 @@ export default function UserInfoModal({
                         @{user.username}
                     </p>
 
-                    <span className="mt-3 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-400">
+                    {isUserOnline(user._id) ?
+                    (<span className="mt-3 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-400">
                         ● Online
-                    </span>
+                    </span>) : (<span className="mt-3 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-gray-400">
+                        {formatRelativeDate(user.lastSeen)}
+                    </span>)}
                 </div>
 
                 {/* Details */}

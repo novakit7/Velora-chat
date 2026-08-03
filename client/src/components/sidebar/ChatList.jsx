@@ -6,6 +6,7 @@ import { notify } from "../../utils/toast";
 import { formatRelativeDate } from "../../utils/date";
 import { useNavigate, useParams } from "react-router-dom";
 import { FiMessageCircle } from "react-icons/fi";
+import { useOnlineStatus } from "../../context/OnlineStatusContext";
 
 export default function ChatList() {
   const [chats, setChats] = useState([]);
@@ -13,6 +14,7 @@ export default function ChatList() {
   const navigate = useNavigate();
   const { chatId } = useParams();
   const [query, setQuery] = useState("");
+  const { isUserOnline } = useOnlineStatus();
 
 
   useEffect(() => {
@@ -137,7 +139,7 @@ export default function ChatList() {
                     )}
 
                     <span
-                      className={`absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-slate-900 ${chat.isOnline ? "bg-emerald-500" : "bg-slate-500"
+                      className={`absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-slate-900 ${isUserOnline(chat?.otherMember?._id) ? "bg-emerald-500" : "bg-slate-500"
                         }`}
                     />
                   </div>

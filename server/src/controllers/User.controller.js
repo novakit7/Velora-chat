@@ -300,7 +300,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
 
   const user = await User.findOne({
     username: username.toLowerCase(),
-  }).select("fullName username email avatar createdAt");
+  }).select("fullName username email avatar createdAt lastSeen");
 
   if (!user) {
     throw new ApiError(404, "User not found");

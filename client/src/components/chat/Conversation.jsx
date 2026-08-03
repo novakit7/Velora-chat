@@ -18,6 +18,8 @@ import { useNavigate } from "react-router-dom";
 import DeleteChatModal from "../models/DeleteModel";
 import GroupInfoModal from "../models/GroupInfoModel";
 import UserInfoModal from "../models/UserInfoModal";
+import { formatRelativeDate } from "../../utils/date";
+import { useOnlineStatus } from "../../context/OnlineStatusContext";
 
 export default function Conversation({ onBack }) {
   const [loadingChat, setLoadingChat] = useState(true);
@@ -32,8 +34,13 @@ export default function Conversation({ onBack }) {
   const [messages, setMessages] = useState([]);
   const [msg, setMsg] = useState("");
   const [chat, setChat] = useState(null);
+
   const menuRef = useRef(null);
   const messagesRef = useRef(null);
+  const { isUserOnline } = useOnlineStatus();
+  const online =
+    !chat?.isGroupChat &&
+    isUserOnline(chat?.otherMember?._id);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -149,11 +156,23 @@ export default function Conversation({ onBack }) {
 
       notify.error(
         error?.response?.data?.message ||
-          "Something went wrong while sending the message.",
+        "Something went wrong while sending the message.",
       );
     } finally {
       setSending(false);
     }
+  };
+
+  const groupSubtitle = (participants = []) => {
+    const names = participants
+      .filter((p) => p._id !== user._id) // Remove current user
+      .map((p) => p.username);
+
+    if (names.length <= 3) {
+      return names.join(", ");
+    }
+
+    return `${names.slice(0, 3).join(", ")} +${names.length - 3}`;
   };
 
   const deleteChat = async () => {
@@ -220,12 +239,17 @@ export default function Conversation({ onBack }) {
                     ? chat.groupAvatar?.url
                     : chat.otherMember?.avatar.url
                 }
-                className="rounded-full"
+                className="h-12 w-12 rounded-full object-cover border border-slate-700"
                 alt=""
               />
             </div>
 
-            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 bg-green-500" />
+            <span
+              className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-slate-900 ${isUserOnline(chat?.otherMember?._id)
+                ? "bg-green-500"
+                : "bg-gray-500"
+                }`}
+            />
           </div>
 
           <div>
@@ -233,7 +257,13 @@ export default function Conversation({ onBack }) {
               {chat.isGroupChat ? chat.groupName : chat.otherMember?.username}
             </h2>
 
-            <p className="text-sm text-gray-400">Online</p>
+            <p className="text-sm text-gray-400">
+              {chat.isGroupChat
+                ? groupSubtitle(chat.participants)
+                : online
+                  ? <span className="text-green-400">online</span>
+                  : `Last seen ${formatRelativeDate(chat.otherMember.lastSeen)}`}
+            </p>
           </div>
         </div>
 
@@ -306,32 +336,40 @@ export default function Conversation({ onBack }) {
         ) : (
           <div className="space-y-4">
             {messages.map((message) => {
+              // System message
+              if (message.messageType === "system") {
+                return (
+                  <div key={message._id} className="flex justify-center py-2">
+                    <div className="rounded-full bg-slate-800 px-4 py-2 text-xs text-slate-400">
+                      {message.content}
+                    </div>
+                  </div>
+                );
+              }
+
               const isMe = message.sender?._id === user?._id;
 
               return (
                 <div
                   key={message._id}
-                  className={`mb-4 flex ${
-                    isMe ? "justify-end" : "justify-start"
-                  }`}
+                  className={`mb-4 flex ${isMe ? "justify-end" : "justify-start"
+                    }`}
                 >
                   <div
-                    className={`flex max-w-[75%] min-w-0 items-end gap-2 ${
-                      isMe ? "flex-row-reverse" : ""
-                    }`}
+                    className={`flex max-w-[75%] min-w-0 items-end gap-2 ${isMe ? "flex-row-reverse" : ""
+                      }`}
                   >
                     <img
                       src={message.sender?.avatar?.url}
                       alt={message.sender?.username}
-                      className="h-10 w-10 shrink-0 rounded-full border border-slate-700 object-cover"
+                      className="h-11 w-11 rounded-full border border-slate-700 object-cover"
                     />
 
                     <div
-                      className={`min-w-0 max-w-full rounded-2xl px-4 py-3 shadow-md ${
-                        isMe
+                      className={`min-w-0 max-w-full rounded-2xl px-4 py-3 shadow-md ${isMe
                           ? "rounded-br-md bg-cyan-500 text-white"
                           : "rounded-bl-md border border-slate-700 bg-slate-800 text-slate-100"
-                      }`}
+                        }`}
                     >
                       {!isMe && (
                         <p className="mb-1 text-xs font-semibold text-cyan-400">
@@ -344,9 +382,8 @@ export default function Conversation({ onBack }) {
                       </p>
 
                       <div
-                        className={`mt-2 flex items-center justify-end gap-1 text-[11px] ${
-                          isMe ? "text-white/80" : "text-slate-400"
-                        }`}
+                        className={`mt-2 flex items-center justify-end gap-1 text-[11px] ${isMe ? "text-white/80" : "text-slate-400"
+                          }`}
                       >
                         <span>{formatDateTime(message.createdAt)}</span>
 

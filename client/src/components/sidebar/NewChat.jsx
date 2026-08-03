@@ -10,6 +10,7 @@ import { notify } from "../../utils/toast";
 import Loader from "../common/Loader";
 import api from "../../api/axois";
 import { useNavigate } from "react-router-dom";
+import { useOnlineStatus } from "../../context/OnlineStatusContext";
 
 export default function NewChat() {
   const [loading, setLoading] = useState(false);
@@ -19,6 +20,7 @@ export default function NewChat() {
   const [removeLoadingId, setRemoveLoadingId] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [query, setQuery] = useState("");
+  const { isUserOnline } = useOnlineStatus();
 
   useEffect(() => {
     const getFriends = async () => {
@@ -178,9 +180,10 @@ export default function NewChat() {
                       </div>
                     )}
 
-                    {user.online && (
-                      <span className="absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-slate-900 bg-emerald-500" />
-                    )}
+                    <span
+                      className={`absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border-2 border-slate-900 ${isUserOnline(user?._id) ? "bg-emerald-500" : "bg-slate-500"
+                        }`}
+                    />
                   </div>
 
                   {/* User Details */}

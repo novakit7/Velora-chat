@@ -29,7 +29,8 @@ export const getOnlineUsers = () => {
 };
 
 export const isUserOnline = (userId) => {
-    return onlineUsers.has(userId);
+    const sockets = getUserSockets(userId.toString());
+    return sockets && sockets.size > 0;
 };
 
 export default onlineUsers;

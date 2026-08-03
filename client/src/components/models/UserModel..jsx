@@ -6,6 +6,8 @@ import {
   FiChevronRight,
 } from "react-icons/fi";
 import AuthContext from "../../context/AuthContext";
+import { useOnlineStatus } from "../../context/OnlineStatusContext";
+import { formatRelativeDate } from "../../utils/date";
 
 export default function UserModal({
   open,
@@ -17,6 +19,7 @@ export default function UserModal({
 
   const { user } = useContext(AuthContext);
   const modalRef = useRef(null);
+  const { isUserOnline } = useOnlineStatus();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -72,14 +75,12 @@ export default function UserModal({
           </p>
 
           <div className="mt-4">
-            <span
-              className={`rounded-full border px-3 py-1 text-xs font-medium ${user?.isOnline
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                : "border-slate-700 bg-slate-800 text-slate-400"
-                }`}
-            >
-              {user?.isOnline ? "Online" : "Offline"}
-            </span>
+             {isUserOnline(user._id) ?
+                    (<span className="mt-3 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-green-400">
+                        ● Online
+                    </span>) : (<span className="mt-3 rounded-full bg-green-500/10 px-3 py-1 text-xs font-medium text-gray-400">
+                        {formatRelativeDate(user.lastSeen)}
+                    </span>)}
           </div>
         </div>
       </div>

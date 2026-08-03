@@ -4,12 +4,13 @@ export const SOCKET_EVENTS = {
   // Connection
   JOIN: "join",
   ONLINE_USERS: "onlineUsers",
+  USER_ONLINE: "online",
+  USER_OFFLINE: 'offline',
 
   CHAT_CREATED: "chat:created",
   GROUP_CREATED: "group:created",
   GROUP_RENAMED: "group:renamed",
   GROUP_UPDATE_DISCRIPTION: "group:update-dis",
-  
 
 
   // Messages

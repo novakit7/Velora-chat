@@ -8,7 +8,21 @@ import { User } from "../models/User.model.js";
 import { Message } from "../models/Message.model.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/Cloudinary.js";
 import { SOCKET_EVENTS } from "../constants.js";
-import { emitToUser } from "../sockets/socket.services.js";
+import {
+  emitToUser,
+  emitToRoom,
+} from "../sockets/socket.services.js";
+
+const createSystemMessage = async ({
+  chatId,
+  content,
+}) => {
+  return await Message.create({
+    chat: chatId,
+    content,
+    messageType: "system",
+  });
+};
 
 const createPrivateChat = asyncHandler(async (req, res) => {
   const { userId } = req.params;
@@ -878,6 +892,7 @@ const getChatById = asyncHandler(async (req, res) => {
               fullName: 1,
               avatar: 1,
               email: 1,
+              lastSeen: 1,
             },
           },
         ],
@@ -898,6 +913,7 @@ const getChatById = asyncHandler(async (req, res) => {
               fullName: 1,
               avatar: 1,
               email: 1,
+              lastSeen: 1,
             },
           },
         ],
@@ -1018,22 +1034,6 @@ const getChatById = asyncHandler(async (req, res) => {
 
         isGroupChat: 1,
 
-        groupName: 1,
-
-        groupAvatar: 1,
-
-        otherMember: 1,
-
-        participants: 1,
-
-        participantsCount: 1,
-
-        admins: 1,
-
-        createdBy: 1,
-
-        isAdmin: 1,
-
         latestMessage: 1,
 
         lastActivity: 1,
@@ -1041,8 +1041,70 @@ const getChatById = asyncHandler(async (req, res) => {
         createdAt: 1,
 
         updatedAt: 1,
+        otherMember: {
+          $cond: [
+            { $eq: ["$isGroupChat", false] },
+            "$otherMember",
+            "$$REMOVE",
+          ],
+        },
+        groupName: {
+          $cond: [
+            "$isGroupChat",
+            "$groupName",
+            "$$REMOVE",
+          ],
+        },
+
+        groupAvatar: {
+          $cond: [
+            "$isGroupChat",
+            "$groupAvatar",
+            "$$REMOVE",
+          ],
+        },
+
+        participants: {
+          $cond: [
+            "$isGroupChat",
+            "$participants",
+            "$$REMOVE",
+          ],
+        },
+
+        participantsCount: {
+          $cond: [
+            "$isGroupChat",
+            "$participantsCount",
+            "$$REMOVE",
+          ],
+        },
+
+        admins: {
+          $cond: [
+            "$isGroupChat",
+            "$admins",
+            "$$REMOVE",
+          ],
+        },
+
+        createdBy: {
+          $cond: [
+            "$isGroupChat",
+            "$createdBy",
+            "$$REMOVE",
+          ],
+        },
+
+        isAdmin: {
+          $cond: [
+            "$isGroupChat",
+            "$isAdmin",
+            "$$REMOVE",
+          ],
+        },
       },
-    },
+    }
   ]);
 
   if (!chat) {
@@ -1201,9 +1263,11 @@ const renameGroupDescription = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid chat id");
   }
 
-  if (!description?.trim()) {
-    throw new ApiError(400, "Group description is required");
+  if (description === undefined) {
+    throw new ApiError(400, "Description is required");
   }
+
+  group.description = description.trim();
 
   const group = await Chat.findById(chatId);
 

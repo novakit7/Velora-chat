@@ -16,6 +16,11 @@ const messageSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    messageType: {
+      type: String,
+      enum: ["text", "system"],
+      default: "text",
+    },
     attachments: {
       type: [String],
       default: [],

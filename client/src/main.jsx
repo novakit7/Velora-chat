@@ -7,6 +7,7 @@ import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext";
 import { SocketProvider } from "./socket/SocketProvider"
 import { NotificationProvider } from "./context/NotificationContext";
+import { OnlineStatusProvider } from "./context/OnlineStatusContext";
 
 createRoot(document.getElementById("root")).render(
   // <StrictMode>
@@ -22,9 +23,11 @@ createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <AuthProvider>
         <NotificationProvider>
-          <SocketProvider>
-            <App />
-          </SocketProvider>
+          <OnlineStatusProvider>
+            <SocketProvider>
+              <App />
+            </SocketProvider>
+          </OnlineStatusProvider>
         </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
