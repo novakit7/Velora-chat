@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
-import { FiCamera, FiEdit2, FiX } from "react-icons/fi";
+import { useEffect, useRef, useContext } from "react";
+import { FiCamera, FiEdit2, FiX, FiTrash2 } from "react-icons/fi";
+import AuthContext from "../../context/AuthContext";
 
 export default function GroupInfoModal({
     isOpen,
@@ -8,6 +9,7 @@ export default function GroupInfoModal({
     setChat
 }) {
     const modalRef = useRef(null);
+    const { user } = useContext(AuthContext);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -36,95 +38,248 @@ export default function GroupInfoModal({
     if (!isOpen || !chat) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-3 backdrop-blur-sm sm:p-6">
             <div
                 ref={modalRef}
-                className="w-full max-w-sm overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl"
+                className="flex h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl"
             >
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-slate-800 px-5 py-3">
-                    <h2 className="text-base font-semibold text-white">
-                        Group Info
-                    </h2>
-
-                    <button
-                        onClick={onClose}
-                        className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
-                    >
-                        <FiX size={18} />
-                    </button>
-                </div>
-
                 {/* Profile */}
-                <div className="flex flex-col items-center border-b border-slate-800 px-5 py-5">
-                    <div className="relative">
-                        <img
-                            src={chat.groupAvatar?.url}
-                            alt={chat.groupName}
-                            className="h-20 w-20 rounded-full border-2 border-slate-700 object-cover"
-                        />
+                <div className="border-b border-slate-800 p-6">
+                    <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
 
-                        <button className="absolute bottom-0 right-0 cursor-pointer rounded-full bg-cyan-500 p-2 text-white transition hover:bg-cyan-600">
-                            <FiCamera size={14} />
-                        </button>
-                    </div>
+                        {/* Avatar */}
+                        <div className="relative shrink-0">
+                            <img
+                                src={chat.groupAvatar?.url}
+                                alt={chat.groupName}
+                                className="h-24 w-24 rounded-full border-2 border-slate-700 object-cover"
+                            />
 
-                    <h3 className="mt-3 text-xl font-semibold text-white">
-                        {chat.groupName}
-                    </h3>
+                            {chat.isAdmin && (
+                                <>
+                                    <input
+                                        id="group-avatar"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                    />
 
-                    <p className="mt-1 text-sm text-slate-400">
-                        {chat.participants?.length || 0} Members
-                    </p>
-                </div>
-
-                {/* Details */}
-                <div className="space-y-4 px-5 py-5">
-
-                    {/* Group Name */}
-                    <div>
-                        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Group Name
-                        </p>
-
-                        <div className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-800 px-3 py-2">
-                            <span className="text-sm text-white">
-                                {chat.groupName}
-                            </span>
-
-                            <button className="cursor-pointer text-cyan-400 transition hover:text-cyan-300">
-                                <FiEdit2 size={16} />
-                            </button>
+                                    <label
+                                        htmlFor="group-avatar"
+                                        className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-cyan-500 text-white shadow-lg transition hover:bg-cyan-600"
+                                    >
+                                        <FiCamera size={15} />
+                                    </label>
+                                </>
+                            )}
                         </div>
-                    </div>
 
-                    {/* Description */}
-                    <div>
-                        <p className="mb-1 text-xs font-medium uppercase tracking-wide text-slate-500">
-                            Description
-                        </p>
+                        {/* Info */}
+                        <div className="min-w-0 flex-1 text-center sm:text-left">
 
-                        <div className="flex items-start justify-between rounded-lg border border-slate-700 bg-slate-800 px-3 py-2">
-                            <p className="text-sm leading-6 text-slate-300">
-                                {chat.description || "No description available."}
+                            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+                                <h2 className="truncate text-2xl font-bold text-white">
+                                    {chat.groupName}
+                                </h2>
+
+                                <span
+                                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${chat.createdBy?._id === user._id
+                                        ? "bg-yellow-500/15 text-yellow-400"
+                                        : chat.isAdmin
+                                            ? "bg-cyan-500/15 text-cyan-400"
+                                            : "bg-slate-700 text-slate-300"
+                                        }`}
+                                >
+                                    {chat.createdBy?._id === user._id
+                                        ? "Owner"
+                                        : chat.isAdmin
+                                            ? "Admin"
+                                            : "Member"}
+                                </span>
+                            </div>
+
+                            <p className="mt-2 text-sm text-slate-400">
+                                {chat.participantsCount} Members
                             </p>
 
-                            <button className="ml-3 cursor-pointer text-cyan-400 transition hover:text-cyan-300">
-                                <FiEdit2 size={16} />
-                            </button>
+                            {/* Created By */}
+                            <div className="mt-5 flex items-center justify-center gap-3 rounded-xl border border-slate-700 bg-slate-800 p-3 sm:justify-start">
+
+                                <img
+                                    src={chat.createdBy?.avatar?.url}
+                                    alt={chat.createdBy?.username}
+                                    className="h-10 w-10 rounded-full border border-slate-700 object-cover"
+                                />
+
+                                <div className="min-w-0">
+                                    <p className="text-xs uppercase tracking-wider text-slate-500">
+                                        Created By
+                                    </p>
+
+                                    <p className="truncate text-sm font-medium text-white">
+                                        {chat.createdBy?.username}
+                                    </p>
+
+                                    <p className="truncate text-xs text-slate-400">
+                                        {chat.createdBy?.fullName}
+                                    </p>
+                                </div>
+
+                            </div>
+
                         </div>
+
+                    </div>
+                </div>
+                {/* Members */}
+                <div className="border-t border-slate-800 p-6">
+
+                    <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <h3 className="text-lg font-semibold text-white">
+                            Members ({chat.participantsCount})
+                        </h3>
+
+                        {chat.isAdmin && (
+                            <button className="w-full rounded-lg bg-cyan-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-cyan-600 sm:w-auto">
+                                + Add Members
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="max-h-80 space-y-3 overflow-y-auto pr-1">
+                        {chat.participants.map((member) => {
+                            const isOwner = chat.createdBy?._id === member._id;
+
+                            const isAdmin = chat.admins.some(
+                                (admin) => admin._id === member._id
+                            );
+
+                            return (
+                                <div
+                                    key={member._id}
+                                    className="flex flex-col gap-4 rounded-xl border border-slate-700 bg-slate-800 p-4 sm:flex-row sm:items-center sm:justify-between"
+                                >
+                                    {/* Left */}
+                                    <div className="flex items-center gap-3 min-w-0">
+
+                                        <img
+                                            src={member.avatar?.url}
+                                            alt={member.username}
+                                            className="h-11 w-11 rounded-full border border-slate-700 object-cover"
+                                        />
+
+                                        <div className="min-w-0">
+
+                                            <div className="flex flex-wrap items-center gap-2">
+
+                                                <p className="truncate font-medium text-white">
+                                                    {member.username}
+                                                </p>
+
+                                                {isOwner ? (
+                                                    <span className="rounded-full bg-yellow-500/15 px-2 py-0.5 text-[10px] font-semibold text-yellow-400">
+                                                        Owner
+                                                    </span>
+                                                ) : isAdmin ? (
+                                                    <span className="rounded-full bg-cyan-500/15 px-2 py-0.5 text-[10px] font-semibold text-cyan-400">
+                                                        Admin
+                                                    </span>
+                                                ) : null}
+
+                                            </div>
+
+                                            <p className="truncate text-xs text-slate-400">
+                                                {member.fullName}
+                                            </p>
+
+                                        </div>
+
+                                    </div>
+
+                                    {/* Actions */}
+                                    {chat.createdBy?._id === user._id &&
+                                        member._id !== user._id && (
+
+                                            <div className="flex flex-wrap gap-2 sm:justify-end">
+
+                                                {!isAdmin ? (
+                                                    <button className="rounded-lg bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-400 transition hover:bg-cyan-500/20">
+                                                        Make Admin
+                                                    </button>
+                                                ) : (
+                                                    <button className="rounded-lg bg-orange-500/10 px-3 py-2 text-xs font-medium text-orange-400 transition hover:bg-orange-500/20">
+                                                        Remove Admin
+                                                    </button>
+                                                )}
+
+                                                <button className="rounded-lg bg-red-500/10 px-3 py-2 text-xs font-medium text-red-400 transition hover:bg-red-500/20">
+                                                    Remove
+                                                </button>
+
+                                            </div>
+
+                                        )}
+
+                                </div>
+                            );
+                        })}
                     </div>
 
                 </div>
+                {/* Danger Zone */}
+                <div className="border-t border-slate-800 px-5 py-5">
 
-                {/* Footer */}
-                <div className="border-t border-slate-800 p-4">
-                    <button
-                        onClick={onClose}
-                        className="w-full cursor-pointer rounded-lg bg-cyan-500 py-2.5 text-sm font-medium text-white transition hover:bg-cyan-600"
-                    >
-                        Close
-                    </button>
+                    <h3 className="mb-4 text-sm font-semibold text-red-400">
+                        Danger Zone
+                    </h3>
+
+                    <div className="space-y-3">
+
+                        {/* Owner */}
+                        {chat.createdBy?._id === user._id ? (
+                            <>
+                                <button
+                                    onClick={() => setShowDeleteGroupModal(true)}
+                                    className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-left transition hover:bg-red-500/20"
+                                >
+                                    <div>
+                                        <p className="font-medium text-red-400">
+                                            Delete Group
+                                        </p>
+
+                                        <p className="mt-1 text-xs text-slate-400">
+                                            Permanently delete this group and all its messages.
+                                        </p>
+                                    </div>
+
+                                    <FiTrash2 className="text-red-400" size={20} />
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                {/* Member/Admin */}
+                                <button
+                                    onClick={() => setShowLeaveGroupModal(true)}
+                                    className="flex w-full cursor-pointer items-center justify-between rounded-xl border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-left transition hover:bg-orange-500/20"
+                                >
+                                    <div>
+                                        <p className="font-medium text-orange-400">
+                                            Leave Group
+                                        </p>
+
+                                        <p className="mt-1 text-xs text-slate-400">
+                                            You will stop receiving messages from this group.
+                                        </p>
+                                    </div>
+
+                                    <FiLogOut className="text-orange-400" size={20} />
+                                </button>
+                            </>
+                        )}
+
+                    </div>
+
                 </div>
             </div>
         </div>

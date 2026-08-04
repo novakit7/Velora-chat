@@ -340,7 +340,7 @@ export default function Conversation({ onBack }) {
               if (message.messageType === "system") {
                 return (
                   <div key={message._id} className="flex justify-center py-2">
-                    <div className="rounded-full bg-slate-800 px-4 py-2 text-xs text-slate-400">
+                    <div className="rounded-full border border-slate-700 bg-slate-800/80 px-4 py-2 text-xs font-medium text-slate-400 backdrop-blur">
                       {message.content}
                     </div>
                   </div>
@@ -367,8 +367,8 @@ export default function Conversation({ onBack }) {
 
                     <div
                       className={`min-w-0 max-w-full rounded-2xl px-4 py-3 shadow-md ${isMe
-                          ? "rounded-br-md bg-cyan-500 text-white"
-                          : "rounded-bl-md border border-slate-700 bg-slate-800 text-slate-100"
+                        ? "rounded-br-md bg-cyan-500 text-white"
+                        : "rounded-bl-md border border-slate-700 bg-slate-800 text-slate-100"
                         }`}
                     >
                       {!isMe && (
