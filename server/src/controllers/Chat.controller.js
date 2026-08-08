@@ -458,6 +458,11 @@ const createGroupChat = asyncHandler(async (req, res) => {
     },
   ]);
 
+  // const notification = await Notification.create({
+  //   sender: req.user._id,
+
+  // })
+
   // Notify all invited users
   uniqueParticipants.forEach((participantId) => {
     emitToUser(participantId, SOCKET_EVENTS.GROUP_CREATED, {

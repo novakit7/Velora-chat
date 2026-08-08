@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { FiSearch, FiX, FiUser, FiCheck, FiPlus } from "react-icons/fi";
+import { FiSearch, FiX, FiPlus } from "react-icons/fi";
 import api from "../../api/axois";
 import Loader from "../common/Loader";
 import { notify } from "../../utils/toast";
 import { formatRelativeDate } from "../../utils/date";
 import { useNavigate, useParams } from "react-router-dom";
+import CreateGroupModel from "../models/CreateGroupModel";
 
 export default function GroupList() {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newGroupName, setNewGroupName] = useState("");
-  const [selectedFriends, setSelectedFriends] = useState([]);
+  const [query, setQuery] = useState("");
   const navigate = useNavigate();
   const { chatId } = useParams();
-  const [query, setQuery] = useState("");
 
   useEffect(() => {
     const getGroups = async () => {
@@ -41,44 +40,6 @@ export default function GroupList() {
     group.groupName.toLowerCase().includes(query.toLowerCase()),
   );
 
-  const handleCreateGroup = () => {
-    if (!newGroupName.trim()) return notify.error("Group name cannot be empty");
-
-    const newGroup = {
-      _id: Date.now().toString(),
-      groupName: newGroupName,
-      isGroupChat: true,
-      participantsCount: 1,
-      createdAt: new Date().toISOString(),
-      latestMessage: {
-        content: "Group created",
-        createdAt: new Date().toISOString(),
-        sender: { fullName: "You" },
-      },
-    };
-
-    setGroups([newGroup, ...groups]);
-    setNewGroupName("");
-    setShowCreateModal(false);
-    notify.success("Group created successfully!");
-    onSelectChat(newGroup);
-  };
-
-  const dummyFriends = [
-    { id: "1", name: "Alex Johnson" },
-    { id: "2", name: "Sam Smith" },
-    { id: "3", name: "Taylor Swift" },
-    { id: "4", name: "Jordan Lee" },
-    { id: "5", name: "Casey Kim" },
-  ];
-
-  const toggleFriendSelection = (friendId) => {
-    setSelectedFriends((prev) =>
-      prev.includes(friendId)
-        ? prev.filter((id) => id !== friendId)
-        : [...prev, friendId],
-    );
-  };
 
   return (
     <div className="h-full bg-slate-900 rounded-2xl flex flex-col">
@@ -195,68 +156,19 @@ export default function GroupList() {
           </>
         )}
       </div>
-      {/* Create Group Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="w-full max-w-md rounded-2xl bg-slate-800 p-6 max-h-[80vh] overflow-y-auto all-scroll">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-white">
-                Create New Group
-              </h3>
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="text-gray-400 cursor-pointer hover:text-white"
-              >
-                <FiX size={24} />
-              </button>
-            </div>
+        <CreateGroupModel
+          onClose={() => setShowCreateModal(false)}
+          onCreate={(groupData) => {
+            console.log("Dummy group:", groupData);
 
-            <div className="space-y-4">
-              <div className="mt-4 flex items-center rounded-xl border border-slate-700 bg-slate-800 px-3 py-3 transition-all focus-within:border-cyan-500">
-                <FiSearch className="text-slate-400" />
-                <input
-                  type="text"
-                  placeholder="Search groups..."
-                  className="ml-3 flex-1 bg-transparent text-sm text-white placeholder:text-slate-500 outline-none"
-                />
-              </div>
+            setShowCreateModal(false);
 
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">
-                  Select Friends ({selectedFriends.length} selected)
-                </label>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
-                  {dummyFriends.map((friend) => (
-                    <div
-                      key={friend.id}
-                      onClick={() => toggleFriendSelection(friend.id)}
-                      className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer ${selectedFriends.includes(friend.id) ? "bg-slate-700" : "hover:bg-slate-700"}`}
-                    >
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-600">
-                        <FiUser className="text-gray-300" />
-                      </div>
-                      <div className="flex-1 text-white">{friend.name}</div>
-                      {selectedFriends.includes(friend.id) && (
-                        <div className="text-cyan-500">
-                          <FiCheck />
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={handleCreateGroup}
-                disabled={!newGroupName.trim() || selectedFriends.length === 0}
-                className="w-full rounded-lg cursor-pointer bg-cyan-500 px-4 py-2 text-white hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Create Group
-              </button>
-            </div>
-          </div>
-        </div>
+            notify.success("Group created successfully!");
+          }}
+        />
       )}
+
     </div>
   );
 }

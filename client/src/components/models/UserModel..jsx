@@ -35,6 +35,7 @@ export default function UserModal({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+    console.log(user?.avatar?.url);
   }, [open, onClose]);
 
   if (!open) return null;
@@ -53,13 +54,9 @@ export default function UserModal({
             <img
               src={user?.avatar?.url}
               alt={user?.username}
-              className="h-24 w-24 rounded-full border-4 border-slate-700 object-cover shadow-xl"
+              className="h-30 w-30 rounded-full border-4 border-slate-700 object-cover shadow-xl"
             />
 
-            <span
-              className={`absolute bottom-1 right-1 h-5 w-5 rounded-full border-4 border-slate-900 ${user?.isOnline ? "bg-emerald-500" : "bg-slate-500"
-                }`}
-            />
           </div>
 
           <h2 className="mt-4 text-xl font-bold text-white">

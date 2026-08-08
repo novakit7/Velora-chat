@@ -60,11 +60,11 @@ export default function UserInfoModal({
                     <img
                         src={user.avatar?.url}
                         alt={user.username}
-                        className="h-20 w-20 rounded-full border-2 border-slate-700 object-cover"
+                        className="h-30 w-30 rounded-full border-2 border-slate-700 object-cover"
                     />
 
                     <h3 className="mt-3 text-xl font-semibold text-white">
-                        {user.username}
+                        {user.fullName}
                     </h3>
 
                     <p className="text-sm text-slate-400">

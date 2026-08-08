@@ -130,7 +130,7 @@ export default function AISection({ onCreateChat }) {
       </div>
 
       {/* Chat List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto all-scroll">
         <div className="space-y-1 p-1">
   {filteredChats.map((chat) => (
           <div

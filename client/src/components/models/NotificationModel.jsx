@@ -66,7 +66,6 @@ export default function NotificationModal({ open, onClose }) {
         default:
           navigate("/home");
       }
-      navigate(0);
     } catch (error) {
       console.error(error);
     }

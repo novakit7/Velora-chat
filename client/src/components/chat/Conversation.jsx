@@ -199,17 +199,7 @@ export default function Conversation({ onBack }) {
 
   if (!chat) {
     return (
-      <div className="flex h-full items-center justify-center rounded-2xl bg-slate-900">
-        <div className="text-center">
-          <h2 className="text-2xl font-semibold text-white">
-            Welcome to Velora
-          </h2>
-
-          <p className="mt-2 text-gray-400">
-            Select a conversation to start chatting.
-          </p>
-        </div>
-      </div>
+      <div className="flex h-full flex-col rounded-2xl bg-slate-900"><Loader variant="button"/></div>
     );
   }
 
